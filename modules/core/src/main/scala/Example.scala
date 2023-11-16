@@ -1,40 +1,139 @@
-/*
- * Copyright 2020 Anton Sviridov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+package com.indoorvivants.proompts
 
-package com.indoorvivants.library
+import ANSI.*
 
-object Main:
-  def main(args: Array[String]) =
-    println(implicitly[TypeClass[(Boolean, Int)]].isPrimitive)
+enum Prompt(label: String):
+  case Input(label: String, state: InputState) extends Prompt(label)
+  case Alternatives(label: String, alts: List[String], state: AlternativesState)
+      extends Prompt(label)
 
-trait TypeClass[T]:
-  def isPrimitive: Boolean
+  def promptLabel =
+    label + " > "
 
-object TypeClass:
+object Prompt:
+  object Alternatives:
+    def apply(label: String, alts: List[String]): Prompt =
+      Prompt.Alternatives(label, alts, AlternativesState("", 0, alts.length))
 
-  def apply[A](implicit tc: TypeClass[A]): TypeClass[A] = tc
+case class InputState(text: String)
+case class AlternativesState(
+    text: String,
+    selected: Int,
+    showing: Int
+)
 
-  implicit val boolPrimitive: TypeClass[Boolean] = new TypeClass[Boolean]:
-    def isPrimitive: Boolean = true
+@main def hello =
 
-  implicit val intPrimitive: TypeClass[Int] = new TypeClass[Int]:
-    def isPrimitive: Boolean = true
+  var prompt = Prompt.Alternatives(
+    "How would you describe yourself?",
+    List("Sexylicious", "Shmexy", "Pexying")
+  )
 
-  implicit def tupled[A: TypeClass, B: TypeClass]: TypeClass[(A, B)] =
-    new TypeClass[(A, B)]:
-      def isPrimitive: Boolean =
-        TypeClass[A].isPrimitive && TypeClass[B].isPrimitive
-end TypeClass
+  def printPrompt() =
+    val lab   = prompt.promptLabel
+    val lines = 0
+    print(move.horizontalTo(0))
+    print(erase.line.toEndOfLine())
+    prompt match
+      case Prompt.Input(label, state) =>
+        print(Console.CYAN + lab + Console.RESET + state.text)
+      case Prompt.Alternatives(label, alts, state) =>
+        print(Console.CYAN + lab + Console.RESET + state.text)
+        withRestore:
+          print("\n")
+
+          val filteredAlts =
+            alts.filter(
+              state.text.isEmpty() || _.toLowerCase().contains(state.text.toLowerCase())
+            )
+
+          val adjustedSelected =
+            state.selected.min(filteredAlts.length - 1).max(0)
+
+          val newState =
+            AlternativesState(
+              state.text,
+              selected = adjustedSelected,
+              showing = filteredAlts.length.min(1)
+            )
+
+          if filteredAlts.isEmpty then
+            print(move.horizontalTo(0))
+            print(erase.line.toEndOfLine())
+            print(fansi.Underlined.On("no matches"))
+          else
+            filteredAlts.zipWithIndex.foreach: (alt, idx) =>
+              print(move.horizontalTo(0))
+              print(erase.line.toEndOfLine())
+
+              val view =
+                if idx == adjustedSelected then fansi.Color.Green("> " + alt)
+                else fansi.Bold.On("· " + alt)
+              print(view)
+              if idx != filteredAlts.length - 1 then print("\n")
+          end if
+
+          for _ <- 0 until state.showing - newState.showing do
+            print(move.nextLine(1))
+            print(move.horizontalTo(0))
+            print(erase.line.toEndOfLine())
+    end match
+  end printPrompt
+
+  printPrompt()
+
+  def selectUp() = prompt match
+    case Prompt.Input(_, _) =>
+    case p @ Prompt.Alternatives(_, _, state) =>
+      prompt =
+        p.copy(state = state.copy(selected = (state.selected - 1).max(0)))
+
+  def selectDown() = prompt match
+    case Prompt.Input(_, _) =>
+    case p @ Prompt.Alternatives(_, _, state) =>
+      prompt =
+        p.copy(state = state.copy(selected = (state.selected + 1).min(1000)))
+
+  def appendText(t: Char) =
+    prompt match
+      case i @ Prompt.Input(label, state) =>
+        prompt = i.copy(state = state.copy(text = state.text + t))
+      case i @ Prompt.Alternatives(label, alts, state) =>
+        prompt = i.copy(state = state.copy(text = state.text + t))
+
+  def trimText() =
+    prompt match
+      case i @ Prompt.Input(label, state) =>
+        prompt = i.copy(state =
+          state.copy(text = state.text.take(state.text.length - 1))
+        )
+      case i @ Prompt.Alternatives(label, alts, state) =>
+        prompt = i.copy(state =
+          state.copy(text = state.text.take(state.text.length - 1))
+        )
+
+  InputProvider().attach:
+    case Event.Key(KeyEvent.UP) =>
+      selectUp()
+      printPrompt()
+      Next.Continue
+    case Event.Key(KeyEvent.DOWN) =>
+      selectDown()
+      printPrompt()
+      Next.Continue
+
+    case Event.Char(10) => // enter
+      println("booyah!")
+      Next.Stop
+
+    case Event.Char(127) => // enter
+      trimText()
+      printPrompt()
+      Next.Continue
+
+    case Event.Char(which) =>
+      appendText(which.toChar)
+      printPrompt()
+      Next.Continue
+    case _ => Next.Continue
+end hello

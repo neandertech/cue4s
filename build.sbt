@@ -13,7 +13,7 @@ inThisBuild(
     homepage := Some(
       url("https://github.com/indoorvivants/scala-library-template")
     ),
-    startYear := Some(2020),
+    startYear := Some(2023),
     licenses := List(
       "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
     ),
@@ -29,7 +29,7 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3          = "3.2.2"
+  val Scala3          = "3.3.1"
   val munit           = "1.0.0-M7"
   val organizeImports = "0.6.0"
   val scalaVersions   = Seq(Scala3)
@@ -58,8 +58,7 @@ lazy val core = projectMatrix
   .in(file("modules/core"))
   .defaultAxes(defaults*)
   .settings(
-    name := "core",
-    Test / scalacOptions ~= filterConsoleScalacOptions
+    name := "core"
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
@@ -74,7 +73,8 @@ lazy val core = projectMatrix
       scalaBinaryVersion
     ),
     scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule))
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0"
   )
 
 lazy val docs = projectMatrix
@@ -96,7 +96,8 @@ val noPublish = Seq(
   publishLocal / skip := true
 )
 
-val defaults = Seq(VirtualAxis.scalaABIVersion("3.2.0"), VirtualAxis.jvm)
+val defaults =
+  Seq(VirtualAxis.scalaABIVersion(Versions.Scala3), VirtualAxis.jvm)
 
 val scalafixRules = Seq(
   "OrganizeImports",
