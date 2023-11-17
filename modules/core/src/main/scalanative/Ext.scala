@@ -5,6 +5,8 @@ import scalanative.unsafe.*
 import scalanative.posix.termios.*
 import scala.util.boundary, boundary.break
 
+import CharCollector.*
+
 class NativeInputProvider extends InputProvider:
   override def attach(listener: Event => Next): Completion =
     changemode(1)
@@ -17,26 +19,43 @@ class NativeInputProvider extends InputProvider:
 
     boundary[Completion]:
 
+      def whatNext(n: Next) =
+        n match
+          case Next.Continue   =>
+          case Next.Stop       => break(Completion.Interrupted)
+          case Next.Error(msg) => break(Completion.Error(msg))
+
       def send(ev: Event) =
-        listener(ev) match
-          case Next.Continue =>
-          case Next.Stop     => break(Completion.Interrupted)
+        whatNext(listener(ev))
+
+      var state = State.Init
 
       while read() != 0 do
-        lastRead match
-          case ANSI.ESC =>
-            assert(
-              read() == '[',
-              s"Invalid character following ESC: `$lastRead`"
-            )
-            val key = read()
 
-            key match
-              case 'A' => send(Event.Key(KeyEvent.UP))
-              case 'B' => send(Event.Key(KeyEvent.DOWN))
-              case 'C' => send(Event.Key(KeyEvent.RIGHT))
-              case 'D' => send(Event.Key(KeyEvent.LEFT))
-          case other => send(Event.Char(other))
+        val (newState, result) = decode(state, lastRead)
+
+        result match
+          case n: Next => whatNext(n)
+          case e: Event =>
+            send(e)
+
+        state = newState
+
+        // lastRead match
+        //   case ANSI.ESC =>
+        //     assert(
+        //       read() == '[',
+        //       s"Invalid character following ESC: `$lastRead`"
+        //     )
+        //     val key = read()
+
+        //     key match
+        //       case 'A' => send(Event.Key(KeyEvent.UP))
+        //       case 'B' => send(Event.Key(KeyEvent.DOWN))
+        //       case 'C' => send(Event.Key(KeyEvent.RIGHT))
+        //       case 'D' => send(Event.Key(KeyEvent.LEFT))
+        //   case other => send(Event.Char(other))
+        // end match
       end while
 
       Completion.Finished

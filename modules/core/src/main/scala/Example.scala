@@ -44,7 +44,9 @@ case class AlternativesState(
 
           val filteredAlts =
             alts.filter(
-              state.text.isEmpty() || _.toLowerCase().contains(state.text.toLowerCase())
+              state.text.isEmpty() || _.toLowerCase().contains(
+                state.text.toLowerCase()
+              )
             )
 
           val adjustedSelected =
@@ -122,11 +124,11 @@ case class AlternativesState(
       printPrompt()
       Next.Continue
 
-    case Event.Char(10) => // enter
+    case Event.Key(KeyEvent.ENTER) => // enter
       println("booyah!")
       Next.Stop
 
-    case Event.Char(127) => // enter
+    case Event.Key(KeyEvent.DELETE) => // enter
       trimText()
       printPrompt()
       Next.Continue
@@ -135,5 +137,7 @@ case class AlternativesState(
       appendText(which.toChar)
       printPrompt()
       Next.Continue
-    case _ => Next.Continue
+
+    case _ =>
+      Next.Continue
 end hello
