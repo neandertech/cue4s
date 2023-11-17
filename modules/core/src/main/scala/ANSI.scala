@@ -99,9 +99,9 @@ private[proompts] object ANSI:
   inline def restore() =
     call('u')
 
-  inline def withRestore[A](inline f: => A) =
-    print(save())
+  inline def withRestore[A](writer: String => Unit)(inline f: => A) =
+    writer(save())
     f
-    print(restore())
+    writer(restore())
 
 end ANSI

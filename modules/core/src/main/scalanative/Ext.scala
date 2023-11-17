@@ -8,7 +8,7 @@ import scala.util.boundary, boundary.break
 import CharCollector.*
 
 class NativeInputProvider extends InputProvider:
-  override def attach(listener: Event => Next): Completion =
+  override def attach(f: Environment => Handler): Completion =
     changemode(1)
 
     var lastRead = 0
@@ -16,6 +16,14 @@ class NativeInputProvider extends InputProvider:
     inline def read() =
       lastRead = getchar()
       lastRead
+
+    val env = Environment(str =>
+      System.err.println(str.getBytes().toList)
+      System.out.write(str.getBytes())
+      System.out.flush()
+    )
+
+    val listener = f(env)
 
     boundary[Completion]:
 
@@ -30,6 +38,8 @@ class NativeInputProvider extends InputProvider:
 
       var state = State.Init
 
+      whatNext(listener(Event.Init))
+
       while read() != 0 do
 
         val (newState, result) = decode(state, lastRead)
@@ -41,21 +51,6 @@ class NativeInputProvider extends InputProvider:
 
         state = newState
 
-        // lastRead match
-        //   case ANSI.ESC =>
-        //     assert(
-        //       read() == '[',
-        //       s"Invalid character following ESC: `$lastRead`"
-        //     )
-        //     val key = read()
-
-        //     key match
-        //       case 'A' => send(Event.Key(KeyEvent.UP))
-        //       case 'B' => send(Event.Key(KeyEvent.DOWN))
-        //       case 'C' => send(Event.Key(KeyEvent.RIGHT))
-        //       case 'D' => send(Event.Key(KeyEvent.LEFT))
-        //   case other => send(Event.Char(other))
-        // end match
       end while
 
       Completion.Finished
