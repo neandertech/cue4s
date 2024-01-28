@@ -25,6 +25,15 @@ package com.indoorvivants.proompts
   write("world\ntest")
   write("yo")
   write("bla")
+  write("s")
+
+  println(term.getPretty())
+
+  term.moveBack(3)
+
+  write("wazooop")
+
+  println(term.getPretty())
   // write("world\n")
   // write("yo")
 
@@ -37,6 +46,5 @@ package com.indoorvivants.proompts
   //   InputProvider().attach(env => Interactive(prompt, env.writer).handler)
   // )
 
-  println(term.getPretty())
 
 end hello

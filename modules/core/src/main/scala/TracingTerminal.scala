@@ -29,7 +29,9 @@ class TracingTerminal extends Terminal:
   def currentIndex() = WIDTH * currentLine + currentColumn
   var INTERNAL       = Array.fill[Char](WIDTH * HEIGHT)(' ')
 
-  override def screenClear(): this.type = ???
+  override def screenClear(): this.type =
+    INTERNAL = Array.fill[Char](WIDTH * HEIGHT)(' ')
+    this
 
   override def movePreviousLine(n: Int): this.type = ???
 
@@ -49,7 +51,10 @@ class TracingTerminal extends Terminal:
 
   override def eraseEntireLine(): this.type = ???
 
-  override def moveBack(n: Int): this.type = ???
+  override def moveBack(n: Int): this.type =
+    errln(s"Back $n characters")
+    currentColumn = (currentColumn - n) max 0
+    this
 
   override def moveUp(n: Int): this.type = ???
 
@@ -112,9 +117,17 @@ class TracingTerminal extends Terminal:
     cur.append("━" * maxLineLength)
     cur.append("┓\n")
 
-    raw.linesIterator.foreach: line =>
+    raw.linesIterator.zipWithIndex.foreach: (line, idx) =>
       cur.append("┃")
-      cur.append(line)
+      if idx == currentLine then
+        val (pre, after) = line.splitAt(currentColumn)
+        cur.append(pre)
+        if currentColumn < currentWidth then
+          cur.append(
+            fansi.Color.Black(fansi.Back.White(line(currentColumn).toString()))
+          )
+          cur.append(after.drop(1))
+      else cur.append(line)
       cur.append("┃")
       cur.append("\n")
 
