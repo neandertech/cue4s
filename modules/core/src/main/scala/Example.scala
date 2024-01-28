@@ -11,6 +11,8 @@ import ANSI.*
   val result =
     InputProvider().attach(env => Interactive(prompt, env.writer).handler)
 
+  println(result)
+
   // Process.stdout.write("how do you do")
   // Process.stdout.write(move.back(5))
   // Process.stdout.write(erase.line.toEndOfLine())

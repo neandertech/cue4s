@@ -11,7 +11,7 @@ inThisBuild(
     organization               := "com.indoorvivants",
     organizationName           := "Anton Sviridov",
     homepage := Some(
-      url("https://github.com/indoorvivants/scala-library-template")
+      url("https://github.com/neandertech/proompts")
     ),
     startYear := Some(2023),
     licenses := List(
@@ -74,7 +74,8 @@ lazy val core = projectMatrix
     ),
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0"
+    libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
+    nativeConfig ~= (_.withIncrementalCompilation(true))
   )
 
 lazy val docs = projectMatrix

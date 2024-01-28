@@ -15,4 +15,4 @@ addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.5.1")
 
 // Scala.js and Scala Native
 addSbtPlugin("org.scala-js"     % "sbt-scalajs"      % "1.14.0")
-addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.4.15")
+addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.4.17")
