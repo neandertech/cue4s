@@ -1,0 +1,130 @@
+/*
+ * Copyright 2023 Anton Sviridov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.indoorvivants.proompts
+
+import scala.collection.mutable
+
+class TracingTerminal extends Terminal:
+  val WIDTH         = 120
+  val HEIGHT        = 500
+  var currentHeight = 0
+  var currentWidth  = 0
+  var currentLine   = 0
+  var currentColumn = 0
+
+  def currentIndex() = WIDTH * currentLine + currentColumn
+  var INTERNAL       = Array.fill[Char](WIDTH * HEIGHT)(' ')
+
+  override def screenClear(): this.type = ???
+
+  override def movePreviousLine(n: Int): this.type = ???
+
+  override def eraseToBeginningOfLine(): this.type = ???
+
+  override def eraseToEndOfLine(): this.type = ???
+
+  override def cursorShow(): this.type = ???
+
+  override def moveHorizontalTo(column: Int): this.type = ???
+
+  override def eraseEntireScreen(): this.type = ???
+
+  override def moveToPosition(row: Int, column: Int): this.type = ???
+
+  override def eraseToBeginningOfScreen(): this.type = ???
+
+  override def eraseEntireLine(): this.type = ???
+
+  override def moveBack(n: Int): this.type = ???
+
+  override def moveUp(n: Int): this.type = ???
+
+  override def save(): this.type = ???
+
+  override def cursorHide(): this.type = ???
+
+  override def moveDown(n: Int): this.type = ???
+
+  override def eraseToEndOfScreen(): this.type = ???
+
+  override def moveForward(n: Int): this.type = ???
+
+  override def moveNextLine(n: Int): this.type = ???
+
+  override def restore(): this.type = ???
+
+  def getLine(i: Int): String =
+    val start = WIDTH * i
+    new String(INTERNAL.slice(start, start + currentWidth))
+
+  def writer: String => Unit =
+
+    val simpleWriter: String => Unit = l =>
+      errln(s"Writing at $currentLine x $currentColumn: $l")
+      val newCurrentWidth = currentWidth max (currentColumn + l.length)
+      if newCurrentWidth > WIDTH then todo("line length overflow")
+      else
+        val start = currentIndex()
+        for idx <- 0 until l.length() do INTERNAL(start + idx) = l.charAt(idx)
+        currentColumn += l.length()
+        currentWidth = newCurrentWidth
+
+    val multilineWriter: String => Unit = l =>
+      val lines = l.linesIterator.zipWithIndex.toList
+      lines.foreach: (line, idx) =>
+        simpleWriter(line)
+        currentColumn = 0
+        currentLine += 1
+        currentHeight = currentHeight max currentLine
+
+    l =>
+      if l.contains("\n") then multilineWriter(l)
+      else simpleWriter(l)
+  end writer
+
+  def get(): String =
+    val cur = mutable.StringBuilder()
+
+    for line <- 0 to currentHeight
+    do cur.append(getLine(line) + "\n")
+
+    cur.result()
+
+  def getPretty(): String =
+    val cur           = mutable.StringBuilder()
+    val raw           = get()
+    val maxLineLength = raw.linesIterator.map(_.length).maxOption.getOrElse(1)
+    cur.append("┏")
+    cur.append("━" * maxLineLength)
+    cur.append("┓\n")
+
+    raw.linesIterator.foreach: line =>
+      cur.append("┃")
+      cur.append(line)
+      cur.append("┃")
+      cur.append("\n")
+
+    cur.append("┗")
+    cur.append("━" * maxLineLength)
+    cur.append("┛")
+
+    cur.result()
+  end getPretty
+
+end TracingTerminal
+
+def todo(msg: String) = throw new NotImplementedError(s"not implemented: $msg")

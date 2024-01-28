@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Sviridov
+ * Copyright 2023 Anton Sviridov
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,52 +16,8 @@
 
 package com.indoorvivants.proompts
 
-trait Terminal:
-  self =>
-  def cursorShow(): self.type
-
-  def cursorHide(): self.type
-
-  def screenClear(): self.type
-
-  def moveUp(n: Int): self.type
-
-  def moveDown(n: Int): self.type
-
-  def moveForward(n: Int): self.type
-
-  def moveBack(n: Int): self.type
-
-  def moveNextLine(n: Int): self.type
-
-  def movePreviousLine(n: Int): self.type
-
-  def moveHorizontalTo(column: Int): self.type
-
-  def moveToPosition(row: Int, column: Int): self.type
-
-  def eraseToEndOfLine(): self.type
-
-  def eraseToBeginningOfLine(): self.type
-
-  def eraseEntireLine(): self.type
-
-  def eraseToEndOfScreen(): self.type
-
-  def eraseToBeginningOfScreen(): self.type
-
-  def eraseEntireScreen(): self.type
-
-  def save(): self.type
-
-  def restore(): self.type
-end Terminal
-
-object Terminal:
-  def ansi(writer: String => Unit) = ANSI(writer)
-
-class ANSI(writer: String => Unit) extends Terminal:
-  import ANSI.{ESC, CSI}
+class AnsiTerminal(writer: String => Unit) extends Terminal:
+  import AnsiTerminal.{ESC, CSI}
 
   private inline def call(name: Char, inline args: Int*): this.type =
     writer(s"$CSI${args.mkString(";")}$name")
@@ -110,9 +66,9 @@ class ANSI(writer: String => Unit) extends Terminal:
     f
     restore()
 
-end ANSI
+end AnsiTerminal
 
-object ANSI:
+object AnsiTerminal:
   final val ESC = '\u001b'
   final val CSI = s"$ESC["
 

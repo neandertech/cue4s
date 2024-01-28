@@ -1,6 +1,20 @@
-package com.indoorvivants.proompts
+/*
+ * Copyright 2023 Anton Sviridov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import ANSI.*
+package com.indoorvivants.proompts
 
 class InteractiveAlternatives(
     prompt: Prompt.Alternatives,
@@ -8,7 +22,7 @@ class InteractiveAlternatives(
 ):
   val terminal = Terminal.ansi(writer)
   val lab      = prompt.promptLabel
-  var state    = prompt.state
+  var state    = AlternativesState("", 0, prompt.alts.length)
 
   def printPrompt() =
     val lines = 0
@@ -17,8 +31,6 @@ class InteractiveAlternatives(
 
     moveHorizontalTo(0)
     eraseToEndOfLine()
-
-    errln(prompt)
 
     writer(s"${fansi.Color.Cyan(lab)}${state.text}")
     withRestore:
@@ -31,12 +43,10 @@ class InteractiveAlternatives(
           )
         )
 
-      errln(filteredAlts)
+      errln(s"Filtered alternatives: ${filteredAlts}")
 
       val adjustedSelected =
         state.selected.min(filteredAlts.length - 1).max(0)
-
-      errln(adjustedSelected)
 
       val newState =
         AlternativesState(
@@ -67,7 +77,7 @@ class InteractiveAlternatives(
       state = newState
   end printPrompt
 
-  val handler = new Handler:
+  def handler = new Handler:
     def apply(event: Event): Next =
       errln(event)
       event match
@@ -113,4 +123,3 @@ class InteractiveAlternatives(
     state = state.copy(text = state.text.take(state.text.length - 1))
 
 end InteractiveAlternatives
-

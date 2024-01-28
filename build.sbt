@@ -72,6 +72,7 @@ lazy val core = projectMatrix
       scalaVersion,
       scalaBinaryVersion
     ),
+    scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
