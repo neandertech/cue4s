@@ -45,10 +45,12 @@ package com.indoorvivants.proompts
     List(
       Event.Init,
       Event.Key(KeyEvent.DOWN),
-      Event.Char('r'.toInt),
+      Event.Char('r'),
       Event.Key(KeyEvent.DELETE),
-      Event.Char('l'.toInt),
-      Event.Char('i'.toInt)
+      Event.Char('l'),
+      Event.Key(KeyEvent.DOWN),
+      Event.Key(KeyEvent.UP),
+      Event.Char('i')
     )
 
   testingProgram(
