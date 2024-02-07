@@ -25,7 +25,10 @@ package com.indoorvivants.proompts
   ) =
     val i = InteractiveAlternatives(
       terminal,
-      Prompt.Alternatives("How do you do fellow kids?", List("killa", "rizza")),
+      Prompt.Alternatives(
+        "How do you do fellow kids?",
+        List("killa", "rizza", "flizza")
+      ),
       write,
       colors = false
     )
@@ -35,14 +38,13 @@ package com.indoorvivants.proompts
       callback()
   end testingProgram
 
-  val term   = TracingTerminal()
+  val term   = TracingTerminal(logger = s => ()) // println(s))
   val writer = term.writer
 
   val events =
     List(
       Event.Init,
       Event.Key(KeyEvent.DOWN),
-      Event.Key(KeyEvent.UP),
       Event.Char('r'.toInt)
     )
 

@@ -18,7 +18,7 @@ package com.indoorvivants.proompts
 
 import scala.collection.mutable
 
-class TracingTerminal(log: Boolean = false) extends Terminal:
+class TracingTerminal(logger: String => Unit = _ => ()) extends Terminal:
   val WIDTH         = 120
   val HEIGHT        = 500
   var currentHeight = 0
@@ -35,7 +35,7 @@ class TracingTerminal(log: Boolean = false) extends Terminal:
   var INTERNAL       = Array.fill[Char](WIDTH * HEIGHT)(' ')
 
   def log(msg: String): Unit =
-    if log then errln(s"[LINE=$currentLine, COL=$currentColumn] $msg")
+    logger(s"[LINE=$currentLine, COL=$currentColumn] $msg")
 
   def updateBounds() =
     currentWidth = currentWidth max currentColumn
