@@ -61,11 +61,6 @@ class AnsiTerminal(writer: String => Unit) extends Terminal:
   override inline def save(): this.type        = call('s')
   override inline def screenClear(): this.type = call(s"${ESC}c")
 
-  inline def withRestore[A](inline f: => A) =
-    save()
-    f
-    restore()
-
 end AnsiTerminal
 
 object AnsiTerminal:

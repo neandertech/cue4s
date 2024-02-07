@@ -26,51 +26,95 @@ class TracingTerminal extends Terminal:
   var currentLine   = 0
   var currentColumn = 0
 
+  var saved = Option.empty[(Int, Int)]
+
+  def set(char: Char, line: Int, column: Int) =
+    INTERNAL(WIDTH * line + column) = char
+
   def currentIndex() = WIDTH * currentLine + currentColumn
   var INTERNAL       = Array.fill[Char](WIDTH * HEIGHT)(' ')
+
+  def updateBounds() =
+    currentWidth = currentWidth max currentColumn
+    currentHeight = currentHeight max currentLine
 
   override def screenClear(): this.type =
     INTERNAL = Array.fill[Char](WIDTH * HEIGHT)(' ')
     this
 
-  override def movePreviousLine(n: Int): this.type = ???
+  override def movePreviousLine(n: Int): this.type =
+    currentLine = (currentLine - n) max 0
+    this
 
-  override def eraseToBeginningOfLine(): this.type = ???
+  override def eraseToBeginningOfLine(): this.type =
+    for column <- 0 to currentColumn do set(' ', currentLine, column)
+    this
 
-  override def eraseToEndOfLine(): this.type = ???
+  override def eraseToEndOfLine(): this.type =
+    for column <- currentColumn to currentWidth do set(' ', currentLine, column)
+    this
 
-  override def cursorShow(): this.type = ???
+  override def cursorShow(): this.type = this
 
-  override def moveHorizontalTo(column: Int): this.type = ???
+  override def moveHorizontalTo(column: Int): this.type =
+    currentColumn = column
+    updateBounds()
+    this
 
   override def eraseEntireScreen(): this.type = ???
 
-  override def moveToPosition(row: Int, column: Int): this.type = ???
+  override def moveToPosition(row: Int, column: Int): this.type =
+    currentLine = row - 1
+    currentColumn = column - 1
+    updateBounds()
+    this
 
   override def eraseToBeginningOfScreen(): this.type = ???
 
-  override def eraseEntireLine(): this.type = ???
+  override def eraseEntireLine(): this.type =
+    for column <- 0 to currentWidth do set(' ', currentLine, column)
+    this
 
   override def moveBack(n: Int): this.type =
     errln(s"Back $n characters")
     currentColumn = (currentColumn - n) max 0
     this
 
-  override def moveUp(n: Int): this.type = ???
+  override def moveUp(n: Int): this.type =
+    currentLine = (currentLine - n) max 0
+    this
 
-  override def save(): this.type = ???
+  override def save(): this.type =
+    saved = Some((currentLine, currentColumn))
+    this
 
   override def cursorHide(): this.type = ???
 
-  override def moveDown(n: Int): this.type = ???
+  override def moveDown(n: Int): this.type =
+    currentLine += n
+    updateBounds()
+    this
 
   override def eraseToEndOfScreen(): this.type = ???
 
-  override def moveForward(n: Int): this.type = ???
+  override def moveForward(n: Int): this.type =
+    currentColumn = (currentColumn + n) max 0
+    updateBounds()
+    this
 
-  override def moveNextLine(n: Int): this.type = ???
+  override def moveNextLine(n: Int): this.type =
+    currentLine += 1
+    currentColumn = 0
+    updateBounds()
+    this
 
-  override def restore(): this.type = ???
+  override def restore(): this.type =
+    saved match
+      case None => this
+      case Some((line, column)) =>
+        currentLine = line
+        currentColumn = column
+        this
 
   def getLine(i: Int): String =
     val start = WIDTH * i
@@ -92,8 +136,9 @@ class TracingTerminal extends Terminal:
       val lines = l.linesIterator.zipWithIndex.toList
       lines.foreach: (line, idx) =>
         simpleWriter(line)
-        currentColumn = 0
-        currentLine += 1
+        if idx != lines.length - 1 then
+          currentColumn = 0
+          currentLine += 1
         currentHeight = currentHeight max currentLine
 
     l =>

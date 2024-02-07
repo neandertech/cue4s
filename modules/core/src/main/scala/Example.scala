@@ -17,23 +17,49 @@
 package com.indoorvivants.proompts
 
 @main def hello =
-  val term = TracingTerminal()
 
-  val write = term.writer
+  def testingProgram(terminal: Terminal, write: String => Unit) =
+    write("hello")
+    write("worldasdasdasd\ntest")
+    write("yo")
+    write("bla")
+    write("s")
+    terminal.moveBack(3)
+    write("kkkk")
+    write("kkkk\nhhhh")
 
-  write("hello")
-  write("world\ntest")
-  write("yo")
-  write("bla")
-  write("s")
+  val term   = TracingTerminal()
+  val writer = term.writer
+
+  testingProgram(term, writer)
 
   println(term.getPretty())
 
-  term.moveBack(3)
+  // changemode(1)
+  val writer1 = (s: String) => System.out.print(s)
+  val ansi    = Terminal.ansi(writer1)
 
-  write("wazooop")
+  testingProgram(ansi, writer1)
 
-  println(term.getPretty())
+  // testingProgram()
+
+  // val term = TracingTerminal()
+
+  // val write = term.writer
+
+  // write("hello")
+  // write("worldasdasdasd\ntest")
+  // write("yo")
+  // write("bla")
+  // write("s")
+
+  // println(term.getPretty())
+
+  // term.moveBack(3)
+
+  // write("wazooop")
+
+  // println(term.getPretty())
   // write("world\n")
   // write("yo")
 
@@ -45,6 +71,5 @@ package com.indoorvivants.proompts
   // println(
   //   InputProvider().attach(env => Interactive(prompt, env.writer).handler)
   // )
-
 
 end hello

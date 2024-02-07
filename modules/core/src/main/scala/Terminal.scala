@@ -55,6 +55,12 @@ trait Terminal:
   def save(): self.type
 
   def restore(): self.type
+
+  inline def withRestore[A](inline f: => A) =
+    save()
+    f
+    restore()
+
 end Terminal
 
 object Terminal:

@@ -1,30 +1,13 @@
-/*
- * Copyright 2023 Anton Sviridov
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.indoorvivants.proompts
 
 import scala.util.boundary
-
 import scalanative.libc.stdio.getchar
 import scalanative.unsafe.*
 import scalanative.posix.termios.*
 import boundary.break
 import CharCollector.*
 
-class NativeInputProvider extends InputProvider:
+class InputProviderPlatform extends InputProvider:
   override def attach(f: Environment => Handler): Completion =
     errln("what the fuck")
     changemode(1)
@@ -78,10 +61,7 @@ class NativeInputProvider extends InputProvider:
   end attach
 
   override def close() = changemode(0)
-end NativeInputProvider
-
-trait InputProviderPlatform:
-  def apply(): InputProvider = NativeInputProvider()
+end InputProviderPlatform
 
 def changemode(dir: Int) =
   val oldt         = stackalloc[termios]()
@@ -94,3 +74,4 @@ def changemode(dir: Int) =
     tcsetattr(STDIN_FILENO, TCSANOW, newt)
   else tcsetattr(STDIN_FILENO, TCSANOW, oldt)
 end changemode
+
