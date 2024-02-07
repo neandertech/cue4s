@@ -17,22 +17,26 @@
 package com.indoorvivants.proompts
 
 class InteractiveAlternatives(
+    terminal: Terminal,
     prompt: Prompt.Alternatives,
-    writer: String => Unit
+    writer: String => Unit,
+    colors: Boolean
 ):
-  val terminal = Terminal.ansi(writer)
-  val lab      = prompt.promptLabel
-  var state    = AlternativesState("", 0, prompt.alts.length)
+  val lab   = prompt.promptLabel
+  var state = AlternativesState("", 0, prompt.alts.length)
+
+  def colored(msg: String)(f: String => fansi.Str) =
+    if colors then f(msg).toString else msg
 
   def printPrompt() =
-    val lines = 0
 
     import terminal.*
 
     moveHorizontalTo(0)
     eraseToEndOfLine()
 
-    writer(s"${fansi.Color.Cyan(lab)}${state.text}")
+    writer(colored(lab + state.text)(fansi.Color.Cyan(_)))
+
     withRestore:
       writer("\n")
 
@@ -42,8 +46,6 @@ class InteractiveAlternatives(
             state.text.toLowerCase()
           )
         )
-
-      errln(s"Filtered alternatives: ${filteredAlts}")
 
       val adjustedSelected =
         state.selected.min(filteredAlts.length - 1).max(0)
@@ -64,8 +66,10 @@ class InteractiveAlternatives(
           moveHorizontalTo(0)
           eraseToEndOfLine()
           val view =
-            if idx == adjustedSelected then fansi.Color.Green("> " + alt)
-            else fansi.Bold.On("· " + alt)
+            if idx == adjustedSelected then
+              if colors then fansi.Color.Green("> " + alt) else "> " + alt
+            else if colors then fansi.Bold.On("· " + alt)
+            else "· " + alt
           writer(view.toString)
           if idx != filteredAlts.length - 1 then writer("\n")
       end if
@@ -79,7 +83,6 @@ class InteractiveAlternatives(
 
   def handler = new Handler:
     def apply(event: Event): Next =
-      errln(event)
       event match
         case Event.Init =>
           printPrompt()

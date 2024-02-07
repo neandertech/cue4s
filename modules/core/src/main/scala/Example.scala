@@ -18,58 +18,43 @@ package com.indoorvivants.proompts
 
 @main def hello =
 
-  def testingProgram(terminal: Terminal, write: String => Unit) =
-    write("hello")
-    write("worldasdasdasd\ntest")
-    write("yo")
-    write("bla")
-    write("s")
-    terminal.moveBack(3)
-    write("kkkk")
-    write("kkkk\nhhhh")
+  def testingProgram(
+      terminal: Terminal,
+      events: List[(Event, () => Unit)],
+      write: String => Unit
+  ) =
+    val i = InteractiveAlternatives(
+      terminal,
+      Prompt.Alternatives("How do you do fellow kids?", List("killa", "rizza")),
+      write,
+      colors = false
+    )
+
+    events.foreach: (ev, callback) =>
+      i.handler(ev)
+      callback()
+  end testingProgram
 
   val term   = TracingTerminal()
   val writer = term.writer
 
-  testingProgram(term, writer)
+  val events =
+    List(
+      Event.Init,
+      Event.Key(KeyEvent.DOWN),
+      Event.Key(KeyEvent.UP),
+      Event.Char('r'.toInt)
+    )
 
-  println(term.getPretty())
-
-  // changemode(1)
-  val writer1 = (s: String) => System.out.print(s)
-  val ansi    = Terminal.ansi(writer1)
-
-  testingProgram(ansi, writer1)
-
-  // testingProgram()
-
-  // val term = TracingTerminal()
-
-  // val write = term.writer
-
-  // write("hello")
-  // write("worldasdasdasd\ntest")
-  // write("yo")
-  // write("bla")
-  // write("s")
-
-  // println(term.getPretty())
-
-  // term.moveBack(3)
-
-  // write("wazooop")
-
-  // println(term.getPretty())
-  // write("world\n")
-  // write("yo")
-
-  // val prompt = Prompt.Alternatives(
-  //   "How would you describe yourself?",
-  //   List("Sexylicious", "Shmexy", "Pexying")
-  // )
-
-  // println(
-  //   InputProvider().attach(env => Interactive(prompt, env.writer).handler)
-  // )
+  testingProgram(
+    term,
+    events
+      .map(ev =>
+        ev -> { () =>
+          println(ev); println(term.getPretty())
+        }
+      ),
+    writer
+  )
 
 end hello

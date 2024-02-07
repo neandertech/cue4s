@@ -18,7 +18,7 @@ package com.indoorvivants.proompts
 
 import scala.collection.mutable
 
-class TracingTerminal extends Terminal:
+class TracingTerminal(log: Boolean = false) extends Terminal:
   val WIDTH         = 120
   val HEIGHT        = 500
   var currentHeight = 0
@@ -34,6 +34,9 @@ class TracingTerminal extends Terminal:
   def currentIndex() = WIDTH * currentLine + currentColumn
   var INTERNAL       = Array.fill[Char](WIDTH * HEIGHT)(' ')
 
+  def log(msg: String): Unit =
+    if log then errln(s"[LINE=$currentLine, COL=$currentColumn] $msg")
+
   def updateBounds() =
     currentWidth = currentWidth max currentColumn
     currentHeight = currentHeight max currentLine
@@ -43,20 +46,24 @@ class TracingTerminal extends Terminal:
     this
 
   override def movePreviousLine(n: Int): this.type =
+    log(s"Moving $n lines up")
     currentLine = (currentLine - n) max 0
     this
 
   override def eraseToBeginningOfLine(): this.type =
+    log(s"Erasing to beginning of line")
     for column <- 0 to currentColumn do set(' ', currentLine, column)
     this
 
   override def eraseToEndOfLine(): this.type =
+    log(s"Erasing to beginning of line")
     for column <- currentColumn to currentWidth do set(' ', currentLine, column)
     this
 
   override def cursorShow(): this.type = this
 
   override def moveHorizontalTo(column: Int): this.type =
+    log(s"Moving to column $column")
     currentColumn = column
     updateBounds()
     this
@@ -64,6 +71,7 @@ class TracingTerminal extends Terminal:
   override def eraseEntireScreen(): this.type = ???
 
   override def moveToPosition(row: Int, column: Int): this.type =
+    log(s"Moving to line ${row - 1}, column ${column}")
     currentLine = row - 1
     currentColumn = column - 1
     updateBounds()
@@ -72,25 +80,29 @@ class TracingTerminal extends Terminal:
   override def eraseToBeginningOfScreen(): this.type = ???
 
   override def eraseEntireLine(): this.type =
+    log(s"Erasing entire line")
     for column <- 0 to currentWidth do set(' ', currentLine, column)
     this
 
   override def moveBack(n: Int): this.type =
-    errln(s"Back $n characters")
+    log(s"Back $n characters")
     currentColumn = (currentColumn - n) max 0
     this
 
   override def moveUp(n: Int): this.type =
+    log(s"Moving up $n lines")
     currentLine = (currentLine - n) max 0
     this
 
   override def save(): this.type =
+    log(s"Saving position")
     saved = Some((currentLine, currentColumn))
     this
 
   override def cursorHide(): this.type = ???
 
   override def moveDown(n: Int): this.type =
+    log(s"Moving down $n lines")
     currentLine += n
     updateBounds()
     this
@@ -98,6 +110,7 @@ class TracingTerminal extends Terminal:
   override def eraseToEndOfScreen(): this.type = ???
 
   override def moveForward(n: Int): this.type =
+    log(s"Moving forward $n columns")
     currentColumn = (currentColumn + n) max 0
     updateBounds()
     this
@@ -111,7 +124,9 @@ class TracingTerminal extends Terminal:
   override def restore(): this.type =
     saved match
       case None => this
+
       case Some((line, column)) =>
+        log(s"Restoring cursor location to [LINE=$line, COL=$column]")
         currentLine = line
         currentColumn = column
         this
@@ -123,7 +138,7 @@ class TracingTerminal extends Terminal:
   def writer: String => Unit =
 
     val simpleWriter: String => Unit = l =>
-      errln(s"Writing at $currentLine x $currentColumn: $l")
+      log(s"Writing single line: `$l`")
       val newCurrentWidth = currentWidth max (currentColumn + l.length)
       if newCurrentWidth > WIDTH then todo("line length overflow")
       else
@@ -133,7 +148,10 @@ class TracingTerminal extends Terminal:
         currentWidth = newCurrentWidth
 
     val multilineWriter: String => Unit = l =>
-      val lines = l.linesIterator.zipWithIndex.toList
+      val lines = l.split("\n", -1).zipWithIndex.toList
+      log(
+        s"Writing multiple lines: ${lines.map(_._1).mkString("`", "`, `", "`")}"
+      )
       lines.foreach: (line, idx) =>
         simpleWriter(line)
         if idx != lines.length - 1 then

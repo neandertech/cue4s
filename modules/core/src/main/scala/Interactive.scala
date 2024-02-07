@@ -18,11 +18,17 @@ package com.indoorvivants.proompts
 
 def errln(o: Any) = System.err.println(o)
 
-class Interactive(var prompt: Prompt, writer: String => Unit):
+class Interactive(
+    terminal: Terminal,
+    prompt: Prompt,
+    writer: String => Unit,
+    colors: Boolean
+):
 
   def handler =
     prompt match
-      case p: Prompt.Input        => InteractiveTextInput(p, writer).handler
-      case p: Prompt.Alternatives => InteractiveAlternatives(p, writer).handler
+      case p: Prompt.Input => InteractiveTextInput(p, writer).handler
+      case p: Prompt.Alternatives =>
+        InteractiveAlternatives(terminal, p, writer, colors).handler
 
 end Interactive

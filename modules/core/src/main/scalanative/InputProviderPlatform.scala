@@ -9,7 +9,6 @@ import CharCollector.*
 
 class InputProviderPlatform extends InputProvider:
   override def attach(f: Environment => Handler): Completion =
-    errln("what the fuck")
     changemode(1)
 
     var lastRead = 0
