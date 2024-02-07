@@ -54,22 +54,21 @@ class InteractiveAlternatives(
         AlternativesState(
           state.text,
           selected = adjustedSelected,
-          showing = filteredAlts.length.min(1)
+          showing = filteredAlts.length.max(1)
         )
 
       if filteredAlts.isEmpty then
         moveHorizontalTo(0)
         eraseToEndOfLine()
-        writer(fansi.Underlined.On("no matches").toString)
+        writer(colored("no matches")(fansi.Underlined.On(_)))
       else
         filteredAlts.zipWithIndex.foreach: (alt, idx) =>
           moveHorizontalTo(0)
           eraseToEndOfLine()
           val view =
             if idx == adjustedSelected then
-              if colors then fansi.Color.Green("> " + alt) else "> " + alt
-            else if colors then fansi.Bold.On("· " + alt)
-            else "· " + alt
+              colored(s"> $alt")(fansi.Color.Green(_))
+            else colored(s"· $alt")(fansi.Bold.On(_))
           writer(view.toString)
           if idx != filteredAlts.length - 1 then writer("\n")
       end if
