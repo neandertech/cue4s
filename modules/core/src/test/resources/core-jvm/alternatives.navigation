@@ -1,0 +1,14 @@
+Event.Init
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃How do you do fellow kids? > ┃
+┃> killa                      ┃
+┃· rizza                      ┃
+┃· flizza                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(DOWN)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃How do you do fellow kids? > ┃
+┃· killa                      ┃
+┃> rizza                      ┃
+┃· flizza                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛

@@ -61,6 +61,7 @@ lazy val core = projectMatrix
   .settings(
     name := "core"
   )
+  .dependsOn(snapshotsRuntime % "test->compile")
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
@@ -80,6 +81,32 @@ lazy val core = projectMatrix
     nativeConfig ~= (_.withIncrementalCompilation(true)),
     withSnapshotTesting
   )
+
+lazy val snapshotsRuntime = projectMatrix
+  .in(file("modules/snapshots-runtime"))
+  .defaultAxes(defaults*)
+  .settings(
+    name := "snapshots-runtime"
+  )
+  .settings(munitSettings)
+  .jvmPlatform(Versions.scalaVersions)
+  .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
+  .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoPackage := "com.indoorvivants.library.internal",
+    buildInfoKeys := Seq[BuildInfoKey](
+      version,
+      scalaVersion,
+      scalaBinaryVersion
+    ),
+    scalacOptions += "-Wunused:all",
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
+    nativeConfig ~= (_.withIncrementalCompilation(true)),
+  )
+
 
 val checkSnapshots = taskKey[Unit]("")
 
@@ -168,30 +195,7 @@ val withSnapshotTesting = Seq(
 def SnapshotsGenerate(path: File, tempPath: File) =
   """
  |package proompts
- |object Snapshots:
- |  inline def location(): String = "PATH"
- |  inline def tmpLocation(): String = "TEMP_PATH"
- |  inline def write(name: String, contents: String, diff: String): Unit = 
- |    import java.io.FileWriter
- |    val tmpName = name + "__snap.new"
- |    val tmpDiff = name + "__snap.new.diff"
- |    val file = java.nio.file.Paths.get(location()).resolve(name)
- |    val tmpFile = java.nio.file.Paths.get(tmpLocation()).resolve(tmpName).toFile
- |    val tmpFileDiff = java.nio.file.Paths.get(tmpLocation()).resolve(tmpDiff).toFile
- |    scala.util.Using(new FileWriter(tmpFile)) { writer => 
- |      writer.write(name + "\n")
- |      writer.write(file.toString + "\n")
- |      writer.write(contents)
- |    }
- |    scala.util.Using(new FileWriter(tmpFileDiff)) { writer => 
- |      writer.write(diff)
- |    }
- |  inline def apply(inline name: String): Option[String] =
- |    val path = java.nio.file.Paths.get(location()).resolve(name)
- |    Option.when(path.toFile.exists()): 
- |      scala.io.Source.fromFile(path.toFile, "utf-8").getLines().mkString(System.lineSeparator())
- |  end apply
- |end Snapshots
+ |object Snapshots extends proompts.snapshots.Snapshots(location = "PATH", tmpLocation = "TEMP_PATH")
   """.trim.stripMargin
     .replace("TEMP_PATH", tempPath.toPath().toAbsolutePath().toString)
     .replace("PATH", path.toPath().toAbsolutePath().toString)
