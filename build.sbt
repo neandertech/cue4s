@@ -66,20 +66,24 @@ lazy val core = projectMatrix
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
   .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
-  .enablePlugins(BuildInfoPlugin)
+  .enablePlugins(SnapshotsPlugin)
   .settings(
-    buildInfoPackage := "com.indoorvivants.library.internal",
-    buildInfoKeys := Seq[BuildInfoKey](
-      version,
-      scalaVersion,
-      scalaBinaryVersion
-    ),
+    snapshotsPackageName := "proompts",
+    snapshotsAddRuntimeDependency := false,
+    snapshotsProjectIdentifier := {
+      val platformSuffix =
+        virtualAxes.value.collectFirst { case p: VirtualAxis.PlatformAxis =>
+          p
+        }.get
+
+      moduleName.value + "-" + platformSuffix.value
+
+    },
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
-    nativeConfig ~= (_.withIncrementalCompilation(true)),
-    withSnapshotTesting
+    nativeConfig ~= (_.withIncrementalCompilation(true))
   )
 
 lazy val snapshotsRuntime = projectMatrix
@@ -92,22 +96,30 @@ lazy val snapshotsRuntime = projectMatrix
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
   .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  .settings(
+    scalacOptions += "-Wunused:all",
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    nativeConfig ~= (_.withIncrementalCompilation(true))
+  )
+
+lazy val snapshotsSbtPlugin = project
+  .in(file("modules/snapshots-sbt-plugin"))
+  .settings(
+    sbtPlugin := true,
+    name      := "sbt-proompt-snapshots"
+  )
   .enablePlugins(BuildInfoPlugin)
   .settings(
-    buildInfoPackage := "com.indoorvivants.library.internal",
+    buildInfoPackage := "proomps.snapshots.sbtplugin",
     buildInfoKeys := Seq[BuildInfoKey](
       version,
       scalaVersion,
       scalaBinaryVersion
-    ),
-    scalacOptions += "-Wunused:all",
-    scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
-    nativeConfig ~= (_.withIncrementalCompilation(true)),
+    )
   )
 
-
+/*
 val checkSnapshots = taskKey[Unit]("")
 
 val withSnapshotTesting = Seq(
@@ -199,7 +211,7 @@ def SnapshotsGenerate(path: File, tempPath: File) =
   """.trim.stripMargin
     .replace("TEMP_PATH", tempPath.toPath().toAbsolutePath().toString)
     .replace("PATH", path.toPath().toAbsolutePath().toString)
-
+ */
 lazy val docs = projectMatrix
   .in(file("myproject-docs"))
   .dependsOn(core)
