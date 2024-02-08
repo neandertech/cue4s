@@ -11,6 +11,10 @@ trait Platform:
     def fileWriteContents(contents: String): Unit =
       FS.writeFileSync(s, contents)
 
+    def delete(): Unit = 
+      FS.rmSync(s, js.Dynamic.literal(force = true))
+
+
     def readFileContents(): Option[String] =
       val exists =
         FS.statSync(
@@ -27,6 +31,8 @@ end Platform
 @js.native
 private[snapshots] trait FS extends js.Object:
   def readFileSync(path: String, options: String | js.Object = ""): String =
+    js.native
+  def rmSync(path: String, options: js.Object = js.Object()): String =
     js.native
   def writeFileSync(
       path: String,

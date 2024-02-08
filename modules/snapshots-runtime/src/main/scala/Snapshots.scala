@@ -15,6 +15,16 @@ case class Snapshots(location: String, tmpLocation: String) extends Platform:
     tmpFileDiff.fileWriteContents(diff)
   end write
 
+  inline def clear(name: String):Unit =
+    val tmpName     = name + "__snap.new"
+    val tmpDiff     = name + "__snap.new.diff"
+    val tmpFile     = tmpLocation.resolve(tmpName)
+    val tmpFileDiff = tmpLocation.resolve(tmpDiff)
+
+    tmpFileDiff.delete()
+    tmpFile.delete()
+
+
   inline def apply(inline name: String): Option[String] =
     location.resolve(name).readFileContents()
 

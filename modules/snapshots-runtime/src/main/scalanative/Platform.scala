@@ -14,6 +14,9 @@ private[snapshots] trait Platform:
         writer.write(contents)
       }
 
+    def delete(): Unit =
+      new File(s).delete()
+
     def readFileContents(): Option[String] =
       val file = new File(s)
       Option.when(file.exists()):

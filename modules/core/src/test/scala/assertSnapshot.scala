@@ -21,3 +21,5 @@ inline def assertSnapshot(inline name: String, contents: String) =
         val diffReport = diff.createDiffOnlyReport()
         Snapshots.write(name, contents, diffReport)
         Assertions.assertNoDiff(contents, value)
+      else
+        Snapshots.clear(name)

@@ -10,19 +10,23 @@ object SnapshotsPlugin extends AutoPlugin {
     val snapshotsProjectIdentifier    = settingKey[String]("")
     val snapshotsPackageName          = settingKey[String]("")
     val snapshotsAddRuntimeDependency = settingKey[Boolean]("")
-
+    val tag = ConcurrentRestrictions.Tag("snapshots-check")
     val snapshotsCheck = taskKey[Unit]("")
   }
 
   import autoImport.*
 
+  override def globalSettings: Seq[Setting[_]] = Seq(
+    concurrentRestrictions += Tags.limit(tag, 1)
+  )
+
   override def projectSettings: Seq[Setting[?]] =
     Seq(
       libraryDependencies ++= {
         if (snapshotsAddRuntimeDependency.value) {
-          val cross = crossVersion.value match{
+          val cross = crossVersion.value match {
             case b: Binary => b.prefix + scalaBinaryVersion.value
-            case _ => scalaBinaryVersion.value
+            case _         => scalaBinaryVersion.value
           }
 
           Seq(
@@ -33,7 +37,7 @@ object SnapshotsPlugin extends AutoPlugin {
       },
       snapshotsProjectIdentifier    := moduleName.value,
       snapshotsAddRuntimeDependency := true,
-      snapshotsCheck := {
+      snapshotsCheck := Def.task{
         val bold  = scala.Console.BOLD
         val reset = scala.Console.RESET
         val legend =
@@ -45,7 +49,7 @@ object SnapshotsPlugin extends AutoPlugin {
           .toList
 
         if (modified.isEmpty) {
-          System.err.println("No snapshots to check")
+          System.err.println(s"No snapshots to check in [${snapshotsProjectIdentifier.value}]")
         } else {
 
           modified
@@ -62,6 +66,9 @@ object SnapshotsPlugin extends AutoPlugin {
               val snapshotName :: destination :: newContentsLines =
                 scala.io.Source.fromFile(f).getLines().toList
 
+              println(
+                s"Project ID: ${bold}${snapshotsProjectIdentifier.value}${reset}"
+              )
               println(
                 s"Name: ${scala.Console.BOLD}$snapshotName${scala.Console.RESET}"
               )
@@ -84,7 +91,7 @@ object SnapshotsPlugin extends AutoPlugin {
             }
         }
 
-      },
+      }.tag(tag).value,
       Test / sourceGenerators += Def.task {
         val name        = snapshotsProjectIdentifier.value
         val packageName = snapshotsPackageName.value
