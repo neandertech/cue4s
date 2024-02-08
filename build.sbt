@@ -168,7 +168,6 @@ val withSnapshotTesting = Seq(
 def SnapshotsGenerate(path: File, tempPath: File) =
   """
  |package proompts
- |import scala.quoted.* // imports Quotes, Expr
  |object Snapshots:
  |  inline def location(): String = "PATH"
  |  inline def tmpLocation(): String = "TEMP_PATH"
@@ -188,15 +187,10 @@ def SnapshotsGenerate(path: File, tempPath: File) =
  |      writer.write(diff)
  |    }
  |  inline def apply(inline name: String): Option[String] =
- |    ${ applyImpl('name) }
- |  private def applyImpl(x: Expr[String])(using
- |      Quotes
- |  ): Expr[Option[String]] =
- |    val path = java.nio.file.Paths.get(location()).resolve(x.valueOrAbort)
- |    if path.toFile.exists() then 
- |      val str = scala.io.Source.fromFile(path.toFile, "utf-8").getLines().mkString(System.lineSeparator())
- |      Expr(Some(str))
- |    else Expr(None)
+ |    val path = java.nio.file.Paths.get(location()).resolve(name)
+ |    Option.when(path.toFile.exists()): 
+ |      scala.io.Source.fromFile(path.toFile, "utf-8").getLines().mkString(System.lineSeparator())
+ |  end apply
  |end Snapshots
   """.trim.stripMargin
     .replace("TEMP_PATH", tempPath.toPath().toAbsolutePath().toString)
