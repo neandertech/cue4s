@@ -1,7 +1,8 @@
-package com.indoorvivants.library
+package proompts
 
 class ExampleTests extends munit.FunSuite:
   test("test1") {
-    // assert(implicitly[TypeClass[Int]].isPrimitive == true)
-    // assert(implicitly[TypeClass[Boolean]].isPrimitive == true)
+    assertSnapshot("my.snapshot.things", "is this what you want?!")
   }
+
+end ExampleTests

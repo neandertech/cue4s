@@ -19,7 +19,7 @@ package com.indoorvivants.proompts
 class InteractiveAlternatives(
     terminal: Terminal,
     prompt: Prompt.Alternatives,
-    writer: String => Unit,
+    out: Output,
     colors: Boolean
 ):
   val lab   = prompt.promptLabel
@@ -35,10 +35,10 @@ class InteractiveAlternatives(
     moveHorizontalTo(0)
     eraseToEndOfLine()
 
-    writer(colored(lab + state.text)(fansi.Color.Cyan(_)))
+    out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
 
     withRestore:
-      writer("\n")
+      out.out("\n")
 
       val filteredAlts =
         prompt.alts.filter(
@@ -60,7 +60,7 @@ class InteractiveAlternatives(
       if filteredAlts.isEmpty then
         moveHorizontalTo(0)
         eraseToEndOfLine()
-        writer(colored("no matches")(fansi.Underlined.On(_)))
+        out.out(colored("no matches")(fansi.Underlined.On(_)))
       else
         filteredAlts.zipWithIndex.foreach: (alt, idx) =>
           moveHorizontalTo(0)
@@ -69,8 +69,8 @@ class InteractiveAlternatives(
             if idx == adjustedSelected then
               colored(s"> $alt")(fansi.Color.Green(_))
             else colored(s"· $alt")(fansi.Bold.On(_))
-          writer(view.toString)
-          if idx != filteredAlts.length - 1 then writer("\n")
+          out.out(view.toString)
+          if idx != filteredAlts.length - 1 then out.out("\n")
       end if
 
       for _ <- 0 until state.showing - newState.showing do

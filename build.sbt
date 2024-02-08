@@ -1,3 +1,4 @@
+import scala.io.StdIn
 Global / excludeLintKeys += logManager
 Global / excludeLintKeys += scalaJSUseMainModuleInitializer
 Global / excludeLintKeys += scalaJSLinkerConfig
@@ -76,8 +77,130 @@ lazy val core = projectMatrix
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
-    nativeConfig ~= (_.withIncrementalCompilation(true))
+    nativeConfig ~= (_.withIncrementalCompilation(true)),
+    withSnapshotTesting
   )
+
+val checkSnapshots = taskKey[Unit]("")
+
+val withSnapshotTesting = Seq(
+  checkSnapshots := {
+    val bold  = scala.Console.BOLD
+    val reset = scala.Console.RESET
+    val legend =
+      s"${bold}a${reset} - accept, ${bold}s${reset} - skip\nYour choice: "
+    val modified = IO
+      .listFiles(
+        (Test / managedResourceDirectories).value.head / "snapshots-tmp"
+      )
+      .toList
+
+    if (modified.isEmpty) {
+      System.err.println("No snapshots to check")
+    } else {
+
+      modified
+        .filter(_.getName.endsWith("__snap.new"))
+        .foreach { f =>
+          val diffFile = new File(f.toString() + ".diff")
+          assert(diffFile.exists(), s"Diff file $diffFile not found")
+
+          val diffContents = scala.io.Source
+            .fromFile(diffFile)
+            .getLines()
+            .mkString(System.lineSeparator())
+
+          val snapshotName :: destination :: newContentsLines =
+            scala.io.Source.fromFile(f).getLines().toList
+
+          println(
+            s"Name: ${scala.Console.BOLD}$snapshotName${scala.Console.RESET}"
+          )
+          println(
+            s"Path: ${scala.Console.BOLD}$destination${scala.Console.RESET}"
+          )
+          println(diffContents)
+
+          println("\n\n")
+          print(legend)
+
+          val choice = StdIn.readLine().trim
+
+          if (choice == "a") {
+            IO.writeLines(new File(destination), newContentsLines)
+            IO.delete(f)
+            IO.delete(diffFile)
+          }
+
+        }
+    }
+
+  },
+  Test / sourceGenerators += Def.task {
+    val platformSuffix =
+      virtualAxes.value.collectFirst { case p: VirtualAxis.PlatformAxis =>
+        p
+      }.get
+
+    val isNative = platformSuffix.value == "jvm"
+    val isJS     = platformSuffix.value == "js"
+    val isJVM    = !isNative && !isJS
+
+    val name = moduleName.value + "-" + platformSuffix.value
+
+    val snapshotsDestination = (Test / resourceDirectory).value / name
+
+    val sourceDest =
+      (Test / managedSourceDirectories).value.head / "Snapshots.scala"
+
+    val tmpDest =
+      (Test / managedResourceDirectories).value.head / "snapshots-tmp"
+
+    IO.write(sourceDest, SnapshotsGenerate(snapshotsDestination, tmpDest))
+
+    IO.createDirectory(snapshotsDestination)
+    IO.createDirectory(tmpDest)
+
+    Seq(sourceDest)
+  }
+)
+
+def SnapshotsGenerate(path: File, tempPath: File) =
+  """
+ |package proompts
+ |import scala.quoted.* // imports Quotes, Expr
+ |object Snapshots:
+ |  inline def location(): String = "PATH"
+ |  inline def tmpLocation(): String = "TEMP_PATH"
+ |  inline def write(name: String, contents: String, diff: String): Unit = 
+ |    import java.io.FileWriter
+ |    val tmpName = name + "__snap.new"
+ |    val tmpDiff = name + "__snap.new.diff"
+ |    val file = java.nio.file.Paths.get(location()).resolve(name)
+ |    val tmpFile = java.nio.file.Paths.get(tmpLocation()).resolve(tmpName).toFile
+ |    val tmpFileDiff = java.nio.file.Paths.get(tmpLocation()).resolve(tmpDiff).toFile
+ |    scala.util.Using(new FileWriter(tmpFile)) { writer => 
+ |      writer.write(name + "\n")
+ |      writer.write(file.toString + "\n")
+ |      writer.write(contents)
+ |    }
+ |    scala.util.Using(new FileWriter(tmpFileDiff)) { writer => 
+ |      writer.write(diff)
+ |    }
+ |  inline def apply(inline name: String): Option[String] =
+ |    ${ applyImpl('name) }
+ |  private def applyImpl(x: Expr[String])(using
+ |      Quotes
+ |  ): Expr[Option[String]] =
+ |    val path = java.nio.file.Paths.get(location()).resolve(x.valueOrAbort)
+ |    if path.toFile.exists() then 
+ |      val str = scala.io.Source.fromFile(path.toFile, "utf-8").getLines().mkString(System.lineSeparator())
+ |      Expr(Some(str))
+ |    else Expr(None)
+ |end Snapshots
+  """.trim.stripMargin
+    .replace("TEMP_PATH", tempPath.toPath().toAbsolutePath().toString)
+    .replace("PATH", path.toPath().toAbsolutePath().toString)
 
 lazy val docs = projectMatrix
   .in(file("myproject-docs"))
@@ -133,3 +256,10 @@ val PrepareCICommands = Seq(
 addCommandAlias("ci", CICommands)
 
 addCommandAlias("preCI", PrepareCICommands)
+
+addCommandAlias(
+  "testSnapshots",
+  """set Test/envVars += ("SNAPSHOTS_INTERACTIVE" -> "true"); test"""
+)
+
+Global / onChangedBuildSource := ReloadOnSourceChanges

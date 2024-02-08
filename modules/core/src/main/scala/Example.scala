@@ -21,7 +21,7 @@ package com.indoorvivants.proompts
   def testingProgram(
       terminal: Terminal,
       events: List[(Event, () => Unit)],
-      write: String => Unit
+      out: Output
   ) =
     val i = InteractiveAlternatives(
       terminal,
@@ -29,7 +29,7 @@ package com.indoorvivants.proompts
         "How do you do fellow kids?",
         List("killa", "rizza", "flizza")
       ),
-      write,
+      out,
       colors = false
     )
 
@@ -38,8 +38,8 @@ package com.indoorvivants.proompts
       callback()
   end testingProgram
 
-  val term   = TracingTerminal(logger = s => ()) // println(s))
-  val writer = term.writer
+  val term      = TracingTerminal(Output.DarkVoid)
+  val capturing = Output.Delegate(term.writer, s => Output.StdOut.logLn(s))
 
   val events =
     List(
@@ -61,7 +61,7 @@ package com.indoorvivants.proompts
           println(ev); println(term.getPretty())
         }
       ),
-    writer
+    capturing
   )
 
 end hello

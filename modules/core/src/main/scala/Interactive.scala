@@ -21,14 +21,13 @@ def errln(o: Any) = System.err.println(o)
 class Interactive(
     terminal: Terminal,
     prompt: Prompt,
-    writer: String => Unit,
+    out: Output,
     colors: Boolean
 ):
-
   def handler =
     prompt match
-      case p: Prompt.Input => InteractiveTextInput(p, writer).handler
+      case p: Prompt.Input => InteractiveTextInput(p, terminal, out, colors).handler
       case p: Prompt.Alternatives =>
-        InteractiveAlternatives(terminal, p, writer, colors).handler
+        InteractiveAlternatives(terminal, p, out, colors).handler
 
 end Interactive

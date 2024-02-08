@@ -18,11 +18,15 @@ package com.indoorvivants.proompts
 
 class InteractiveTextInput(
     prompt: Prompt.Input,
-    writer: String => Unit
+    terminal: Terminal,
+    out: Output,
+    colors: Boolean
 ):
-  val terminal = Terminal.ansi(writer)
-  val lab      = prompt.promptLabel
-  var state    = TextInputState("")
+  val lab   = prompt.promptLabel
+  var state = TextInputState("")
+
+  def colored(msg: String)(f: String => fansi.Str) =
+    if colors then f(msg).toString else msg
 
   def printPrompt() =
 
@@ -33,7 +37,7 @@ class InteractiveTextInput(
 
     errln(prompt)
 
-    writer(s"${fansi.Color.Cyan(lab)}${state.text}")
+    out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
   end printPrompt
 
   val handler = new Handler:
