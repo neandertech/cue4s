@@ -17,51 +17,17 @@
 package com.indoorvivants.proompts
 
 @main def hello =
+  val terminal = Terminal.ansi(Output.Std)
 
-  def testingProgram(
-      terminal: Terminal,
-      events: List[(Event, () => Unit)],
-      out: Output
-  ) =
-    val i = InteractiveAlternatives(
-      terminal,
-      Prompt.Alternatives(
-        "How do you do fellow kids?",
-        List("killa", "rizza", "flizza")
-      ),
-      out,
-      colors = false
-    )
-
-    events.foreach: (ev, callback) =>
-      i.handler(ev)
-      callback()
-  end testingProgram
-
-  val term      = TracingTerminal(Output.DarkVoid)
-  val capturing = Output.Delegate(term.writer, s => Output.StdOut.logLn(s))
-
-  val events =
-    List(
-      Event.Init,
-      Event.Key(KeyEvent.DOWN),
-      Event.Char('r'),
-      Event.Key(KeyEvent.DELETE),
-      Event.Char('l'),
-      Event.Key(KeyEvent.DOWN),
-      Event.Key(KeyEvent.UP),
-      Event.Char('i')
-    )
-
-  testingProgram(
-    term,
-    events
-      .map(ev =>
-        ev -> { () =>
-          println(ev); println(term.getPretty())
-        }
-      ),
-    capturing
+  val prompt = Prompt.Alternatives(
+    "How is your day?",
+    List("Good", "bad", "excellent", "could've been better")
   )
+
+  val interactive = Interactive(terminal, prompt, Output.Std, true)
+
+  val inputProvider = InputProvider(Output.Std)
+
+  val result = inputProvider.evaluateFuture(interactive)
 
 end hello

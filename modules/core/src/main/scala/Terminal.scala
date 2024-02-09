@@ -64,4 +64,4 @@ trait Terminal:
 end Terminal
 
 object Terminal:
-  def ansi(writer: String => Unit) = AnsiTerminal(writer)
+  def ansi(out: Output) = AnsiTerminal(out)

@@ -16,8 +16,10 @@
 
 package com.indoorvivants.proompts
 
-class AnsiTerminal(writer: String => Unit) extends Terminal:
+class AnsiTerminal(out: Output) extends Terminal:
   import AnsiTerminal.{ESC, CSI}
+
+  private val writer = (s: String) => out.out(s)
 
   private inline def call(name: Char, inline args: Int*): this.type =
     writer(s"$CSI${args.mkString(";")}$name")

@@ -16,12 +16,13 @@
 
 package com.indoorvivants.proompts
 
-case class Environment(writer: String => Unit)
+// case class Environment(writer: String => Unit)
 
 abstract class Handler:
   def apply(ev: Event): Next
 
-trait InputProvider extends AutoCloseable:
-  def attach(env: Environment => Handler): Completion
+abstract class InputProvider(protected val output: Output)
+    extends AutoCloseable,
+      InputProviderPlatform
 
-object InputProvider extends InputProviderPlatform
+object InputProvider extends InputProviderCompanionPlatform

@@ -16,12 +16,16 @@
 
 package com.indoorvivants.proompts
 
+import scala.concurrent.Future
+
 trait InputProviderPlatform:
   self: InputProvider =>
 
-private class InputProviderImpl(o: Output)
-    extends InputProvider(o),
-      InputProviderPlatform
+  def evaluateFuture(
+      f: Interactive
+  ): Future[Completion]
 
 trait InputProviderCompanionPlatform:
-  def apply(f: Output): InputProvider = InputProviderImpl(f)
+  def apply(o: Output): InputProvider = InputProviderImpl(o)
+
+end InputProviderCompanionPlatform
