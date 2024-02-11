@@ -1,5 +1,6 @@
 package com.indoorvivants.proompts
 
+import scala.concurrent.Future
 import scala.scalajs.js.annotation.JSGlobal
 import scala.scalajs.js.annotation.JSImport
 
@@ -7,7 +8,6 @@ import com.indoorvivants.proompts.CharCollector.State
 import com.indoorvivants.proompts.CharCollector.decode
 
 import scalajs.js
-import scala.concurrent.Future
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),

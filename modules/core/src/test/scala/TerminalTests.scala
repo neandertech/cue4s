@@ -1,8 +1,9 @@
 package proompts
 
 import com.indoorvivants.proompts.*
+import com.indoorvivants.snapshots.munit_integration.*
 
-trait TerminalTests:
+trait TerminalTests extends MunitSnapshotsIntegration:
   self: munit.FunSuite =>
 
   def terminalTest(

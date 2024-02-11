@@ -1,12 +1,13 @@
 package com.indoorvivants.proompts
 
+import scala.concurrent.Future
 import scala.util.boundary
+
 import scalanative.libc.stdio.getchar
 import scalanative.unsafe.*
 import scalanative.posix.termios.*
 import boundary.break
 import CharCollector.*
-import scala.concurrent.Future
 
 def changemode(dir: Int) =
   val oldt         = stackalloc[termios]()

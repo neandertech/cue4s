@@ -11,6 +11,7 @@ inThisBuild(
     scalafixScalaBinaryVersion := scalaBinaryVersion.value,
     organization               := "com.indoorvivants",
     organizationName           := "Anton Sviridov",
+    resolvers ++= Resolver.sonatypeOssRepos("releases"),
     homepage := Some(
       url("https://github.com/neandertech/proompts")
     ),
@@ -39,7 +40,6 @@ val Versions = new {
 // https://github.com/cb372/sbt-explicit-dependencies/issues/27
 lazy val disableDependencyChecks = Seq(
   unusedCompileDependenciesTest     := {},
-  missinglinkCheck                  := {},
   undeclaredCompileDependenciesTest := {}
 )
 
@@ -61,157 +61,21 @@ lazy val core = projectMatrix
   .settings(
     name := "core"
   )
-  .dependsOn(snapshotsRuntime % "test->compile")
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
   .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
-  .enablePlugins(SnapshotsPlugin)
   .settings(
     snapshotsPackageName := "proompts",
-    snapshotsAddRuntimeDependency := false,
-    snapshotsProjectIdentifier := {
-      val platformSuffix =
-        virtualAxes.value.collectFirst { case p: VirtualAxis.PlatformAxis =>
-          p
-        }.get
-
-      moduleName.value + "-" + platformSuffix.value
-
-    },
+    snapshotsIntegrations += SnapshotIntegration.MUnit,
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
+  .enablePlugins(SnapshotsPlugin)
 
-lazy val snapshotsRuntime = projectMatrix
-  .in(file("modules/snapshots-runtime"))
-  .defaultAxes(defaults*)
-  .settings(
-    name := "snapshots-runtime"
-  )
-  .settings(munitSettings)
-  .jvmPlatform(Versions.scalaVersions)
-  .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
-  .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
-  .settings(
-    scalacOptions += "-Wunused:all",
-    scalaJSUseMainModuleInitializer := true,
-    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    nativeConfig ~= (_.withIncrementalCompilation(true))
-  )
-
-lazy val snapshotsSbtPlugin = project
-  .in(file("modules/snapshots-sbt-plugin"))
-  .settings(
-    sbtPlugin := true,
-    name      := "sbt-proompt-snapshots"
-  )
-  .enablePlugins(BuildInfoPlugin)
-  .settings(
-    buildInfoPackage := "proomps.snapshots.sbtplugin",
-    buildInfoKeys := Seq[BuildInfoKey](
-      version,
-      scalaVersion,
-      scalaBinaryVersion
-    )
-  )
-
-/*
-val checkSnapshots = taskKey[Unit]("")
-
-val withSnapshotTesting = Seq(
-  checkSnapshots := {
-    val bold  = scala.Console.BOLD
-    val reset = scala.Console.RESET
-    val legend =
-      s"${bold}a${reset} - accept, ${bold}s${reset} - skip\nYour choice: "
-    val modified = IO
-      .listFiles(
-        (Test / managedResourceDirectories).value.head / "snapshots-tmp"
-      )
-      .toList
-
-    if (modified.isEmpty) {
-      System.err.println("No snapshots to check")
-    } else {
-
-      modified
-        .filter(_.getName.endsWith("__snap.new"))
-        .foreach { f =>
-          val diffFile = new File(f.toString() + ".diff")
-          assert(diffFile.exists(), s"Diff file $diffFile not found")
-
-          val diffContents = scala.io.Source
-            .fromFile(diffFile)
-            .getLines()
-            .mkString(System.lineSeparator())
-
-          val snapshotName :: destination :: newContentsLines =
-            scala.io.Source.fromFile(f).getLines().toList
-
-          println(
-            s"Name: ${scala.Console.BOLD}$snapshotName${scala.Console.RESET}"
-          )
-          println(
-            s"Path: ${scala.Console.BOLD}$destination${scala.Console.RESET}"
-          )
-          println(diffContents)
-
-          println("\n\n")
-          print(legend)
-
-          val choice = StdIn.readLine().trim
-
-          if (choice == "a") {
-            IO.writeLines(new File(destination), newContentsLines)
-            IO.delete(f)
-            IO.delete(diffFile)
-          }
-
-        }
-    }
-
-  },
-  Test / sourceGenerators += Def.task {
-    val platformSuffix =
-      virtualAxes.value.collectFirst { case p: VirtualAxis.PlatformAxis =>
-        p
-      }.get
-
-    val isNative = platformSuffix.value == "jvm"
-    val isJS     = platformSuffix.value == "js"
-    val isJVM    = !isNative && !isJS
-
-    val name = moduleName.value + "-" + platformSuffix.value
-
-    val snapshotsDestination = (Test / resourceDirectory).value / name
-
-    val sourceDest =
-      (Test / managedSourceDirectories).value.head / "Snapshots.scala"
-
-    val tmpDest =
-      (Test / managedResourceDirectories).value.head / "snapshots-tmp"
-
-    IO.write(sourceDest, SnapshotsGenerate(snapshotsDestination, tmpDest))
-
-    IO.createDirectory(snapshotsDestination)
-    IO.createDirectory(tmpDest)
-
-    Seq(sourceDest)
-  }
-)
-
-def SnapshotsGenerate(path: File, tempPath: File) =
-  """
- |package proompts
- |object Snapshots extends proompts.snapshots.Snapshots(location = "PATH", tmpLocation = "TEMP_PATH")
-  """.trim.stripMargin
-    .replace("TEMP_PATH", tempPath.toPath().toAbsolutePath().toString)
-    .replace("PATH", path.toPath().toAbsolutePath().toString)
- */
 lazy val docs = projectMatrix
   .in(file("myproject-docs"))
   .dependsOn(core)
@@ -251,8 +115,7 @@ val CICommands = Seq(
   s"scalafix --check $scalafixRules",
   "headerCheck",
   "undeclaredCompileDependenciesTest",
-  "unusedCompileDependenciesTest",
-  "missinglinkCheck"
+  "unusedCompileDependenciesTest"
 ).mkString(";")
 
 val PrepareCICommands = Seq(
