@@ -40,6 +40,7 @@ trait WriteStream extends js.Object:
 @js.native
 trait Process extends js.Object:
   def stdin: ReadStream   = js.native
+  def stderr: WriteStream = js.native
   def stdout: WriteStream = js.native
 
 @js.native

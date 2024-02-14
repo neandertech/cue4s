@@ -1,6 +1,23 @@
+/*
+ * Copyright 2023 Anton Sviridov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.indoorvivants.proompts
 
 import scala.concurrent.Future
+import scala.concurrent.Promise
 import scala.scalajs.js.annotation.JSGlobal
 import scala.scalajs.js.annotation.JSImport
 
@@ -17,13 +34,10 @@ private class InputProviderImpl(o: Output)
   ): Future[Completion] =
 
     val stdin = Process.stdin
+
     if stdin.isTTY.contains(true) then
 
       stdin.setRawMode(true)
-      // val env = Environment(writer = s =>
-      //   System.err.println(s.getBytes.toList)
-      //   Process.stdout.write(s)
-      // )
 
       val handler = f.handler
 
@@ -38,16 +52,20 @@ private class InputProviderImpl(o: Output)
 
       var state = State.Init
 
-      var completion = Completion.Finished
+      val completion = Promise[Completion]
+      val fut        = completion.future
+
+      // var completion = Completion.Finished
 
       lazy val keypress: js.Function = (str: js.UndefOr[String], key: Key) =>
         handle(key)
 
       def close(res: Completion) =
-        stdin.setRawMode(false)
-        rl.close()
         stdin.removeListener("keypress", keypress)
-        completion = res
+        if stdin.isTTY.contains(true) then stdin.setRawMode(false)
+        rl.close()
+        completion.success(res)
+        // completion = res
 
       def whatNext(n: Next) =
         n match
@@ -78,7 +96,7 @@ private class InputProviderImpl(o: Output)
       handler(Event.Init)
       stdin.on("keypress", keypress)
 
-      Future.successful(completion) // TODO fix
+      fut
     else Future.successful(Completion.Error("STDIN is not a TTY"))
     end if
   end evaluateFuture

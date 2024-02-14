@@ -5,7 +5,6 @@ Global / excludeLintKeys += scalaJSLinkerConfig
 
 inThisBuild(
   List(
-    scalafixDependencies += "com.github.liancheng" %% "organize-imports" % Versions.organizeImports,
     semanticdbEnabled          := true,
     semanticdbVersion          := scalafixSemanticdb.revision,
     scalafixScalaBinaryVersion := scalaBinaryVersion.value,
@@ -31,10 +30,9 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3          = "3.3.1"
-  val munit           = "1.0.0-M7"
-  val organizeImports = "0.6.0"
-  val scalaVersions   = Seq(Scala3)
+  val Scala3        = "3.3.1"
+  val munit         = "1.0.0-M11"
+  val scalaVersions = Seq(Scala3)
 }
 
 // https://github.com/cb372/sbt-explicit-dependencies/issues/27
@@ -75,6 +73,25 @@ lazy val core = projectMatrix
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
   .enablePlugins(SnapshotsPlugin)
+
+lazy val example = projectMatrix
+  .dependsOn(core)
+  .in(file("modules/example"))
+  .defaultAxes(defaults*)
+  .settings(
+    name := "example",
+    noPublish
+  )
+  .settings(munitSettings)
+  .jvmPlatform(Versions.scalaVersions)
+  .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
+  .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  .settings(
+    scalacOptions += "-Wunused:all",
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    nativeConfig ~= (_.withIncrementalCompilation(true))
+  )
 
 lazy val docs = projectMatrix
   .in(file("myproject-docs"))

@@ -15,20 +15,7 @@
  */
 
 package com.indoorvivants.proompts
-import concurrent.ExecutionContext.Implicits.global
 
-@main def hello =
-  val terminal = Terminal.ansi(Output.Std)
-
-  val prompt = Prompt.Alternatives(
-    "How is your day?",
-    List("Good", "bad", "excellent", "could've been better")
-  )
-
-  val interactive = Interactive(terminal, prompt, Output.Std, true)
-
-  val inputProvider = InputProvider(Output.Std)
-
-  inputProvider.evaluateFuture(interactive).foreach: value => 
-      println(value)
-end hello
+trait PlatformStd extends Output:
+  override def logLn[A: AsString](a: A): Unit = System.err.println(a.render)
+  override def out[A: AsString](a: A): Unit   = System.out.print(a.render)

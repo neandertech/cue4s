@@ -26,7 +26,8 @@ class Interactive(
 ):
   val handler =
     prompt match
-      case p: Prompt.Input => InteractiveTextInput(p, terminal, out, colors).handler
+      case p: Prompt.Input =>
+        InteractiveTextInput(p, terminal, out, colors).handler
       case p: Prompt.Alternatives =>
         InteractiveAlternatives(terminal, p, out, colors).handler
 

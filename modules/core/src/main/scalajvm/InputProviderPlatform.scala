@@ -22,7 +22,7 @@ trait InputProviderPlatform:
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
-    def close(): Unit = ()
+  def close(): Unit = ()
 
 trait InputProviderCompanionPlatform:
   def apply(f: Output): InputProvider = InputProviderImpl(f)
