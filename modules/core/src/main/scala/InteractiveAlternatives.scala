@@ -22,7 +22,7 @@ class InteractiveAlternatives(
     out: Output,
     colors: Boolean
 ):
-  val lab           = prompt.promptLabel
+  val lab           = prompt.label + " > "
   val altsWithIndex = prompt.alts.zipWithIndex
   var state         = AlternativesState("", Some(0), altsWithIndex)
 
@@ -92,6 +92,14 @@ class InteractiveAlternatives(
       end if
   end printPrompt
 
+  def printFinished(value: String) =
+    terminal.eraseEntireLine()
+    terminal.moveBack(lab.length + 2)
+    out.out(colored("✔ " + lab)(fansi.Color.Cyan(_)))
+    out.out(colored(value + "\n")(fansi.Bold.On(_)))
+
+  end printFinished
+
   def handler = new Handler:
     def apply(event: Event): Next =
       event match
@@ -113,7 +121,9 @@ class InteractiveAlternatives(
             case Some(value) =>
               terminal.withRestore:
                 clear(state, state.copy(showing = Nil))
-              Next.Done(state.showing(value)._1)
+              val stringValue = state.showing(value)._1
+              printFinished(stringValue)
+              Next.Done(stringValue)
 
         case Event.Key(KeyEvent.DELETE) => // enter
           trimText()

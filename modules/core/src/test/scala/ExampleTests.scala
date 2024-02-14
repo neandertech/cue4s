@@ -10,7 +10,12 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
 
   terminalTest("alternatives.navigation")(
     prompt,
-    List(Event.Init, Event.Key(KeyEvent.DOWN), Event.Key(KeyEvent.DOWN))
+    List(
+      Event.Init,
+      Event.Key(KeyEvent.DOWN),
+      Event.Key(KeyEvent.DOWN),
+      Event.Key(KeyEvent.ENTER)
+    )
   )
 
   terminalTest("alternatives.typing")(
@@ -20,7 +25,8 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Char('z'),
       Event.Key(KeyEvent.DELETE),
       Event.Char('l'),
-      Event.Char('i')
+      Event.Char('i'),
+      Event.Key(KeyEvent.ENTER)
     )
   )
 

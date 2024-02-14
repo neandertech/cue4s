@@ -25,12 +25,21 @@ import concurrent.ExecutionContext.Implicits.global
     List("Good", "bad", "shexcellent", "could've been better")
   )
 
-  val interactive = Interactive(terminal, prompt, Output.Std, true)
+  val nextPrompt = Prompt.Alternatives(
+    "And how was your poop",
+    List("Strong", "Smelly")
+  )
+
+  def interactive(prompt: Prompt) =
+    Interactive(terminal, prompt, Output.Std, true)
 
   val inputProvider = InputProvider(Output.Std)
 
   inputProvider
-    .evaluateFuture(interactive)
-    .foreach: value =>
-      println(value)
+    .evaluateFuture(interactive(prompt))
+    .collect:
+      case Completion.Finished(v) => v
+    .flatMap: v =>
+      inputProvider.evaluateFuture(interactive(nextPrompt))
+
 end hello

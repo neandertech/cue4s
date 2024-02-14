@@ -22,7 +22,7 @@ class InteractiveTextInput(
     out: Output,
     colors: Boolean
 ):
-  val lab   = prompt.promptLabel
+  val lab   = prompt.label + " > "
   var state = TextInputState("")
 
   def colored(msg: String)(f: String => fansi.Str) =

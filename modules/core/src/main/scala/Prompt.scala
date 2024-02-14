@@ -16,9 +16,10 @@
 
 package com.indoorvivants.proompts
 
-enum Prompt(label: String):
-  case Input(label: String)                            extends Prompt(label)
-  case Alternatives(label: String, alts: List[String]) extends Prompt(label)
+enum Prompt:
+  case Input(lab: String)
+  case Alternatives(lab: String, alts: List[String])
 
-  def promptLabel =
-    label + " > "
+  def label = this match
+    case Input(label)              => label
+    case Alternatives(label, alts) => label
