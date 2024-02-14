@@ -43,6 +43,7 @@ class InteractiveAlternatives(
     moveHorizontalTo(0)
     eraseToEndOfLine()
 
+    out.out("· ")
     out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
 
     withRestore:
@@ -74,8 +75,8 @@ class InteractiveAlternatives(
             eraseToEndOfLine()
             val view =
               if state.selected.contains(idx) then
-                colored(s"> $alt")(fansi.Color.Green(_))
-              else colored(s"· $alt")(fansi.Bold.On(_))
+                colored(s"‣ $alt")(fansi.Color.Green(_))
+              else colored(s"  $alt")(fansi.Bold.On(_))
             out.out(view.toString)
             if idx != filteredAlts.length - 1 then out.out("\n")
 
@@ -95,7 +96,8 @@ class InteractiveAlternatives(
   def printFinished(value: String) =
     terminal.eraseEntireLine()
     terminal.moveBack(lab.length + 2)
-    out.out(colored("✔ " + lab)(fansi.Color.Cyan(_)))
+    out.out(colored("✔ ")(fansi.Color.Green(_)))
+    out.out(colored(lab)(fansi.Color.Cyan(_)))
     out.out(colored(value + "\n")(fansi.Bold.On(_)))
 
   end printFinished
