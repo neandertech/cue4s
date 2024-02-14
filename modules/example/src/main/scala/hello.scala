@@ -22,13 +22,15 @@ import concurrent.ExecutionContext.Implicits.global
 
   val prompt = Prompt.Alternatives(
     "How is your day?",
-    List("Good", "bad", "excellent", "could've been better")
+    List("Good", "bad", "shexcellent", "could've been better")
   )
 
   val interactive = Interactive(terminal, prompt, Output.Std, true)
 
   val inputProvider = InputProvider(Output.Std)
 
-  inputProvider.evaluateFuture(interactive).foreach: value => 
+  inputProvider
+    .evaluateFuture(interactive)
+    .foreach: value =>
       println(value)
 end hello

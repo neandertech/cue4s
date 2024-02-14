@@ -45,7 +45,7 @@ object CharCollector:
         char match
           case AnsiTerminal.ESC =>
             (State.ESC_Started, Next.Continue)
-          case 10 =>
+          case 10 | 13 =>
             emit(Event.Key(KeyEvent.ENTER))
           case 127 =>
             emit(Event.Key(KeyEvent.DELETE))

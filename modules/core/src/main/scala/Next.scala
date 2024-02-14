@@ -18,4 +18,5 @@ package com.indoorvivants.proompts
 
 enum Next:
   case Stop, Continue
+  case Done(value: String)
   case Error(msg: String)

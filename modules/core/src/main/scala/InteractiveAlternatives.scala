@@ -22,11 +22,19 @@ class InteractiveAlternatives(
     out: Output,
     colors: Boolean
 ):
-  val lab   = prompt.promptLabel
-  var state = AlternativesState("", 0, prompt.alts.length)
+  val lab           = prompt.promptLabel
+  val altsWithIndex = prompt.alts.zipWithIndex
+  var state         = AlternativesState("", Some(0), altsWithIndex)
 
   def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
+
+  def clear(oldState: AlternativesState, newState: AlternativesState) =
+    import terminal.*
+    for _ <- 0 until state.showing.length - newState.showing.length do
+      moveNextLine(1)
+      moveHorizontalTo(0)
+      eraseToEndOfLine()
 
   def printPrompt() =
 
@@ -41,43 +49,47 @@ class InteractiveAlternatives(
       out.out("\n")
 
       val filteredAlts =
-        prompt.alts.filter(
-          state.text.isEmpty() || _.toLowerCase().contains(
-            state.text.toLowerCase()
-          )
-        )
-
-      val adjustedSelected =
-        state.selected.min(filteredAlts.length - 1).max(0)
-
-      val newState =
-        AlternativesState(
-          state.text,
-          selected = adjustedSelected,
-          showing = filteredAlts.length.max(1)
-        )
+        altsWithIndex.filter: (txt, idx) =>
+          state.text.isEmpty() || txt
+            .toLowerCase()
+            .contains(
+              state.text.toLowerCase()
+            )
 
       if filteredAlts.isEmpty then
         moveHorizontalTo(0)
         eraseToEndOfLine()
         out.out(colored("no matches")(fansi.Underlined.On(_)))
+        val newState = AlternativesState(
+          state.text,
+          selected = None,
+          showing = Nil
+        )
+        clear(state, newState)
+        state = newState
       else
-        filteredAlts.zipWithIndex.foreach: (alt, idx) =>
-          moveHorizontalTo(0)
-          eraseToEndOfLine()
-          val view =
-            if idx == adjustedSelected then
-              colored(s"> $alt")(fansi.Color.Green(_))
-            else colored(s"· $alt")(fansi.Bold.On(_))
-          out.out(view.toString)
-          if idx != filteredAlts.length - 1 then out.out("\n")
-      end if
+        filteredAlts.zipWithIndex.foreach:
+          case ((alt, originalIdx), idx) =>
+            moveHorizontalTo(0)
+            eraseToEndOfLine()
+            val view =
+              if state.selected.contains(idx) then
+                colored(s"> $alt")(fansi.Color.Green(_))
+              else colored(s"· $alt")(fansi.Bold.On(_))
+            out.out(view.toString)
+            if idx != filteredAlts.length - 1 then out.out("\n")
 
-      for _ <- 0 until state.showing - newState.showing do
-        moveNextLine(1)
-        moveHorizontalTo(0)
-        eraseToEndOfLine()
-      state = newState
+        val newState = state.copy(
+          showing = filteredAlts,
+          selected =
+            if state.showing == filteredAlts then state.selected
+            else Some(0)
+        )
+
+        clear(state, newState)
+        state = newState
+
+      end if
   end printPrompt
 
   def handler = new Handler:
@@ -96,7 +108,12 @@ class InteractiveAlternatives(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) => // enter
-          Next.Stop
+          state.selected match
+            case None => Next.Continue
+            case Some(value) =>
+              terminal.withRestore:
+                clear(state, state.copy(showing = Nil))
+              Next.Done(state.showing(value)._1)
 
         case Event.Key(KeyEvent.DELETE) => // enter
           trimText()
@@ -113,10 +130,11 @@ class InteractiveAlternatives(
       end match
     end apply
 
-  def selectUp() = state = state.copy(selected = (state.selected - 1).max(0))
+  def selectUp() = state =
+    state.copy(selected = state.selected.map(s => (s - 1).max(0)))
 
   def selectDown() = state =
-    state.copy(selected = (state.selected + 1).min(1000))
+    state.copy(selected = state.selected.map(s => (s + 1).min(1000)))
 
   def appendText(t: Char) =
     state = state.copy(text = state.text + t)

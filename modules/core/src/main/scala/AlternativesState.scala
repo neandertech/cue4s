@@ -18,6 +18,6 @@ package com.indoorvivants.proompts
 
 case class AlternativesState(
     text: String,
-    selected: Int,
-    showing: Int
+    selected: Option[Int],
+    showing: List[(String, Int)]
 )

@@ -55,8 +55,6 @@ private class InputProviderImpl(o: Output)
       val completion = Promise[Completion]
       val fut        = completion.future
 
-      // var completion = Completion.Finished
-
       lazy val keypress: js.Function = (str: js.UndefOr[String], key: Key) =>
         handle(key)
 
@@ -65,13 +63,13 @@ private class InputProviderImpl(o: Output)
         if stdin.isTTY.contains(true) then stdin.setRawMode(false)
         rl.close()
         completion.success(res)
-        // completion = res
 
       def whatNext(n: Next) =
         n match
-          case Next.Continue   =>
-          case Next.Stop       => close(Completion.Interrupted)
-          case Next.Error(msg) => close(Completion.Error(msg))
+          case Next.Continue    =>
+          case Next.Done(value) => close(Completion.Finished(value))
+          case Next.Stop        => close(Completion.Interrupted)
+          case Next.Error(msg)  => close(Completion.Error(msg))
 
       def send(ev: Event) =
         whatNext(handler(ev))

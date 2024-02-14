@@ -17,6 +17,6 @@
 package com.indoorvivants.proompts
 
 enum Completion:
-  case Finished
+  case Finished(value: String)
   case Interrupted
   case Error(msg: String)

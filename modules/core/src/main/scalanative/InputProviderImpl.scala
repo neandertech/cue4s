@@ -57,9 +57,10 @@ private class InputProviderImpl(o: Output)
 
       def whatNext(n: Next) =
         n match
-          case Next.Continue   =>
-          case Next.Stop       => break(Completion.Interrupted)
-          case Next.Error(msg) => break(Completion.Error(msg))
+          case Next.Continue            =>
+          case Next.Done(value: String) => break(Completion.Finished(value))
+          case Next.Stop                => break(Completion.Interrupted)
+          case Next.Error(msg)          => break(Completion.Error(msg))
 
       def send(ev: Event) =
         whatNext(f.handler(ev))
@@ -80,7 +81,8 @@ private class InputProviderImpl(o: Output)
 
       end while
 
-      Completion.Finished
+      Completion.Interrupted
+
   end evaluate
 
   override def close() = changemode(0)
