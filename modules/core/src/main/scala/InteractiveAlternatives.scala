@@ -60,7 +60,7 @@ class InteractiveAlternatives(
       if filteredAlts.isEmpty then
         moveHorizontalTo(0)
         eraseToEndOfLine()
-        out.out(colored("no matches")(fansi.Underlined.On(_)))
+        out.out(colored("  no matches")(fansi.Underlined.On(_)))
         val newState = AlternativesState(
           state.text,
           selected = None,
@@ -75,8 +75,8 @@ class InteractiveAlternatives(
             eraseToEndOfLine()
             val view =
               if state.selected.contains(idx) then
-                colored(s"‣ $alt")(fansi.Color.Green(_))
-              else colored(s"  $alt")(fansi.Bold.On(_))
+                colored(s"  ‣ $alt")(fansi.Color.Green(_))
+              else colored(s"    $alt")(fansi.Bold.On(_))
             out.out(view.toString)
             if idx != filteredAlts.length - 1 then out.out("\n")
 

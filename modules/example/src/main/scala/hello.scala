@@ -22,11 +22,11 @@ import concurrent.ExecutionContext.Implicits.global
 
   val prompt = Prompt.Alternatives(
     "How is your day?",
-    List("Good", "bad", "shexcellent", "could've been better")
+    List("great", "okay", "shite")
   )
 
-  val nextPrompt = Prompt.Alternatives(
-    "And how was your poop",
+  def nextPrompt(day: String) = Prompt.Alternatives(
+    s"So your day has been ${day}. And how was your poop",
     List("Strong", "Smelly")
   )
 
@@ -40,6 +40,6 @@ import concurrent.ExecutionContext.Implicits.global
     .collect:
       case Completion.Finished(v) => v
     .flatMap: v =>
-      inputProvider.evaluateFuture(interactive(nextPrompt))
+      inputProvider.evaluateFuture(interactive(nextPrompt(v)))
 
 end hello
