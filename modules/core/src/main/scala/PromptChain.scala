@@ -9,29 +9,30 @@ case class PromptChainFuture[A](
     terminal: Terminal,
     out: Output,
     colors: Boolean,
-    start: (Prompt, String => Future[A]),
-    reversedChain: List[(String => Future[Prompt], (A, String) => Future[A])]
+    start: (Prompt, String => A | Future[A]),
+    reversedChain: List[
+      (String => Prompt | Future[Prompt], (A, String) => A | Future[A])
+    ]
 ):
-
   def evaluateFuture(using ExecutionContext): Future[A] =
     val (startPrompt, startTransform) = start
     val chain                         = reversedChain.reverse
 
     eval(startPrompt): startResult =>
-      val init = startTransform(startResult)
+      val init = lift(startTransform)(startResult)
 
       chain.foldLeft(init):
         case (acc, (nextPrompt, nextValueTransform)) =>
           acc.flatMap: a =>
-            nextPrompt(startResult).flatMap: prompt =>
+            lift(nextPrompt)(startResult).flatMap: prompt =>
               eval(prompt): nextResult =>
-                nextValueTransform(a, nextResult)
+                lift(nextValueTransform.tupled)(a, nextResult)
 
   end evaluateFuture
 
   def andThen(
-      nextPrompt: String => Future[Prompt],
-      updateValue: (A, String) => Future[A]
+      nextPrompt: String => Prompt | Future[Prompt],
+      updateValue: (A, String) => A | Future[A]
   ) =
     copy(reversedChain = (nextPrompt, updateValue) :: reversedChain)
 
@@ -40,6 +41,12 @@ case class PromptChainFuture[A](
       ExecutionContext
   ): Future[T] =
     c.flatMap(check(_)(v))
+
+  private def lift[A, B](f: A => B | Future[B]): A => Future[B] =
+    a =>
+      f(a) match
+        case f: Future[?] => f.asInstanceOf[Future[B]]
+        case other        => Future.successful(other.asInstanceOf[B])
 
   private def eval[T](p: Prompt)(v: String => Future[T])(using
       ExecutionContext
@@ -64,7 +71,7 @@ end PromptChainFuture
 object PromptChain:
   def future[A](
       start: Prompt,
-      createValue: String => Future[A],
+      createValue: String => A | Future[A],
       terminal: Terminal,
       out: Output,
       colors: Boolean

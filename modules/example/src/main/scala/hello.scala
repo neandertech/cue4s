@@ -19,30 +19,21 @@ import concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @main def hello =
-  val out      = Output.Std
-  val terminal = Terminal.ansi(out)
-  val colors   = true
-
-  PromptChain
+  PromptChains
     .future(
       Prompt.Alternatives(
         "How is your day?",
         List("great", "okay", "shite")
       ),
-      s => Future.successful(List(s)),
-      terminal,
-      out,
-      colors
+      s => List(s)
     )
     .andThen(
       day =>
-        Future.successful(
-          Prompt.Alternatives(
-            s"So your day has been ${day}. And how was your poop",
-            List("Strong", "Smelly")
-          )
+        Prompt.Alternatives(
+          s"So your day has been ${day}. And how was your poop",
+          List("Strong", "Smelly")
         ),
-      (cur, poop) => Future.successful(poop :: cur)
+      (cur, poop) => poop :: cur
     )
     .andThen(
       poop =>
@@ -52,26 +43,10 @@ import scala.concurrent.Future
             List("Partay", "sleep")
           )
         ),
-      (cur, doing) => Future.successful(doing :: cur)
+      (cur, doing) => doing :: cur
     )
-    .evaluateFuture.foreach: results =>
+    .evaluateFuture
+    .foreach: results =>
       println(results)
-
-  // def nextPrompt(day: String) = Prompt.Alternatives(
-  //   s"So your day has been ${day}. And how was your poop",
-  //   List("Strong", "Smelly")
-  // )
-
-  // def interactive(prompt: Prompt) =
-  //   Interactive(terminal, prompt, Output.Std, true)
-
-  // val inputProvider = InputProvider(Output.Std)
-
-  // inputProvider
-  //   .evaluateFuture(interactive(prompt))
-  //   .collect:
-  //     case Completion.Finished(v) => v
-  //   .flatMap: v =>
-  //     inputProvider.evaluateFuture(interactive(nextPrompt(v)))
 
 end hello
