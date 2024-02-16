@@ -14,32 +14,28 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 import scala.concurrent.Future
 import scala.concurrent.Promise
-import scala.scalajs.js.annotation.JSGlobal
-import scala.scalajs.js.annotation.JSImport
 
-import com.indoorvivants.proompts.CharCollector.State
-import com.indoorvivants.proompts.CharCollector.decode
+import proompts.CharCollector.State
+import proompts.CharCollector.decode
 
 import scalajs.js
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
-  override def evaluateFuture(
-      f: Interactive
-  ): Future[Completion] =
+  override def evaluateFuture[Result](
+      handler: Handler[Result]
+  ): Future[Completion[Result]] =
 
     val stdin = Process.stdin
 
     if stdin.isTTY.contains(true) then
 
       stdin.setRawMode(true)
-
-      val handler = f.handler
 
       val rl = Readline.createInterface(
         js.Dynamic.literal(
@@ -52,19 +48,19 @@ private class InputProviderImpl(o: Output)
 
       var state = State.Init
 
-      val completion = Promise[Completion]
+      val completion = Promise[Completion[Result]]
       val fut        = completion.future
 
       lazy val keypress: js.Function = (str: js.UndefOr[String], key: Key) =>
         handle(key)
 
-      def close(res: Completion) =
+      def close(res: Completion[Result]) =
         stdin.removeListener("keypress", keypress)
         if stdin.isTTY.contains(true) then stdin.setRawMode(false)
         rl.close()
         completion.success(res)
 
-      def whatNext(n: Next) =
+      def whatNext(n: Next[Result]) =
         n match
           case Next.Continue    =>
           case Next.Done(value) => close(Completion.Finished(value))
@@ -88,7 +84,12 @@ private class InputProviderImpl(o: Output)
               state = newState
 
               result match
-                case n: Next  => whatNext(n)
+                case d: CharCollector.DecodeResult =>
+                  import CharCollector.DecodeResult.*
+                  d match
+                    case Continue   => whatNext(Next.Continue)
+                    case Error(msg) => whatNext(Next.Error(msg))
+
                 case e: Event => send(e)
 
       handler(Event.Init)

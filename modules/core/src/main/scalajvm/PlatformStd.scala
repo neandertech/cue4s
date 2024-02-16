@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 trait PlatformStd extends Output:
   override def logLn[A: AsString](a: A): Unit = System.err.println(a.render)

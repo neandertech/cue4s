@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 trait Output:
   def out[A: AsString](a: A): Unit

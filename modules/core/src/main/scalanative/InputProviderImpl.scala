@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 import scala.concurrent.Future
 import scala.util.boundary
@@ -25,11 +25,11 @@ import scalanative.posix.termios.*
 import boundary.break
 import CharCollector.*
 
-def changemode(dir: Int) =
+def changemode(rawMode: Boolean) =
   val oldt         = stackalloc[termios]()
   val newt         = stackalloc[termios]()
   val STDIN_FILENO = 0
-  if dir == 1 then
+  if rawMode then
     tcgetattr(STDIN_FILENO, oldt)
     !newt = !oldt
     (!newt)._4 = (!newt)._4 & ~(ICANON | ECHO)
@@ -41,11 +41,11 @@ private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
 
-  override def evaluateFuture(f: Interactive) =
-    Future.successful(evaluate(f))
+  override def evaluateFuture[Result](handler: Handler[Result]) =
+    Future.successful(evaluate(handler))
 
-  override def evaluate(f: Interactive): Completion =
-    changemode(1)
+  override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
+    changemode(rawMode = true)
 
     var lastRead = 0
 
@@ -53,27 +53,27 @@ private class InputProviderImpl(o: Output)
       lastRead = getchar()
       lastRead
 
-    boundary[Completion]:
+    boundary[Completion[Result]]:
 
-      def whatNext(n: Next) =
+      def whatNext(n: Next[Result]) =
         n match
-          case Next.Continue            =>
-          case Next.Done(value: String) => break(Completion.Finished(value))
-          case Next.Stop                => break(Completion.Interrupted)
-          case Next.Error(msg)          => break(Completion.Error(msg))
+          case Next.Continue    =>
+          case Next.Done(value) => break(Completion.Finished(value))
+          case Next.Stop        => break(Completion.Interrupted)
+          case Next.Error(msg)  => break(Completion.Error(msg))
 
       def send(ev: Event) =
-        whatNext(f.handler(ev))
+        whatNext(handler(ev))
 
       var state = State.Init
 
-      whatNext(f.handler(Event.Init))
+      whatNext(handler(Event.Init))
 
       while read() != 0 do
         val (newState, result) = decode(state, lastRead)
 
         result match
-          case n: Next => whatNext(n)
+          case n: DecodeResult => whatNext(n.toNext)
           case e: Event =>
             send(e)
 
@@ -85,5 +85,5 @@ private class InputProviderImpl(o: Output)
 
   end evaluate
 
-  override def close() = changemode(0)
+  override def close() = changemode(rawMode = false)
 end InputProviderImpl

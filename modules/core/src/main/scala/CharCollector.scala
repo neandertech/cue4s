@@ -14,14 +14,23 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 object CharCollector:
   enum State:
     case Init, ESC_Started, CSI_Started
     case CSI_Collecting(bytes: List[Byte])
 
-  def decode(curState: State, char: Int): (State, Next | Event) =
+  enum DecodeResult:
+    case Continue
+    case Error(msg: String)
+
+    def toNext[R]: Next[R] = this match
+      case Continue => Next.Continue
+      case Error(msg) => Next.Error(msg)
+    
+
+  def decode(curState: State, char: Int): (State, DecodeResult | Event) =
     def isCSIParameterByte(b: Int) =
       (b >= 0x30 && b <= 0x3f)
 
@@ -32,19 +41,19 @@ object CharCollector:
       (b >= 0x40 && b <= 0x7e)
 
     def error(msg: String) =
-      (curState, Next.Error(msg))
+      (curState, DecodeResult.Error(msg))
 
     def emit(event: Event) =
       (curState, event)
 
-    def toInit(result: Next | Event) =
+    def toInit(result: DecodeResult | Event) =
       (State.Init, result)
 
     curState match
       case State.Init =>
         char match
           case AnsiTerminal.ESC =>
-            (State.ESC_Started, Next.Continue)
+            (State.ESC_Started, DecodeResult.Continue)
           case 10 | 13 =>
             emit(Event.Key(KeyEvent.ENTER))
           case 127 =>
@@ -55,7 +64,7 @@ object CharCollector:
       case State.ESC_Started =>
         char match
           case '[' =>
-            (State.CSI_Started, Next.Continue)
+            (State.CSI_Started, DecodeResult.Continue)
           case _ =>
             error(s"Unexpected symbol ${char} following an ESC sequence")
 
@@ -70,7 +79,7 @@ object CharCollector:
               if isCSIParameterByte(b) || isCSIIntermediateByte(
                 b
               ) =>
-            (State.CSI_Collecting(b.toByte :: Nil), Next.Continue)
+            (State.CSI_Collecting(b.toByte :: Nil), DecodeResult.Continue)
 
       case State.CSI_Collecting(bytes) =>
         char match

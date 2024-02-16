@@ -1,0 +1,3 @@
+package proompts
+
+trait PromptChainCompanionPlatform

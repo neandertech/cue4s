@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 import scala.collection.mutable
 

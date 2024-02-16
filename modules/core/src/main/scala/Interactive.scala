@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 def errln(o: Any) = System.err.println(o)
 
-class Interactive(
-    terminal: Terminal,
-    prompt: Prompt,
-    out: Output,
-    colors: Boolean
-):
-  val handler =
-    prompt match
-      case p: Prompt.Input =>
-        InteractiveTextInput(p, terminal, out, colors).handler
-      case p: Prompt.Alternatives =>
-        InteractiveAlternatives(terminal, p, out, colors).handler
+// class Interactive[Result](
+//     terminal: Terminal,
+//     prompt: Prompt[Result],
+//     out: Output,
+//     colors: Boolean
+// ):
+//   val handler: Handler[Result] =
+//     prompt match
+//       case p: Prompt.Input =>
+//         // TODO - reorg the codebase so this instanceOf is not required
+//         InteractiveTextInput(p, terminal, out, colors).handler.asInstanceOf
+//       case p: Prompt.Alternatives =>
+//         // TODO - reorg the codebase so this instanceOf is not required
+//         InteractiveAlternatives(terminal, p, out, colors).handler.asInstanceOf
 
-end Interactive
+// end Interactive

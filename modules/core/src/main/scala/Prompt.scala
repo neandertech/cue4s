@@ -14,12 +14,42 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
-enum Prompt:
-  case Input(lab: String)
-  case Alternatives(lab: String, alts: List[String])
+trait Prompt[Result]:
+  def handler(
+      terminal: Terminal,
+      output: Output,
+      colors: Boolean
+  ): Handler[Result]
 
-  def label = this match
-    case Input(label)              => label
-    case Alternatives(label, alts) => label
+case class InputPrompt(lab: String) extends Prompt[String]:
+  override def handler(
+      terminal: Terminal,
+      output: Output,
+      colors: Boolean
+  ): Handler[String] =
+    val inp = InteractiveTextInput(this, terminal, output, colors)
+
+    inp.handler
+end InputPrompt
+
+case class AlternativesPrompt(lab: String, alts: List[String])
+    extends Prompt[String]:
+  override def handler(
+      terminal: Terminal,
+      output: Output,
+      colors: Boolean
+  ): Handler[String] =
+    val inp = InteractiveAlternatives(this, terminal, output, colors)
+
+    inp.handler
+end AlternativesPrompt
+
+// enum Prompt[Result]:
+//   case Input(lab: String) extends Prompt[String]
+//   case Alternatives(lab: String, alts: List[String]) extends Prompt[String]
+
+//   def label = this match
+//     case Input(label)              => label
+//     case Alternatives(label, alts) => label

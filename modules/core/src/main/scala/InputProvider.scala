@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
-// case class Environment(writer: String => Unit)
-
-abstract class Handler:
-  def apply(ev: Event): Next
+abstract class Handler[Result]:
+  def apply(ev: Event): Next[Result]
 
 abstract class InputProvider(protected val output: Output)
     extends AutoCloseable,

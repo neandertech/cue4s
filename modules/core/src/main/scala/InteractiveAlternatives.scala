@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 class InteractiveAlternatives(
+    prompt: AlternativesPrompt,
     terminal: Terminal,
-    prompt: Prompt.Alternatives,
     out: Output,
     colors: Boolean
 ):
-  val lab           = prompt.label + " > "
+  val lab           = prompt.lab + " > "
   val altsWithIndex = prompt.alts.zipWithIndex
   var state         = AlternativesState("", Some(0), altsWithIndex)
 
@@ -33,7 +33,7 @@ class InteractiveAlternatives(
     import terminal.*
     for _ <- 0 until state.showing.length - newState.showing.length do
       moveNextLine(1)
-      moveHorizontalTo(0)
+      moveHorizontalTo(1)
       eraseToEndOfLine()
 
   def printPrompt() =
@@ -41,7 +41,7 @@ class InteractiveAlternatives(
     import terminal.*
 
     moveHorizontalTo(0)
-    eraseToEndOfLine()
+    eraseEntireLine()
 
     out.out("· ")
     out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
@@ -50,7 +50,7 @@ class InteractiveAlternatives(
       out.out("\n")
 
       val filteredAlts =
-        altsWithIndex.filter: (txt, idx) =>
+        altsWithIndex.filter: (txt, _) =>
           state.text.isEmpty() || txt
             .toLowerCase()
             .contains(
@@ -95,15 +95,15 @@ class InteractiveAlternatives(
 
   def printFinished(value: String) =
     terminal.eraseEntireLine()
-    terminal.moveBack(lab.length + 2)
+    terminal.moveHorizontalTo(0)
     out.out(colored("✔ ")(fansi.Color.Green(_)))
     out.out(colored(lab)(fansi.Color.Cyan(_)))
     out.out(colored(value + "\n")(fansi.Bold.On(_)))
 
   end printFinished
 
-  def handler = new Handler:
-    def apply(event: Event): Next =
+  val handler = new Handler[String]:
+    def apply(event: Event): Next[String] =
       event match
         case Event.Init =>
           printPrompt()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 class AnsiTerminal(out: Output) extends Terminal:
   import AnsiTerminal.{ESC, CSI}

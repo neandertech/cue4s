@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
-enum Next:
+enum Next[+Result]:
   case Stop, Continue
-  case Done(value: String)
+  case Done(value: Result)
   case Error(msg: String)

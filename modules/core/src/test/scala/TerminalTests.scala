@@ -1,14 +1,16 @@
 package proompts
 
-import com.indoorvivants.proompts.*
+import proompts.*
 import com.indoorvivants.snapshots.munit_integration.*
 
 trait TerminalTests extends MunitSnapshotsIntegration:
   self: munit.FunSuite =>
 
-  def terminalTest(
+  def terminalTest[R](
       name: String
-  )(prompt: Prompt, events: List[Event])(implicit loc: munit.Location): Unit =
+  )(prompt: Prompt[R], events: List[Event])(implicit
+      loc: munit.Location
+  ): Unit =
     test(name) {
       val result =
         terminalSession(
@@ -19,15 +21,15 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       assertSnapshot(name, result)
     }
 
-  def terminalSession(name: String, prompt: Prompt, events: List[Event]) =
+  def terminalSession[R](name: String, prompt: Prompt[R], events: List[Event]) =
     val sb        = new java.lang.StringBuilder
     val term      = TracingTerminal(Output.DarkVoid)
     val capturing = Output.Delegate(term.writer, s => sb.append(s + "\n"))
 
-    val i = Interactive(term, prompt, capturing, colors = false)
+    val handler = prompt.handler(term, capturing, colors = false)
     events.foreach: ev =>
       sb.append(ev.toString() + "\n")
-      i.handler(ev)
+      handler(ev)
       sb.append(term.getPretty() + "\n")
     sb.toString()
   end terminalSession

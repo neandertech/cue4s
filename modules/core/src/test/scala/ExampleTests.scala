@@ -1,9 +1,9 @@
 package proompts
 
-import com.indoorvivants.proompts.*
+import proompts.*
 
 class ExampleTests extends munit.FunSuite, TerminalTests:
-  val prompt = Prompt.Alternatives(
+  val prompt = AlternativesPrompt(
     "How do you do fellow kids?",
     List("killa", "rizza", "flizza")
   )

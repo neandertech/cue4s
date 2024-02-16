@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 class InteractiveTextInput(
-    prompt: Prompt.Input,
+    prompt: InputPrompt,
     terminal: Terminal,
     out: Output,
     colors: Boolean
 ):
-  val lab   = prompt.label + " > "
+  val lab   = prompt.lab + " > "
   var state = TextInputState("")
 
   def colored(msg: String)(f: String => fansi.Str) =
@@ -35,14 +35,11 @@ class InteractiveTextInput(
     moveHorizontalTo(0)
     eraseToEndOfLine()
 
-    errln(prompt)
-
     out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
   end printPrompt
 
-  val handler = new Handler:
-    def apply(event: Event): Next =
-      errln(event)
+  val handler = new Handler[String]:
+    def apply(event: Event): Next[String] =
       event match
         case Event.Init =>
           printPrompt()

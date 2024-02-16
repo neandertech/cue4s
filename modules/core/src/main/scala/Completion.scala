@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
-enum Completion:
-  case Finished(value: String)
+enum Completion[+Result]:
+  case Finished(value: Result)
   case Interrupted
   case Error(msg: String)

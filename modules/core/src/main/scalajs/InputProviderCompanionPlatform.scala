@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 import scala.concurrent.Future
 
 trait InputProviderPlatform:
   self: InputProvider =>
 
-  def evaluateFuture(
-      f: Interactive
-  ): Future[Completion]
+  def evaluateFuture[Result](
+      f: Handler[Result]
+  ): Future[Completion[Result]]
 
 trait InputProviderCompanionPlatform:
   def apply(o: Output): InputProvider = InputProviderImpl(o)

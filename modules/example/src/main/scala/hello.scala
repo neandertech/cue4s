@@ -14,36 +14,41 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 import concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+
+case class Info(
+    day: Option[String] = None,
+    work: Option[String] = None,
+    weather: Option[String] = None
+)
 
 @main def hello =
-  PromptChains
-    .future(
-      Prompt.Alternatives(
-        "How is your day?",
-        List("great", "okay", "shite")
-      ),
-      s => List(s)
-    )
-    .andThen(
-      day =>
-        Prompt.Alternatives(
-          s"So your day has been ${day}. And how was your poop",
-          List("Strong", "Smelly")
+  PromptChain
+    .future(Info())
+    .prompt(
+      _ =>
+        AlternativesPrompt(
+          "How is your day?",
+          List("great", "okay", "shite")
         ),
-      (cur, poop) => poop :: cur
+      (info, day) => info.copy(day = Some(day))
     )
-    .andThen(
-      poop =>
-        Future.successful(
-          Prompt.Alternatives(
-            s"I see... whatcha wanna do",
-            List("Partay", "sleep")
-          )
+    .prompt(
+      info =>
+        AlternativesPrompt(
+          s"So your day has been ${info.day.get}. How are things at work?",
+          List("please go away", "I don't want to talk about it")
         ),
-      (cur, doing) => doing :: cur
+      (info, work) => info.copy(work = Some(work))
+    )
+    .prompt(
+      _ =>
+        AlternativesPrompt(
+          s"Great! What fantastic weather we're having, right?",
+          List("please leave me alone", "don't you have actual friends?")
+        ),
+      (cur, weather) => cur.copy(weather = Some(weather))
     )
     .evaluateFuture
     .foreach: results =>

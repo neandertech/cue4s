@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package com.indoorvivants.proompts
+package proompts
 
 case class TextInputState(text: String)
