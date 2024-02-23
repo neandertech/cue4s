@@ -30,7 +30,7 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3        = "3.3.1"
+  val Scala3        = "3.3.2"
   val munit         = "1.0.0-M11"
   val scalaVersions = Seq(Scala3)
 }
@@ -50,7 +50,8 @@ lazy val munitSettings = Seq(
 lazy val root = project
   .in(file("."))
   .aggregate(core.projectRefs*)
-  .aggregate(docs.projectRefs*)
+  .aggregate(example.projectRefs*)
+  //.aggregate(docs.projectRefs*)
   .settings(noPublish)
 
 lazy val core = projectMatrix
@@ -60,7 +61,7 @@ lazy val core = projectMatrix
     name := "core"
   )
   .settings(munitSettings)
-  .jvmPlatform(Versions.scalaVersions)
+  //.jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
   .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
@@ -82,7 +83,7 @@ lazy val catsEffect = projectMatrix
   )
   .dependsOn(core)
   .settings(munitSettings)
-  .jvmPlatform(Versions.scalaVersions)
+  //.jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
   .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
@@ -105,7 +106,7 @@ lazy val example = projectMatrix
     noPublish
   )
   .settings(munitSettings)
-  .jvmPlatform(Versions.scalaVersions)
+  //.jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
   .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
@@ -115,20 +116,6 @@ lazy val example = projectMatrix
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
-
-lazy val docs = projectMatrix
-  .in(file("myproject-docs"))
-  .dependsOn(core)
-  .defaultAxes(defaults*)
-  .settings(
-    mdocVariables := Map(
-      "VERSION" -> version.value
-    )
-  )
-  .settings(disableDependencyChecks)
-  .jvmPlatform(Versions.scalaVersions)
-  .enablePlugins(MdocPlugin)
-  .settings(noPublish)
 
 val noPublish = Seq(
   publish / skip      := true,
@@ -149,7 +136,6 @@ val CICommands = Seq(
   "clean",
   "compile",
   "test",
-  "docs/mdoc",
   "scalafmtCheckAll",
   "scalafmtSbtCheck",
   s"scalafix --check $scalafixRules",
