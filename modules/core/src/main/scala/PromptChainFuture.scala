@@ -29,7 +29,6 @@ private[proompts] case class PromptChainFuture[A] private[proompts] (
     reversedSteps.reverse.foldLeft(Future.successful(init)):
       case (acc, step) =>
         acc.flatMap(step)
-
   end evaluateFuture
 
   private def fail(msg: String) = Future.failed(new RuntimeException(msg))
@@ -47,7 +46,7 @@ private[proompts] case class PromptChainFuture[A] private[proompts] (
   private def eval[T, R](p: Prompt[R])(v: R => Future[T])(using
       ExecutionContext
   ): Future[T] = check(
-    ip.evaluateFuture(handler(p))
+    inputProvider.evaluateFuture(handler(p))
   )(v)
 
   private def check[T, R](c: Completion[R])(v: R => Future[T]): Future[T] =
@@ -59,7 +58,7 @@ private[proompts] case class PromptChainFuture[A] private[proompts] (
       case Completion.Finished(value) =>
         v(value)
 
-  private def ip = InputProvider(out)
+  private def inputProvider = InputProvider(out)
   private def handler[R](prompt: Prompt[R]) =
     prompt.handler(terminal, out, colors)
 end PromptChainFuture

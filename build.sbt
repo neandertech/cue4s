@@ -74,8 +74,30 @@ lazy val core = projectMatrix
   )
   .enablePlugins(SnapshotsPlugin)
 
-lazy val example = projectMatrix
+lazy val catsEffect = projectMatrix
+  .in(file("modules/cats-effect"))
+  .defaultAxes(defaults*)
+  .settings(
+    name := "cats-effect"
+  )
   .dependsOn(core)
+  .settings(munitSettings)
+  .jvmPlatform(Versions.scalaVersions)
+  .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
+  .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  .settings(
+    snapshotsPackageName := "proompts.catseffect",
+    snapshotsIntegrations += SnapshotIntegration.MUnit,
+    scalacOptions += "-Wunused:all",
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    libraryDependencies += "org.typelevel" %%% "cats-effect" % "3.5.3",
+    nativeConfig ~= (_.withIncrementalCompilation(true))
+  )
+  .enablePlugins(SnapshotsPlugin)
+
+lazy val example = projectMatrix
+  .dependsOn(core, catsEffect)
   .in(file("modules/example"))
   .defaultAxes(defaults*)
   .settings(
@@ -89,6 +111,7 @@ lazy val example = projectMatrix
   .settings(
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
+    mainClass := Some("example.io.ioExample"),
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )

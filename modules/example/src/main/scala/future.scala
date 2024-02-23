@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-package proompts
+package example.future
+
 import concurrent.ExecutionContext.Implicits.global
+import proompts.*
 
 case class Info(
     day: Option[String] = None,
@@ -23,7 +25,7 @@ case class Info(
     weather: Option[String] = None
 )
 
-@main def hello =
+@main def future =
   PromptChain
     .future(Info())
     .prompt(
@@ -53,5 +55,3 @@ case class Info(
     .evaluateFuture
     .foreach: results =>
       println(results)
-
-end hello
