@@ -29,9 +29,7 @@ case class InputPrompt(lab: String) extends Prompt[String]:
       output: Output,
       colors: Boolean
   ): Handler[String] =
-    val inp = InteractiveTextInput(this, terminal, output, colors)
-
-    inp.handler
+    InteractiveTextInput(this, terminal, output, colors).handler
 end InputPrompt
 
 case class AlternativesPrompt(lab: String, alts: List[String])
@@ -41,15 +39,6 @@ case class AlternativesPrompt(lab: String, alts: List[String])
       output: Output,
       colors: Boolean
   ): Handler[String] =
-    val inp = InteractiveAlternatives(this, terminal, output, colors)
-
-    inp.handler
+    InteractiveAlternatives(this, terminal, output, colors).handler
 end AlternativesPrompt
 
-// enum Prompt[Result]:
-//   case Input(lab: String) extends Prompt[String]
-//   case Alternatives(lab: String, alts: List[String]) extends Prompt[String]
-
-//   def label = this match
-//     case Input(label)              => label
-//     case Alternatives(label, alts) => label
