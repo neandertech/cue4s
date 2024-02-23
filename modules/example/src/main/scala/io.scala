@@ -54,5 +54,5 @@ object ioExample extends IOApp.Simple:
       )
       .evaluateIO
       .flatMap: results =>
-        IO.println(results)
+        IO.println(results).replicateA_(5)
 end ioExample

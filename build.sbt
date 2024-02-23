@@ -111,7 +111,7 @@ lazy val example = projectMatrix
   .settings(
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
-    mainClass := Some("example.io.ioExample"),
+    Compile / mainClass := Some("example.catseffect.ioExample"),
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
