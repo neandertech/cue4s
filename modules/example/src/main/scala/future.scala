@@ -16,8 +16,9 @@
 
 package example.future
 
-import concurrent.ExecutionContext.Implicits.global
 import proompts.*
+
+import concurrent.ExecutionContext.Implicits.global
 
 case class Info(
     day: Option[String] = None,

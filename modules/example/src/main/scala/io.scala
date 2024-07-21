@@ -16,14 +16,17 @@
 
 package example.catseffect
 
-import proompts.*, catseffect.*
 import cats.effect.*
+import proompts.*
+
+import catseffect.*
 
 case class Info(
     day: Option[String] = None,
     work: Option[String] = None,
     weather: Option[String] = None
 )
+
 object ioExample extends IOApp.Simple:
   def run: IO[Unit] =
     PromptChain

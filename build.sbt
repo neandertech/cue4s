@@ -38,12 +38,6 @@ val Versions = new {
   val catsEffect    = "3.5.3"
 }
 
-// https://github.com/cb372/sbt-explicit-dependencies/issues/27
-lazy val disableDependencyChecks = Seq(
-  unusedCompileDependenciesTest     := {},
-  undeclaredCompileDependenciesTest := {}
-)
-
 lazy val munitSettings = Seq(
   libraryDependencies += {
     "org.scalameta" %%% "munit" % Versions.munit % Test
@@ -65,8 +59,8 @@ lazy val core = projectMatrix
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
-  .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
-  .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  .jsPlatform(Versions.scalaVersions)
+  .nativePlatform(Versions.scalaVersions)
   .settings(
     snapshotsPackageName := "proompts",
     snapshotsIntegrations += SnapshotIntegration.MUnit,
@@ -104,7 +98,7 @@ lazy val catsEffect = projectMatrix
   .dependsOn(core)
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
-  .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
+  .jsPlatform(Versions.scalaVersions)
   // .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
     snapshotsPackageName := "proompts.catseffect",
@@ -128,7 +122,7 @@ lazy val example = projectMatrix
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
-  .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
+  .jsPlatform(Versions.scalaVersions)
   // .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
     scalacOptions += "-Wunused:all",
@@ -160,17 +154,14 @@ val CICommands = Seq(
   "scalafmtCheckAll",
   "scalafmtSbtCheck",
   s"scalafix --check $scalafixRules",
-  "headerCheck",
-  "undeclaredCompileDependenciesTest",
-  "unusedCompileDependenciesTest"
+  "headerCheck"
 ).mkString(";")
 
 val PrepareCICommands = Seq(
   s"scalafix --rules $scalafixRules",
   "scalafmtAll",
   "scalafmtSbt",
-  "headerCreate",
-  "undeclaredCompileDependenciesTest"
+  "headerCreate"
 ).mkString(";")
 
 addCommandAlias("ci", CICommands)

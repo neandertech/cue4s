@@ -26,9 +26,8 @@ object CharCollector:
     case Error(msg: String)
 
     def toNext[R]: Next[R] = this match
-      case Continue => Next.Continue
+      case Continue   => Next.Continue
       case Error(msg) => Next.Error(msg)
-    
 
   def decode(curState: State, char: Int): (State, DecodeResult | Event) =
     def isCSIParameterByte(b: Int) =

@@ -41,4 +41,3 @@ case class AlternativesPrompt(lab: String, alts: List[String])
   ): Handler[String] =
     InteractiveAlternatives(this, terminal, output, colors).handler
 end AlternativesPrompt
-
