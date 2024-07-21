@@ -16,23 +16,15 @@
 
 package proompts
 
-enum Event:
-  case Init
-  case Key(which: KeyEvent)
-  case Char(which: Int)
-  case CSICode(bytes: List[Byte])
+import scala.concurrent.Future
 
-  override def toString(): String =
-    this match
-      case Init           => "Event.Init"
-      case Key(which)     => s"Event.Key($which)"
-      case Char(which)    => s"Event.Char('${which.toChar}')"
-      case CSICode(bytes) => s"Event.CSICode(${bytes.mkString("[", ", ", "]")})"
-end Event
+trait InputProviderPlatform:
+  self: InputProvider =>
 
-object Event:
-  object Char:
-    def apply(c: scala.Char): Event.Char = Event.Char(c.toInt)
+  def evaluate[Result](f: Handler[Result]): Completion[Result]
+  def evaluateFuture[Result](f: Handler[Result]): Future[Completion[Result]]
 
-enum KeyEvent:
-  case UP, DOWN, LEFT, RIGHT, ENTER, DELETE
+trait InputProviderCompanionPlatform:
+  def apply(o: Output): InputProvider = InputProviderImpl(o)
+
+end InputProviderCompanionPlatform

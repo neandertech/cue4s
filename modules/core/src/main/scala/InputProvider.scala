@@ -1,20 +1,26 @@
-package com.indoorvivants.proompts
+/*
+ * Copyright 2023 Anton Sviridov
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-enum Completion:
-  case Finished
-  case Interrupted
-  case Error(msg: String)
+package proompts
 
-enum Next:
-  case Stop, Continue
-  case Error(msg: String)
+abstract class Handler[Result]:
+  def apply(ev: Event): Next[Result]
 
-case class Environment(writer: String => Unit)
+abstract class InputProvider(protected val output: Output)
+    extends AutoCloseable,
+      InputProviderPlatform
 
-abstract class Handler:
-  def apply(ev: Event): Next
-
-trait InputProvider extends AutoCloseable:
-  def attach(env: Environment => Handler): Completion
-
-object InputProvider extends InputProviderPlatform
+object InputProvider extends InputProviderCompanionPlatform

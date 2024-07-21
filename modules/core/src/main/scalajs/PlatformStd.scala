@@ -16,23 +16,7 @@
 
 package proompts
 
-enum Event:
-  case Init
-  case Key(which: KeyEvent)
-  case Char(which: Int)
-  case CSICode(bytes: List[Byte])
-
-  override def toString(): String =
-    this match
-      case Init           => "Event.Init"
-      case Key(which)     => s"Event.Key($which)"
-      case Char(which)    => s"Event.Char('${which.toChar}')"
-      case CSICode(bytes) => s"Event.CSICode(${bytes.mkString("[", ", ", "]")})"
-end Event
-
-object Event:
-  object Char:
-    def apply(c: scala.Char): Event.Char = Event.Char(c.toInt)
-
-enum KeyEvent:
-  case UP, DOWN, LEFT, RIGHT, ENTER, DELETE
+trait PlatformStd extends Output:
+  override def logLn[A: AsString](a: A): Unit =
+    Process.stderr.write(a.render + "\n")
+  override def out[A: AsString](a: A): Unit = Process.stdout.write(a.render)
