@@ -30,9 +30,12 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3        = "3.3.2"
-  val munit         = "1.0.0-M11"
+  val Scala3        = "3.3.3"
+  val munit         = "1.0.0"
   val scalaVersions = Seq(Scala3)
+  val fansi         = "0.5.0"
+  val jna           = "5.14.0"
+  val catsEffect    = "3.5.3"
 }
 
 // https://github.com/cb372/sbt-explicit-dependencies/issues/27
@@ -51,7 +54,7 @@ lazy val root = project
   .in(file("."))
   .aggregate(core.projectRefs*)
   .aggregate(example.projectRefs*)
-  //.aggregate(docs.projectRefs*)
+  // .aggregate(docs.projectRefs*)
   .settings(noPublish)
 
 lazy val core = projectMatrix
@@ -61,7 +64,7 @@ lazy val core = projectMatrix
     name := "core"
   )
   .settings(munitSettings)
-  //.jvmPlatform(Versions.scalaVersions)
+  .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
   .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
@@ -70,7 +73,24 @@ lazy val core = projectMatrix
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    libraryDependencies += "com.lihaoyi" %%% "fansi" % "0.4.0",
+    libraryDependencies += "com.lihaoyi" %%% "fansi" % Versions.fansi,
+    libraryDependencies +=
+      "net.java.dev.jna" % "jna" % Versions.jna,
+    (Compile / unmanagedSourceDirectories) ++= {
+      val allCombos = List("js", "jvm", "native").combinations(2).toList
+      val dis =
+        virtualAxes.value.collectFirst { case p: VirtualAxis.PlatformAxis =>
+          p.directorySuffix
+        }.get
+
+      allCombos
+        .filter(_.contains(dis))
+        .map { suff =>
+          val suffixes = "scala" + suff.mkString("-", "-", "")
+
+          (Compile / sourceDirectory).value / suffixes
+        }
+    },
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
   .enablePlugins(SnapshotsPlugin)
@@ -83,16 +103,16 @@ lazy val catsEffect = projectMatrix
   )
   .dependsOn(core)
   .settings(munitSettings)
-  //.jvmPlatform(Versions.scalaVersions)
+  .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
-  .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  // .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
     snapshotsPackageName := "proompts.catseffect",
     snapshotsIntegrations += SnapshotIntegration.MUnit,
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    libraryDependencies += "org.typelevel" %%% "cats-effect" % "3.5.3",
+    libraryDependencies += "org.typelevel" %%% "cats-effect" % Versions.catsEffect,
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
   .enablePlugins(SnapshotsPlugin)
@@ -101,18 +121,19 @@ lazy val example = projectMatrix
   .dependsOn(core, catsEffect)
   .in(file("modules/example"))
   .defaultAxes(defaults*)
+  .enablePlugins(JavaAppPackaging)
   .settings(
     name := "example",
     noPublish
   )
   .settings(munitSettings)
-  //.jvmPlatform(Versions.scalaVersions)
+  .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions, disableDependencyChecks)
-  .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  // .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
-    Compile / mainClass := Some("example.catseffect.ioExample"),
+    Compile / mainClass             := Some("example.catseffect.ioExample"),
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )

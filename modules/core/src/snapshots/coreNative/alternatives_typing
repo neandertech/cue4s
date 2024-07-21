@@ -1,0 +1,42 @@
+Event.Init
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃· How do you do fellow kids? > ┃
+┃  ‣ killa                      ┃
+┃    rizza                      ┃
+┃    flizza                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Char('z')
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃· How do you do fellow kids? > z┃
+┃  ‣ rizza                       ┃
+┃    flizza                      ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(DELETE)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃· How do you do fellow kids? > [30m[107m [39m[49m┃
+┃  ‣ killa                       ┃
+┃    rizza                       ┃
+┃    flizza                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Char('l')
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃· How do you do fellow kids? > l┃
+┃  ‣ killa                       ┃
+┃    flizza                      ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Char('i')
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃· How do you do fellow kids? > li┃
+┃  ‣ flizza                       ┃
+┃                                 ┃
+┃                                 ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(ENTER)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃✔ How do you do fellow kids? > flizza┃
+┃[30m[107m [39m[49m                                    ┃
+┃                                     ┃
+┃                                     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛

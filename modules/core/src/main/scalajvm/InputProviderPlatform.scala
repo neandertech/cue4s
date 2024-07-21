@@ -16,13 +16,15 @@
 
 package proompts
 
+import scala.concurrent.Future
+
 trait InputProviderPlatform:
   self: InputProvider =>
 
-private class InputProviderImpl(o: Output)
-    extends InputProvider(o),
-      InputProviderPlatform:
-  def close(): Unit = ()
+  def evaluate[Result](f: Handler[Result]): Completion[Result]
+  def evaluateFuture[Result](f: Handler[Result]): Future[Completion[Result]]
 
 trait InputProviderCompanionPlatform:
-  def apply(f: Output): InputProvider = InputProviderImpl(f)
+  def apply(o: Output): InputProvider = InputProviderImpl(o)
+
+end InputProviderCompanionPlatform
