@@ -46,7 +46,7 @@ class InteractiveTextInput(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) => // enter
-          Next.Stop
+          Next.Done(state.text)
 
         case Event.Key(KeyEvent.DELETE) => // enter
           trimText()

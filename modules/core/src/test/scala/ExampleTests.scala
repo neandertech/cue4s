@@ -15,7 +15,21 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Key(KeyEvent.DOWN),
       Event.Key(KeyEvent.DOWN),
       Event.Key(KeyEvent.ENTER)
-    )
+    ),
+    Next.Done("flizza")
+  )
+
+  terminalTest("input")(
+    InputPrompt("how do you do fellow kids?"),
+    List(
+      Event.Init,
+      Event.Char('g'),
+      Event.Char('o'),
+      Event.Char('o'),
+      Event.Char('d'),
+      Event.Key(KeyEvent.ENTER)
+    ),
+    Next.Done("good")
   )
 
   terminalTest("alternatives.typing")(
@@ -27,7 +41,8 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Char('l'),
       Event.Char('i'),
       Event.Key(KeyEvent.ENTER)
-    )
+    ),
+    Next.Done("flizza")
   )
 
 end ExampleTests

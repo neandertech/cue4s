@@ -8,17 +8,18 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   def terminalTest[R](
       name: String
-  )(prompt: Prompt[R], events: List[Event])(implicit
+  )(prompt: Prompt[R], events: List[Event], expected: Next[R])(implicit
       loc: munit.Location
   ): Unit =
     test(name) {
-      val result =
+      val (snapshot, result) =
         terminalSession(
           name,
           prompt,
           events
         )
-      assertSnapshot(name, result)
+      assertSnapshot(name, snapshot)
+      assertEquals(result, expected)
     }
 
   def terminalSession[R](name: String, prompt: Prompt[R], events: List[Event]) =
@@ -27,10 +28,14 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     val capturing = Output.Delegate(term.writer, s => sb.append(s + "\n"))
 
     val handler = prompt.handler(term, capturing, colors = false)
+
+    var result = Option.empty[Next[R]]
+
     events.foreach: ev =>
       sb.append(ev.toString() + "\n")
-      handler(ev)
+      result = Some(handler(ev))
       sb.append(term.getPretty() + "\n")
-    sb.toString()
+
+    sb.toString() -> result.getOrElse(sys.error("No result produced"))
   end terminalSession
 end TerminalTests
