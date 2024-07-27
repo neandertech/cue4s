@@ -47,6 +47,7 @@ lazy val munitSettings = Seq(
 lazy val root = project
   .in(file("."))
   .aggregate(core.projectRefs*)
+  .aggregate(catsEffect.projectRefs*)
   .aggregate(example.projectRefs*)
   // .aggregate(docs.projectRefs*)
   .settings(noPublish)
@@ -55,7 +56,7 @@ lazy val core = projectMatrix
   .in(file("modules/core"))
   .defaultAxes(defaults*)
   .settings(
-    name := "core"
+    name := "proompts"
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
@@ -93,7 +94,7 @@ lazy val catsEffect = projectMatrix
   .in(file("modules/cats-effect"))
   .defaultAxes(defaults*)
   .settings(
-    name := "cats-effect"
+    name := "proompts-cats-effect"
   )
   .dependsOn(core)
   .settings(munitSettings)
