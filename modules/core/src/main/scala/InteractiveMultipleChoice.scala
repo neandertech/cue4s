@@ -50,7 +50,6 @@ class InteractiveMultipleChoice(
     moveHorizontalTo(0)
     eraseEntireLine()
 
-    out.out("· ")
     out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
 
     withRestore:
@@ -81,8 +80,12 @@ class InteractiveMultipleChoice(
             eraseToEndOfLine()
             val view =
               if state.selected.contains(idx) then
-                colored(s"  ‣ $alt")(fansi.Color.Green(_))
-              else colored(s"  ▹ $alt")(fansi.Bold.On(_))
+                if state.current.contains(idx) then
+                  colored(s"  ‣ $alt")(s => fansi.Bold.On(fansi.Color.Green(s)))
+                else colored(s"  ‣ $alt")(fansi.Color.Green(_))
+              else if state.current.contains(idx) then
+                colored(s"  ▹ $alt")(fansi.Bold.On(_))
+              else s"  ▹ $alt"
             out.out(view.toString)
             if idx != filteredAlts.length - 1 then out.out("\n")
 
@@ -120,7 +123,9 @@ class InteractiveMultipleChoice(
           printPrompt()
           Next.Continue
 
-        case Event.Key(KeyEvent.ENTER) => // enter
+        case Event.Key(KeyEvent.ENTER) =>
+          printPrompt() // enter
+          out.out("\n")
           Next.Done(state.selected.map(prompt.alts.apply))
         // state.selected match
         //   case None => Next.Continue
