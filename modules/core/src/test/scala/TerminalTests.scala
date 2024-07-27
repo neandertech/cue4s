@@ -18,6 +18,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
           prompt,
           events
         )
+
       assertSnapshot(name, snapshot)
       assertEquals(result, expected)
     }

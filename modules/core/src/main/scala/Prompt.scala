@@ -23,21 +23,30 @@ trait Prompt[Result]:
       colors: Boolean
   ): Handler[Result]
 
-case class InputPrompt(lab: String) extends Prompt[String]:
-  override def handler(
-      terminal: Terminal,
-      output: Output,
-      colors: Boolean
-  ): Handler[String] =
-    InteractiveTextInput(this, terminal, output, colors).handler
-end InputPrompt
+object Prompt:
+  case class Input(lab: String) extends Prompt[String]:
+    override def handler(
+        terminal: Terminal,
+        output: Output,
+        colors: Boolean
+    ): Handler[String] =
+      InteractiveTextInput(this, terminal, output, colors).handler
 
-case class AlternativesPrompt(lab: String, alts: List[String])
-    extends Prompt[String]:
-  override def handler(
-      terminal: Terminal,
-      output: Output,
-      colors: Boolean
-  ): Handler[String] =
-    InteractiveAlternatives(this, terminal, output, colors).handler
-end AlternativesPrompt
+  case class SingleChoice(lab: String, alts: List[String])
+      extends Prompt[String]:
+    override def handler(
+        terminal: Terminal,
+        output: Output,
+        colors: Boolean
+    ): Handler[String] =
+      InteractiveSingleChoice(this, terminal, output, colors).handler
+
+  case class MultipleChoice(lab: String, alts: List[String])
+      extends Prompt[List[String]]:
+    override def handler(
+        terminal: Terminal,
+        output: Output,
+        colors: Boolean
+    ): Handler[List[String]] =
+      InteractiveMultipleChoice(this, terminal, output, colors).handler
+end Prompt

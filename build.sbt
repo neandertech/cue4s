@@ -25,7 +25,8 @@ inThisBuild(
         "keynmol@gmail.com",
         url("https://blog.indoorvivants.com")
       )
-    )
+    ),
+    version := (if (!sys.env.contains("CI")) "dev" else version.value)
   )
 )
 

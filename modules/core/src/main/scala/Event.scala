@@ -35,4 +35,4 @@ object Event:
     def apply(c: scala.Char): Event.Char = Event.Char(c.toInt)
 
 enum KeyEvent:
-  case UP, DOWN, LEFT, RIGHT, ENTER, DELETE
+  case UP, DOWN, LEFT, RIGHT, ENTER, DELETE, TAB

@@ -17,7 +17,7 @@
 package proompts
 
 class InteractiveTextInput(
-    prompt: InputPrompt,
+    prompt: Prompt.Input,
     terminal: Terminal,
     out: Output,
     colors: Boolean
@@ -39,9 +39,8 @@ class InteractiveTextInput(
   end printPrompt
 
   def clearPrompt() =
-    import terminal.*
-    moveHorizontalTo(0)
-    eraseToEndOfLine()
+    terminal.moveHorizontalTo(0).eraseToEndOfLine()
+    out.out(colored(lab + state.text + "\n")(fansi.Color.Cyan(_)))
 
   val handler = new Handler[String]:
     def apply(event: Event): Next[String] =

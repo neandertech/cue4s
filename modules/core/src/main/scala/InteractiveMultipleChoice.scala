@@ -16,20 +16,27 @@
 
 package proompts
 
-class InteractiveAlternatives(
-    prompt: AlternativesPrompt,
+class InteractiveMultipleChoice(
+    prompt: Prompt.MultipleChoice,
     terminal: Terminal,
     out: Output,
     colors: Boolean
 ):
+  case class State(
+      text: String,
+      selected: List[Int],
+      current: Option[Int],
+      showing: List[(String, Int)]
+  )
+
   val lab           = prompt.lab + " > "
   val altsWithIndex = prompt.alts.zipWithIndex
-  var state         = AlternativesState("", Some(0), altsWithIndex)
+  var state         = State("", Nil, current = Some(0), altsWithIndex)
 
   def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
 
-  def clear(oldState: AlternativesState, newState: AlternativesState) =
+  def clear(oldState: State, newState: State) =
     import terminal.*
     for _ <- 0 until state.showing.length - newState.showing.length do
       moveNextLine(1)
@@ -61,10 +68,9 @@ class InteractiveAlternatives(
         moveHorizontalTo(0)
         eraseToEndOfLine()
         out.out(colored("  no matches")(fansi.Underlined.On(_)))
-        val newState = AlternativesState(
-          state.text,
-          selected = None,
-          showing = Nil
+        val newState = state.copy(
+          showing = Nil,
+          current = Some(0)
         )
         clear(state, newState)
         state = newState
@@ -76,15 +82,12 @@ class InteractiveAlternatives(
             val view =
               if state.selected.contains(idx) then
                 colored(s"  ‣ $alt")(fansi.Color.Green(_))
-              else colored(s"    $alt")(fansi.Bold.On(_))
+              else colored(s"  ▹ $alt")(fansi.Bold.On(_))
             out.out(view.toString)
             if idx != filteredAlts.length - 1 then out.out("\n")
 
         val newState = state.copy(
-          showing = filteredAlts,
-          selected =
-            if state.showing == filteredAlts then state.selected
-            else Some(0)
+          showing = filteredAlts
         )
 
         clear(state, newState)
@@ -102,8 +105,8 @@ class InteractiveAlternatives(
 
   end printFinished
 
-  val handler = new Handler[String]:
-    def apply(event: Event): Next[String] =
+  val handler = new Handler[List[String]]:
+    def apply(event: Event): Next[List[String]] =
       event match
         case Event.Init =>
           printPrompt()
@@ -118,14 +121,20 @@ class InteractiveAlternatives(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) => // enter
-          state.selected match
-            case None => Next.Continue
-            case Some(value) =>
-              terminal.withRestore:
-                clear(state, state.copy(showing = Nil))
-              val stringValue = state.showing(value)._1
-              printFinished(stringValue)
-              Next.Done(stringValue)
+          Next.Done(state.selected.map(prompt.alts.apply))
+        // state.selected match
+        //   case None => Next.Continue
+        //   case Some(value) =>
+        //     terminal.withRestore:
+        //       clear(state, state.copy(showing = Nil))
+        //     val stringValue = state.showing(value)._1
+        //     printFinished(stringValue)
+        //     Next.Done(List(stringValue))
+
+        case Event.Key(KeyEvent.TAB) =>
+          toggle()
+          printPrompt()
+          Next.Continue
 
         case Event.Key(KeyEvent.DELETE) => // enter
           trimText()
@@ -142,16 +151,33 @@ class InteractiveAlternatives(
       end match
     end apply
 
+  def toggle() =
+    state.current match
+      case None =>
+      case Some(value) =>
+        state.showing.lift(value) match
+          case None =>
+          case Some((_, realIdx)) =>
+            state = state.copy(selected =
+              if state.selected.contains(realIdx) then
+                state.selected.diff(Seq(realIdx))
+              else state.selected :+ realIdx
+            )
+    end match
+  end toggle
+
   def selectUp() = state =
-    state.copy(selected = state.selected.map(s => (s - 1).max(0)))
+    state.copy(current = state.current.map(s => (s - 1).max(0)))
 
   def selectDown() = state =
-    state.copy(selected = state.selected.map(s => (s + 1).min(1000)))
+    state.copy(current = state.current.map(s => (s + 1).min(1000)))
 
   def appendText(t: Char) =
-    state = state.copy(text = state.text + t)
+    state = state.copy(text = state.text + t, current = Some(0))
 
   def trimText() =
-    state = state.copy(text = state.text.take(state.text.length - 1))
-
-end InteractiveAlternatives
+    state = state.copy(
+      text = state.text.take(state.text.length - 1),
+      current = Some(0)
+    )
+end InteractiveMultipleChoice

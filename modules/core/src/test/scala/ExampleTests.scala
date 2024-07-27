@@ -3,13 +3,11 @@ package proompts
 import proompts.*
 
 class ExampleTests extends munit.FunSuite, TerminalTests:
-  val prompt = AlternativesPrompt(
-    "How do you do fellow kids?",
-    List("killa", "rizza", "flizza")
-  )
-
   terminalTest("alternatives.navigation")(
-    prompt,
+    Prompt.SingleChoice(
+      "How do you do fellow kids?",
+      List("killa", "rizza", "flizza")
+    ),
     List(
       Event.Init,
       Event.Key(KeyEvent.DOWN),
@@ -20,7 +18,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   )
 
   terminalTest("input")(
-    InputPrompt("how do you do fellow kids?"),
+    Prompt.Input("how do you do fellow kids?"),
     List(
       Event.Init,
       Event.Char('g'),
@@ -33,7 +31,10 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   )
 
   terminalTest("alternatives.typing")(
-    prompt,
+    Prompt.SingleChoice(
+      "How do you do fellow kids?",
+      List("killa", "rizza", "flizza")
+    ),
     List(
       Event.Init,
       Event.Char('z'),
@@ -43,6 +44,25 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Key(KeyEvent.ENTER)
     ),
     Next.Done("flizza")
+  )
+
+  terminalTest("multiple.choice")(
+    Prompt.MultipleChoice(
+      "What would you like for lunch",
+      List("pizza", "steak", "sweet potato", "fried chicken")
+    ),
+    List(
+      Event.Init,
+      Event.Key(KeyEvent.TAB),
+      Event.Key(KeyEvent.DOWN),
+      Event.Key(KeyEvent.TAB),
+      Event.Key(KeyEvent.DOWN),
+      Event.Char('h'), // skip sweet potato
+      Event.Key(KeyEvent.TAB),
+      Event.Key(KeyEvent.DELETE),
+      Event.Key(KeyEvent.ENTER)
+    ),
+    Next.Done(List("pizza", "steak", "fried chicken"))
   )
 
 end ExampleTests

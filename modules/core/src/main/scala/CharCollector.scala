@@ -55,6 +55,8 @@ object CharCollector:
             (State.ESC_Started, DecodeResult.Continue)
           case 10 | 13 =>
             emit(Event.Key(KeyEvent.ENTER))
+          case 9 =>
+            emit(Event.Key(KeyEvent.TAB))
           case 127 =>
             emit(Event.Key(KeyEvent.DELETE))
           case _ =>
