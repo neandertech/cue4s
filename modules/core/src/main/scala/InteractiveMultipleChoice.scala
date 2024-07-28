@@ -36,9 +36,9 @@ class InteractiveMultipleChoice(
   def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
 
-  def clear(oldState: State, newState: State) =
+  def clear(oldShowing: Int, newShowing: Int) =
     import terminal.*
-    for _ <- 0 until state.showing.length - newState.showing.length do
+    for _ <- 0 until oldShowing - newShowing do
       moveNextLine(1)
       moveHorizontalTo(1)
       eraseToEndOfLine()
@@ -47,12 +47,10 @@ class InteractiveMultipleChoice(
 
     import terminal.*
 
-    moveHorizontalTo(0)
-    eraseEntireLine()
-
-    out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
-
     withRestore:
+      moveHorizontalTo(0)
+      eraseEntireLine()
+      out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
       out.out("\n")
 
       val filteredAlts =
@@ -71,7 +69,7 @@ class InteractiveMultipleChoice(
           showing = Nil,
           current = Some(0)
         )
-        clear(state, newState)
+        clear(state.showing.length, newState.showing.length)
         state = newState
       else
         filteredAlts.zipWithIndex.foreach:
@@ -93,18 +91,26 @@ class InteractiveMultipleChoice(
           showing = filteredAlts
         )
 
-        clear(state, newState)
+        clear(state.showing.length, newState.showing.length)
         state = newState
 
       end if
   end printPrompt
 
-  def printFinished(value: String) =
+  def printFinished(values: List[String]) =
     terminal.eraseEntireLine()
     terminal.moveHorizontalTo(0)
     out.out(colored("✔ ")(fansi.Color.Green(_)))
-    out.out(colored(lab)(fansi.Color.Cyan(_)))
-    out.out(colored(value + "\n")(fansi.Bold.On(_)))
+    out.out(colored(prompt.lab + ":")(fansi.Color.Cyan(_)))
+    out.out("\n")
+    terminal.withRestore:
+      (0 until state.showing.length).foreach: _ =>
+        terminal.moveHorizontalTo(0)
+        terminal.eraseEntireLine()
+        terminal.moveNextLine(1)
+
+    values.foreach: value =>
+      out.out(colored(s"  ‣ $value" + "\n")(fansi.Bold.On(_)))
 
   end printFinished
 
@@ -124,9 +130,9 @@ class InteractiveMultipleChoice(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) =>
-          printPrompt() // enter
-          out.out("\n")
-          Next.Done(state.selected.map(prompt.alts.apply))
+          val resolved = state.selected.map(prompt.alts.apply)
+          printFinished(resolved)
+          Next.Done(resolved)
         // state.selected match
         //   case None => Next.Continue
         //   case Some(value) =>

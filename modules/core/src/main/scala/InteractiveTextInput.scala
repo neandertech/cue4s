@@ -38,9 +38,10 @@ class InteractiveTextInput(
     out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
   end printPrompt
 
-  def clearPrompt() =
+  def printFinished() =
     terminal.moveHorizontalTo(0).eraseToEndOfLine()
-    out.out(colored(lab + state.text + "\n")(fansi.Color.Cyan(_)))
+    out.out(colored("✔ ")(fansi.Color.Green(_)))
+    out.out(colored(prompt.lab + ": " + state.text + "\n")(fansi.Color.Cyan(_)))
 
   val handler = new Handler[String]:
     def apply(event: Event): Next[String] =
@@ -50,7 +51,7 @@ class InteractiveTextInput(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) => // enter
-          clearPrompt()
+          printFinished()
           Next.Done(state.text)
 
         case Event.Key(KeyEvent.DELETE) => // enter
