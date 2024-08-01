@@ -16,7 +16,7 @@
 
 package proompts
 
-enum Event:
+private[proompts] enum Event:
   case Init
   case Key(which: KeyEvent)
   case Char(which: Int)
@@ -30,9 +30,9 @@ enum Event:
       case CSICode(bytes) => s"Event.CSICode(${bytes.mkString("[", ", ", "]")})"
 end Event
 
-object Event:
+private[proompts] object Event:
   object Char:
     def apply(c: scala.Char): Event.Char = Event.Char(c.toInt)
 
-enum KeyEvent:
+private[proompts] enum KeyEvent:
   case UP, DOWN, LEFT, RIGHT, ENTER, DELETE, TAB

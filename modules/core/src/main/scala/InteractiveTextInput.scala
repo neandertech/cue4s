@@ -23,7 +23,7 @@ private[proompts] class InteractiveTextInput(
     colors: Boolean
 ):
   val lab   = prompt.lab + " > "
-  var state = TextInputState("")
+  var state = InteractiveTextInput.State("")
 
   def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
@@ -42,7 +42,7 @@ private[proompts] class InteractiveTextInput(
   def printFinished() =
     terminal.moveHorizontalTo(0).eraseToEndOfLine()
     out.out(colored("✔ ")(fansi.Color.Green(_)))
-    out.out(colored(prompt.lab + ": ")(fansi.Color.Cyan(_)))
+    out.out(colored(prompt.lab + " ")(fansi.Color.Cyan(_)))
     out.out(colored(state.text + "\n")(fansi.Bold.On(_)))
 
   val handler = new Handler[String]:
@@ -77,3 +77,6 @@ private[proompts] class InteractiveTextInput(
   def trimText() =
     state = state.copy(text = state.text.take(state.text.length - 1))
 end InteractiveTextInput
+
+private[proompts] object InteractiveTextInput:
+  case class State(text: String)

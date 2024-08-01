@@ -3,6 +3,15 @@ package proompts.catseffect
 import cats.effect.*
 import proompts.*
 
+/**
+  * This functionality is not stable yet and therefore marked private
+  *
+  * @param init
+  * @param terminal
+  * @param out
+  * @param colors
+  * @param reversedSteps
+  */
 private[catseffect] case class PromptChainIO[A] private[catseffect] (
     init: A,
     terminal: Terminal,
@@ -58,32 +67,3 @@ private[catseffect] case class PromptChainIO[A] private[catseffect] (
   private def fail(msg: String) = IO.raiseError(new RuntimeException(msg))
 
 end PromptChainIO
-
-// extension (p: PromptChain.type)
-//   private def io[A](
-//       init: A,
-//       terminal: Terminal = Terminal.ansi(Output.Std),
-//       out: Output = Output.Std,
-//       colors: Boolean = true
-//   ): PromptChainIO[A] =
-//     new PromptChainIO[A](
-//       init = init,
-//       terminal = terminal,
-//       out = out,
-//       colors = colors,
-//       reversedSteps = Nil
-//     )
-
-extension (p: RunPrompt.type)
-  def io[A](
-      prompt: Prompt[A],
-      out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true
-  ): IO[Completion[A]] =
-    val terminal      = createTerminal(out)
-    val inputProvider = InputProvider(out)
-    val handler       = prompt.handler(terminal, out, colors)
-
-    IO.executionContext.flatMap: ec =>
-      IO.fromFuture(IO(inputProvider.evaluateFuture(handler)(using ec)))

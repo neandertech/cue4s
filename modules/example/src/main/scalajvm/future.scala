@@ -19,6 +19,8 @@ package example.future
 import proompts.*
 
 import concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 case class Info(
     day: Option[String] = None,
@@ -26,17 +28,19 @@ case class Info(
     letters: Set[String] = Set.empty
 )
 
-@main def sync =
-  for
-    day <- RunPrompt
+@main def future =
+  val prompts = Prompts()
+
+  val fut = for
+    day <- prompts
       .future(
         Prompt.SingleChoice("How was your day?", List("great", "okay"))
       )
       .map(_.toResult)
 
-    work <- RunPrompt.future(Prompt.Input("Where do you work?")).map(_.toResult)
+    work <- prompts.future(Prompt.Input("Where do you work?")).map(_.toResult)
 
-    letters <- RunPrompt
+    letters <- prompts
       .future(
         Prompt.MultipleChoice(
           "What are your favourite letters?",
@@ -47,3 +51,6 @@ case class Info(
 
     info = Info(day, work, letters.fold(Set.empty)(_.toSet))
   yield println(info)
+
+  Await.result(fut, Duration.Inf)
+end future

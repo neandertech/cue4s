@@ -27,8 +27,11 @@ private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
 
-  override def evaluateFuture[Result](handler: Handler[Result])(using ExecutionContext) =
-    Future.successful(evaluate(handler))
+  override def evaluateFuture[Result](handler: Handler[Result])(using
+      ExecutionContext
+  ) =
+    Future(evaluate(handler))
+  end evaluateFuture
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     proompts.ChangeMode.changemode(1)

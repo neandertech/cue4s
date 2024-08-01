@@ -29,36 +29,37 @@ case class Info(
 
 object ioExample extends IOApp.Simple:
   def run: IO[Unit] =
-    for
-      ref <- IO.ref(Info())
+    PromptsIO().use: prompts =>
+      for
+        ref <- IO.ref(Info())
 
-      day <- RunPrompt
-        .io(
-          Prompt.SingleChoice("How was your day?", List("great", "okay"))
-        )
-        .map(_.toResult)
-        .flatTap(day => ref.update(_.copy(day = day)))
-
-      work <- RunPrompt
-        .io(
-          Prompt.Input("Where do you work?")
-        )
-        .map(_.toResult)
-        .flatTap(work => ref.update(_.copy(work = work)))
-
-      letter <- RunPrompt
-        .io(
-          Prompt.MultipleChoice(
-            "What are your favourite letters?",
-            ('A' to 'F').map(_.toString).toList
+        day <- prompts
+          .io(
+            Prompt.SingleChoice("How was your day?", List("great", "okay"))
           )
-        )
-        .map(_.toResult)
-        .flatTap(letter =>
-          ref.update(_.copy(letters = letter.fold(Set.empty)(_.toSet)))
-        )
+          .map(_.toResult)
+          .flatTap(day => ref.update(_.copy(day = day)))
 
-      _ <- ref.get.flatMap(IO.println)
-    yield ()
+        work <- prompts
+          .io(
+            Prompt.Input("Where do you work?")
+          )
+          .map(_.toResult)
+          .flatTap(work => ref.update(_.copy(work = work)))
+
+        letter <- prompts
+          .io(
+            Prompt.MultipleChoice(
+              "What are your favourite letters?",
+              ('A' to 'F').map(_.toString).toList
+            )
+          )
+          .map(_.toResult)
+          .flatTap(letter =>
+            ref.update(_.copy(letters = letter.fold(Set.empty)(_.toSet)))
+          )
+
+        _ <- ref.get.flatMap(IO.println)
+      yield ()
 
 end ioExample

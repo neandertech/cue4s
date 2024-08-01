@@ -112,7 +112,7 @@ lazy val catsEffect = projectMatrix
   .enablePlugins(SnapshotsPlugin)
 
 lazy val example = projectMatrix
-  .dependsOn(core, catsEffect)
+  .dependsOn(core)
   .in(file("modules/example"))
   .defaultAxes(defaults*)
   .enablePlugins(JavaAppPackaging)

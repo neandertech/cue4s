@@ -103,7 +103,7 @@ private[proompts] class InteractiveSingleChoice(
     terminal.eraseEntireLine()
     terminal.moveHorizontalTo(0)
     out.out(colored("✔ ")(fansi.Color.Green(_)))
-    out.out(colored(prompt.lab + ": ")(fansi.Color.Cyan(_)))
+    out.out(colored(prompt.lab + " ")(fansi.Color.Cyan(_)))
     out.out(colored(value + "\n")(fansi.Bold.On(_)))
 
   end printFinished

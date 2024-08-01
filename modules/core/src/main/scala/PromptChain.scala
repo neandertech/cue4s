@@ -16,7 +16,7 @@
 
 package proompts
 
-object PromptChain:
+private[proompts] object PromptChain:
   def future[A](
       init: A,
       terminal: Terminal = Terminal.ansi(Output.Std),

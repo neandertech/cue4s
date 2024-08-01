@@ -16,11 +16,11 @@
 
 package proompts
 
-abstract class Handler[Result]:
+private[proompts] abstract class Handler[Result]:
   def apply(ev: Event): Next[Result]
 
-abstract class InputProvider(protected val output: Output)
+private[proompts] abstract class InputProvider(protected val output: Output)
     extends AutoCloseable,
       InputProviderPlatform
 
-object InputProvider extends InputProviderCompanionPlatform
+private[proompts] object InputProvider extends InputProviderCompanionPlatform

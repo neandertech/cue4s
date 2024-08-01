@@ -3,17 +3,8 @@ package proompts
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
 
-object RunPrompt:
-  def sync[R](
-      prompt: Prompt[R],
-      out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true
-  ): Completion[R] =
-    val handler = prompt.handler(createTerminal(out), out, colors)
-    val inputProvider = InputProvider(out)
-
-    inputProvider.evaluate(handler)
+transparent trait PromptsPlatform:
+  self: Prompts =>
 
   def future[R](
       prompt: Prompt[R],
@@ -22,6 +13,7 @@ object RunPrompt:
       colors: Boolean = true
   )(using ExecutionContext): Future[Completion[R]] =
     val handler = prompt.handler(createTerminal(out), out, colors)
-    val inputProvider = InputProvider(out)
 
     inputProvider.evaluateFuture(handler)
+  end future
+end PromptsPlatform

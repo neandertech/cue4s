@@ -16,7 +16,7 @@
 
 package proompts
 
-enum Next[+Result]:
+private[proompts] enum Next[+Result]:
   case Stop, Continue
   case Done(value: Result)
   case Error(msg: String)

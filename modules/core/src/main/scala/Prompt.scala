@@ -17,7 +17,7 @@
 package proompts
 
 trait Prompt[Result]:
-  def handler(
+  private[proompts] def handler(
       terminal: Terminal,
       output: Output,
       colors: Boolean

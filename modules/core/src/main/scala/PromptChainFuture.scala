@@ -19,6 +19,14 @@ package proompts
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
+/** This functionality is not stable yet and therefore marked private
+  *
+  * @param init
+  * @param terminal
+  * @param out
+  * @param colors
+  * @param reversedSteps
+  */
 private[proompts] case class PromptChainFuture[A] private[proompts] (
     init: A,
     terminal: Terminal,
