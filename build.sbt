@@ -50,7 +50,6 @@ lazy val root = project
   .aggregate(core.projectRefs*)
   .aggregate(catsEffect.projectRefs*)
   .aggregate(example.projectRefs*)
-  // .aggregate(docs.projectRefs*)
   .settings(noPublish)
 
 lazy val core = projectMatrix
@@ -101,7 +100,6 @@ lazy val catsEffect = projectMatrix
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions)
-  // .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
   .settings(
     snapshotsPackageName := "proompts.catseffect",
     snapshotsIntegrations += SnapshotIntegration.MUnit,
@@ -125,7 +123,26 @@ lazy val example = projectMatrix
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions)
-  // .nativePlatform(Versions.scalaVersions, disableDependencyChecks)
+  .nativePlatform(Versions.scalaVersions)
+  .settings(
+    scalacOptions += "-Wunused:all",
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    nativeConfig ~= (_.withIncrementalCompilation(true))
+  )
+
+lazy val exampleCatsEffect = projectMatrix
+  .dependsOn(core, catsEffect)
+  .in(file("modules/example-catseffect"))
+  .defaultAxes(defaults*)
+  .enablePlugins(JavaAppPackaging)
+  .settings(
+    name := "example",
+    noPublish
+  )
+  .settings(munitSettings)
+  .jvmPlatform(Versions.scalaVersions)
+  .jsPlatform(Versions.scalaVersions)
   .settings(
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,

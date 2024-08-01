@@ -16,7 +16,7 @@
 
 package proompts
 
-object CharCollector:
+private object CharCollector:
   enum State:
     case Init, ESC_Started, CSI_Started
     case CSI_Collecting(bytes: List[Byte])

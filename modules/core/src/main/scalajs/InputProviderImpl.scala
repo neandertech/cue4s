@@ -23,13 +23,14 @@ import proompts.CharCollector.State
 import proompts.CharCollector.decode
 
 import scalajs.js
+import scala.concurrent.ExecutionContext
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
   override def evaluateFuture[Result](
       handler: Handler[Result]
-  ): Future[Completion[Result]] =
+  )(using ExecutionContext): Future[Completion[Result]] =
 
     val stdin = Process.stdin
 

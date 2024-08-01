@@ -36,8 +36,6 @@ extension (o: Output)
 
 object Output:
   object Std extends PlatformStd
-  // override def logLn[A: AsString](a: A): Unit = System.err.println(a.render)
-  // override def out[A: AsString](a: A): Unit   = System.out.print(a.render)
 
   object StdOut extends Output:
     override def logLn[A: AsString](a: A): Unit = System.out.println(a.render)

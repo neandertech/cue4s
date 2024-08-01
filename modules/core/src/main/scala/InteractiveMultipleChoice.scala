@@ -16,7 +16,7 @@
 
 package proompts
 
-class InteractiveMultipleChoice(
+private[proompts] class InteractiveMultipleChoice(
     prompt: Prompt.MultipleChoice,
     terminal: Terminal,
     out: Output,

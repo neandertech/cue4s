@@ -23,36 +23,27 @@ import concurrent.ExecutionContext.Implicits.global
 case class Info(
     day: Option[String] = None,
     work: Option[String] = None,
-    weather: Option[String] = None
+    letters: Set[String] = Set.empty
 )
 
-@main def future =
-  PromptChain
-    .future(Info())
-    .prompt(
-      _ =>
-        AlternativesPrompt(
-          "How is your day?",
-          List("great", "okay", "shite")
-        ),
-      (info, day) => info.copy(day = Some(day))
-    )
-    .prompt(
-      info =>
-        AlternativesPrompt(
-          s"So your day has been ${info.day.get}. How are things at work?",
-          List("please go away", "I don't want to talk about it")
-        ),
-      (info, work) => info.copy(work = Some(work))
-    )
-    .prompt(
-      _ =>
-        AlternativesPrompt(
-          s"Great! What fantastic weather we're having, right?",
-          List("please leave me alone", "don't you have actual friends?")
-        ),
-      (cur, weather) => cur.copy(weather = Some(weather))
-    )
-    .evaluateFuture
-    .foreach: results =>
-      println(results)
+@main def sync =
+  for
+    day <- RunPrompt
+      .future(
+        Prompt.SingleChoice("How was your day?", List("great", "okay"))
+      )
+      .map(_.toResult)
+
+    work <- RunPrompt.future(Prompt.Input("Where do you work?")).map(_.toResult)
+
+    letters <- RunPrompt
+      .future(
+        Prompt.MultipleChoice(
+          "What are your favourite letters?",
+          ('A' to 'F').map(_.toString).toList
+        )
+      )
+      .map(_.toResult)
+
+    info = Info(day, work, letters.fold(Set.empty)(_.toSet))
+  yield println(info)

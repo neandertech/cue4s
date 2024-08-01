@@ -20,3 +20,9 @@ enum Completion[+Result]:
   case Finished(value: Result)
   case Interrupted
   case Error(msg: String)
+
+  def toResult: Option[Result] =
+    this match
+      case Finished(value) => Some(value)
+      case _               => None
+end Completion

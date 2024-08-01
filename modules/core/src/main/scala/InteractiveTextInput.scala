@@ -16,7 +16,7 @@
 
 package proompts
 
-class InteractiveTextInput(
+private[proompts] class InteractiveTextInput(
     prompt: Prompt.Input,
     terminal: Terminal,
     out: Output,
@@ -35,13 +35,15 @@ class InteractiveTextInput(
     moveHorizontalTo(0)
     eraseToEndOfLine()
 
-    out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
+    out.out(colored(lab)(fansi.Color.Cyan(_)))
+    out.out(colored(state.text)(fansi.Bold.On(_)))
   end printPrompt
 
   def printFinished() =
     terminal.moveHorizontalTo(0).eraseToEndOfLine()
     out.out(colored("✔ ")(fansi.Color.Green(_)))
-    out.out(colored(prompt.lab + ": " + state.text + "\n")(fansi.Color.Cyan(_)))
+    out.out(colored(prompt.lab + ": ")(fansi.Color.Cyan(_)))
+    out.out(colored(state.text + "\n")(fansi.Bold.On(_)))
 
   val handler = new Handler[String]:
     def apply(event: Event): Next[String] =

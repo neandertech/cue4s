@@ -16,7 +16,7 @@
 
 package proompts
 
-class InteractiveSingleChoice(
+private[proompts] class InteractiveSingleChoice(
     prompt: Prompt.SingleChoice,
     terminal: Terminal,
     out: Output,

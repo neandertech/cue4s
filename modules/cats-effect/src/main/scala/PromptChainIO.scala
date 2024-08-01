@@ -3,7 +3,7 @@ package proompts.catseffect
 import cats.effect.*
 import proompts.*
 
-case class PromptChainIO[A] private[catseffect] (
+private[catseffect] case class PromptChainIO[A] private[catseffect] (
     init: A,
     terminal: Terminal,
     out: Output,
@@ -38,8 +38,9 @@ case class PromptChainIO[A] private[catseffect] (
         case other    => IO.pure(other.asInstanceOf[B])
 
   private def eval[T, R](p: Prompt[R])(v: R => IO[T]): IO[T] =
-    IO.fromFuture(IO(inputProvider.evaluateFuture(handler(p))))
-      .flatMap(c => check(c)(v))
+    IO.executionContext.flatMap: ec =>
+      IO.fromFuture(IO(inputProvider.evaluateFuture(handler(p))(using ec)))
+        .flatMap(c => check(c)(v))
 
   private def check[T, R](c: Completion[R])(v: R => IO[T]): IO[T] =
     c match
@@ -58,17 +59,31 @@ case class PromptChainIO[A] private[catseffect] (
 
 end PromptChainIO
 
-extension (p: PromptChain.type)
+// extension (p: PromptChain.type)
+//   private def io[A](
+//       init: A,
+//       terminal: Terminal = Terminal.ansi(Output.Std),
+//       out: Output = Output.Std,
+//       colors: Boolean = true
+//   ): PromptChainIO[A] =
+//     new PromptChainIO[A](
+//       init = init,
+//       terminal = terminal,
+//       out = out,
+//       colors = colors,
+//       reversedSteps = Nil
+//     )
+
+extension (p: RunPrompt.type)
   def io[A](
-      init: A,
-      terminal: Terminal = Terminal.ansi(Output.Std),
+      prompt: Prompt[A],
       out: Output = Output.Std,
+      createTerminal: Output => Terminal = Terminal.ansi(_),
       colors: Boolean = true
-  ): PromptChainIO[A] =
-    new PromptChainIO[A](
-      init = init,
-      terminal = terminal,
-      out = out,
-      colors = colors,
-      reversedSteps = Nil
-    )
+  ): IO[Completion[A]] =
+    val terminal      = createTerminal(out)
+    val inputProvider = InputProvider(out)
+    val handler       = prompt.handler(terminal, out, colors)
+
+    IO.executionContext.flatMap: ec =>
+      IO.fromFuture(IO(inputProvider.evaluateFuture(handler)(using ec)))

@@ -21,12 +21,13 @@ import scala.util.boundary
 
 import boundary.break
 import CharCollector.*
+import scala.concurrent.ExecutionContext
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
 
-  override def evaluateFuture[Result](handler: Handler[Result]) =
+  override def evaluateFuture[Result](handler: Handler[Result])(using ExecutionContext) =
     Future.successful(evaluate(handler))
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =

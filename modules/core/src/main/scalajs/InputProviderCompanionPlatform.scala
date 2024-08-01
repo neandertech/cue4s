@@ -17,13 +17,14 @@
 package proompts
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext
 
 trait InputProviderPlatform:
   self: InputProvider =>
 
   def evaluateFuture[Result](
       f: Handler[Result]
-  ): Future[Completion[Result]]
+  )(using ExecutionContext): Future[Completion[Result]]
 
 trait InputProviderCompanionPlatform:
   def apply(o: Output): InputProvider = InputProviderImpl(o)
