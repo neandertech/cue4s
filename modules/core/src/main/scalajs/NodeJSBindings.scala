@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
 import scala.scalajs.js.annotation.JSGlobal
 import scala.scalajs.js.annotation.JSImport

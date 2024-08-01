@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
-private[proompts] abstract class Handler[Result]:
+private[cue4s] abstract class Handler[Result]:
   def apply(ev: Event): Next[Result]
 
-private[proompts] abstract class InputProvider(protected val output: Output)
+private[cue4s] abstract class InputProvider(protected val output: Output)
     extends AutoCloseable,
       InputProviderPlatform
 
-private[proompts] object InputProvider extends InputProviderCompanionPlatform
+private[cue4s] object InputProvider extends InputProviderCompanionPlatform

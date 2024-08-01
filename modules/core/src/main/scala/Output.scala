@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
 trait Output:
   def out[A: AsString](a: A): Unit

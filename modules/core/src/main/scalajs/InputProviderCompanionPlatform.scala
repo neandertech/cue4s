@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 trait InputProviderPlatform:
   self: InputProvider =>

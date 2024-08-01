@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
-private[proompts] enum Next[+Result]:
+private[cue4s] enum Next[+Result]:
   case Stop, Continue
   case Done(value: Result)
   case Error(msg: String)

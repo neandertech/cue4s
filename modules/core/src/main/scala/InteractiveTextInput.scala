@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
-private[proompts] class InteractiveTextInput(
+private[cue4s] class InteractiveTextInput(
     prompt: Prompt.Input,
     terminal: Terminal,
     out: Output,
@@ -78,5 +78,5 @@ private[proompts] class InteractiveTextInput(
     state = state.copy(text = state.text.take(state.text.length - 1))
 end InteractiveTextInput
 
-private[proompts] object InteractiveTextInput:
+private[cue4s] object InteractiveTextInput:
   case class State(text: String)

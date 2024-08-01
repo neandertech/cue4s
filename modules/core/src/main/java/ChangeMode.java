@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package proompts;
+package cue4s;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;

@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.concurrent.Promise
 
-import proompts.CharCollector.State
-import proompts.CharCollector.decode
+import cue4s.CharCollector.State
+import cue4s.CharCollector.decode
 
 import scalajs.js
-import scala.concurrent.ExecutionContext
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),

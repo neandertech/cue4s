@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
 private object CharCollector:
   enum State:

@@ -12,7 +12,7 @@ inThisBuild(
     organizationName           := "Anton Sviridov",
     resolvers ++= Resolver.sonatypeOssRepos("releases"),
     homepage := Some(
-      url("https://github.com/neandertech/proompts")
+      url("https://github.com/neandertech/cue4s")
     ),
     startYear := Some(2023),
     licenses := List(
@@ -56,14 +56,14 @@ lazy val core = projectMatrix
   .in(file("modules/core"))
   .defaultAxes(defaults*)
   .settings(
-    name := "proompts"
+    name := "cue4s"
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions)
   .nativePlatform(Versions.scalaVersions)
   .settings(
-    snapshotsPackageName := "proompts",
+    snapshotsPackageName := "cue4s",
     snapshotsIntegrations += SnapshotIntegration.MUnit,
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
@@ -94,14 +94,14 @@ lazy val catsEffect = projectMatrix
   .in(file("modules/cats-effect"))
   .defaultAxes(defaults*)
   .settings(
-    name := "proompts-cats-effect"
+    name := "cue4s-cats-effect"
   )
   .dependsOn(core)
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions)
   .settings(
-    snapshotsPackageName := "proompts.catseffect",
+    snapshotsPackageName := "cue4s.catseffect",
     snapshotsIntegrations += SnapshotIntegration.MUnit,
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,

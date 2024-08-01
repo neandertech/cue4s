@@ -16,7 +16,7 @@
 
 package example.sync
 
-import proompts.*
+import cue4s.*
 
 case class Info(
     day: Option[String] = None,
@@ -24,26 +24,28 @@ case class Info(
     letters: Set[String] = Set.empty
 )
 
-@main def future =
-    val day = RunPrompt
-      .sync(
-        Prompt.SingleChoice("How was your day?", List("great", "okay"))
-      ).toResult
+@main def sync =
+  var info = Info()
 
-    println(day)
+  val prompts = Prompts()
 
-    // _ = sys.error(day.toString())
+  val day = prompts
+    .sync(
+      Prompt.SingleChoice("How was your day?", List("great", "okay"))
+    )
+    .toResult
+  info = info.copy(day = day)
 
-    // work <- RunPrompt.future(Prompt.Input("Where do you work?")).map(_.toResult)
+  val work = prompts.sync(Prompt.Input("Where do you work?")).toResult
+  info = info.copy(work = work)
 
-    // letters <- RunPrompt
-    //   .future(
-    //     Prompt.MultipleChoice(
-    //       "What are your favourite letters?",
-    //       ('A' to 'F').map(_.toString).toList
-    //     )
-    //   )
-    //   .map(_.toResult)
-
-    // info = Info(day, work, letters.fold(Set.empty)(_.toSet))
-  // yield println(info)
+  val letters = prompts
+    .sync(
+      Prompt.MultipleChoice(
+        "What are your favourite letters?",
+        ('A' to 'F').map(_.toString).toList
+      )
+    )
+    .toResult
+  info = info.copy(letters = letters.fold(Set.empty)(_.toSet))
+end sync

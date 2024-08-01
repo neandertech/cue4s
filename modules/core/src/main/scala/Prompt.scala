@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
 trait Prompt[Result]:
-  private[proompts] def handler(
+  private[cue4s] def handler(
       terminal: Terminal,
       output: Output,
       colors: Boolean

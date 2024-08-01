@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
+import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.util.boundary
 
 import boundary.break
 import CharCollector.*
-import scala.concurrent.ExecutionContext
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
@@ -34,12 +34,12 @@ private class InputProviderImpl(o: Output)
   end evaluateFuture
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
-    proompts.ChangeMode.changemode(1)
+    cue4s.ChangeMode.changemode(1)
 
     var lastRead = 0
 
     inline def read() =
-      lastRead = proompts.ChangeMode.CLibrary.INSTANCE.getchar()
+      lastRead = cue4s.ChangeMode.CLibrary.INSTANCE.getchar()
       lastRead
 
     boundary[Completion[Result]]:
@@ -74,6 +74,6 @@ private class InputProviderImpl(o: Output)
 
   end evaluate
 
-  override def close() = proompts.ChangeMode.changemode(0)
+  override def close() = cue4s.ChangeMode.changemode(0)
 
 end InputProviderImpl

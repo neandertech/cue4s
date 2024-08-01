@@ -1,6 +1,6 @@
-package proompts
+package cue4s
 
-import proompts.*
+import cue4s.*
 
 class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTest("alternatives.navigation")(

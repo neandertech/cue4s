@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -27,7 +27,7 @@ import scala.concurrent.Future
   * @param colors
   * @param reversedSteps
   */
-private[proompts] case class PromptChainFuture[A] private[proompts] (
+private[cue4s] case class PromptChainFuture[A] private[cue4s] (
     init: A,
     terminal: Terminal,
     out: Output,

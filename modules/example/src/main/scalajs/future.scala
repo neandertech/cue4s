@@ -16,7 +16,7 @@
 
 package example.future
 
-import proompts.*
+import cue4s.*
 
 import concurrent.ExecutionContext.Implicits.global
 

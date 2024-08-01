@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
-private[proompts] object PromptChain:
+private[cue4s] object PromptChain:
   def future[A](
       init: A,
       terminal: Terminal = Terminal.ansi(Output.Std),

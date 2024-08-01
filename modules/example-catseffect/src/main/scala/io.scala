@@ -17,7 +17,7 @@
 package example.catseffect
 
 import cats.effect.*
-import proompts.*
+import cue4s.*
 
 import catseffect.*
 

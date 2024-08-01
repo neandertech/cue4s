@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
-private[proompts] class InteractiveMultipleChoice(
+private[cue4s] class InteractiveMultipleChoice(
     prompt: Prompt.MultipleChoice,
     terminal: Terminal,
     out: Output,

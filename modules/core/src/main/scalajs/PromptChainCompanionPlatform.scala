@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
 trait PromptChainCompanionPlatform

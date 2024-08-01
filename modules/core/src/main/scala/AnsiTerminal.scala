@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
 class AnsiTerminal(out: Output) extends Terminal:
   import AnsiTerminal.{ESC, CSI}

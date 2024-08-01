@@ -1,6 +1,6 @@
-package proompts
+package cue4s
 
-import proompts.*
+import cue4s.*
 import com.indoorvivants.snapshots.munit_integration.*
 
 trait TerminalTests extends MunitSnapshotsIntegration:

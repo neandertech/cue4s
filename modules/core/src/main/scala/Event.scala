@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package proompts
+package cue4s
 
-private[proompts] enum Event:
+private[cue4s] enum Event:
   case Init
   case Key(which: KeyEvent)
   case Char(which: Int)
@@ -30,9 +30,9 @@ private[proompts] enum Event:
       case CSICode(bytes) => s"Event.CSICode(${bytes.mkString("[", ", ", "]")})"
 end Event
 
-private[proompts] object Event:
+private[cue4s] object Event:
   object Char:
     def apply(c: scala.Char): Event.Char = Event.Char(c.toInt)
 
-private[proompts] enum KeyEvent:
+private[cue4s] enum KeyEvent:
   case UP, DOWN, LEFT, RIGHT, ENTER, DELETE, TAB

@@ -16,11 +16,12 @@
 
 package example.future
 
-import proompts.*
-
-import concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+
+import cue4s.*
+
+import concurrent.ExecutionContext.Implicits.global
 
 case class Info(
     day: Option[String] = None,
