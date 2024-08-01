@@ -8,8 +8,9 @@ inThisBuild(
     semanticdbEnabled          := true,
     semanticdbVersion          := scalafixSemanticdb.revision,
     scalafixScalaBinaryVersion := scalaBinaryVersion.value,
-    organization               := "com.indoorvivants",
-    organizationName           := "Anton Sviridov",
+    organization               := "tech.neander",
+    organizationName           := "Neandertech",
+    sonatypeCredentialHost     := "s01.oss.sonatype.org",
     resolvers ++= Resolver.sonatypeOssRepos("releases"),
     homepage := Some(
       url("https://github.com/neandertech/cue4s")
@@ -22,7 +23,7 @@ inThisBuild(
       Developer(
         "keynmol",
         "Anton Sviridov",
-        "keynmol@gmail.com",
+        "velbm@pm.me",
         url("https://blog.indoorvivants.com")
       )
     ),
