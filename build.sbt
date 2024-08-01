@@ -151,6 +151,13 @@ lazy val exampleCatsEffect = projectMatrix
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
 
+lazy val docs =
+  project
+    .in(file("target/.docs-target"))
+    .enablePlugins(MdocPlugin)
+    .settings(scalaVersion := Versions.Scala3)
+    .dependsOn(core.jvm(true), catsEffect.jvm(true))
+
 val noPublish = Seq(
   publish / skip      := true,
   publishLocal / skip := true
@@ -191,5 +198,7 @@ addCommandAlias(
   "testSnapshots",
   """set Test/envVars += ("SNAPSHOTS_INTERACTIVE" -> "true"); test"""
 )
+
+addCommandAlias("checkDocs", "docs/mdoc --in README.md")
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
