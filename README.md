@@ -81,6 +81,14 @@ A simple Cats Effect integration is provided, which wraps the future-based imple
 
 The integration is available only for JVM and JS targets.
 
+
+**Installation**
+
+ - Scala CLI: `//> using dep tech.neander::cue4s-cats-effect::<version>`
+ - SBT: `libraryDependencies += "tech.neander" %%% "cue4s-cats-effect" % "<version>"`
+
+**Usage**
+
 ```scala mdoc:compile-only
 import cats.effect.*
 import cue4s.*, catseffect.*
