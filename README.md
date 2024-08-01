@@ -1,3 +1,11 @@
+<!--toc:start-->
+- [Cue4s](#cue4s)
+  - [Installation](#installation)
+  - [Platform support](#platform-support)
+  - [Usage](#usage)
+  - [Cats Effect integration](#cats-effect-integration)
+<!--toc:end-->
+
 ## Cue4s
 
 Experimental Scala library for CLI prompts that works on JVM, JS, and Native.
