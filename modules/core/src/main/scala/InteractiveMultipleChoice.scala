@@ -52,6 +52,11 @@ private[cue4s] class InteractiveMultipleChoice(
       eraseEntireLine()
       out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
       out.out("\n")
+      out.out(colored("Tab")(fansi.Bold.On(_)))
+      out.out(" to toggle, ")
+      out.out(colored("Enter")(fansi.Bold.On(_)))
+      out.out(" to submit.")
+      out.out("\n")
 
       val filteredAlts =
         altsWithIndex.filter: (txt, _) =>
@@ -76,13 +81,15 @@ private[cue4s] class InteractiveMultipleChoice(
           case ((alt, originalIdx), idx) =>
             moveHorizontalTo(0)
             eraseToEndOfLine()
+
+            val isSelected  = state.selected.contains(idx)
+            val underCursor = state.current.contains(idx)
             val view =
-              if state.selected.contains(idx) then
-                if state.current.contains(idx) then
+              if isSelected then
+                if underCursor then
                   colored(s"  ‣ $alt")(s => fansi.Bold.On(fansi.Color.Green(s)))
                 else colored(s"  ‣ $alt")(fansi.Color.Green(_))
-              else if state.current.contains(idx) then
-                colored(s"  ▹ $alt")(fansi.Bold.On(_))
+              else if underCursor then colored(s"  ▹ $alt")(fansi.Bold.On(_))
               else s"  ▹ $alt"
             out.out(view.toString)
             if idx != filteredAlts.length - 1 then out.out("\n")
@@ -101,10 +108,10 @@ private[cue4s] class InteractiveMultipleChoice(
     terminal.eraseEntireLine()
     terminal.moveHorizontalTo(0)
     out.out(colored("✔ ")(fansi.Color.Green(_)))
-    out.out(colored(prompt.lab + ":")(fansi.Color.Cyan(_)))
+    out.out(colored(prompt.lab)(fansi.Color.Cyan(_)))
     out.out("\n")
     terminal.withRestore:
-      (0 until state.showing.length).foreach: _ =>
+      (0 until state.showing.length + 1).foreach: _ =>
         terminal.moveHorizontalTo(0)
         terminal.eraseEntireLine()
         terminal.moveNextLine(1)

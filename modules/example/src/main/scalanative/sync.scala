@@ -48,4 +48,6 @@ case class Info(
     )
     .toResult
   info = info.copy(letters = letters.fold(Set.empty)(_.toSet))
+
+  println(info)
 end sync
