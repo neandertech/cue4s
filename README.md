@@ -12,7 +12,7 @@ Experimental Scala library for CLI prompts that works on JVM, JS, and Native.
 
 The inspiration is taken from a JS library [prompts](https://github.com/terkelg/prompts#options), and the eventual goal is to have cue4s support all the same functionality. We're nowhere near that yet of course.
 
-Library is experimental and is only available in Sonatype Snapshots, mainly 
+Library is experimental and is only available in Sonatype Snapshots (pick latest from [here](https://s01.oss.sonatype.org/content/repositories/snapshots/tech/neander/cue4s_3/)), mainly 
 because there is plenty of known bugs (they're present even in the GIF below!), so we are still not ready for a 
 proper release. If you are interested in this effort, please create issues 
 and contribute fixes!
