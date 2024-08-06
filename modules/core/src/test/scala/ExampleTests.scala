@@ -17,7 +17,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     Next.Done("flizza")
   )
 
-  terminalTest("input".only)(
+  terminalTest("input")(
     Prompt.Input(
       "how do you do fellow kids?",
       value =>

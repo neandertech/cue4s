@@ -16,10 +16,6 @@
 
 package cue4s
 
-import scala.annotation.tailrec
-import scala.deriving.Mirror
-import scala.util.boundary
-
 class cue(f: CueBuilder => CueBuilder = identity)
     extends annotation.StaticAnnotation:
   private[cue4s] def getHints = f(CueBuilder()).getHints

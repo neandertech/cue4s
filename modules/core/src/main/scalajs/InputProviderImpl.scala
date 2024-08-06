@@ -65,8 +65,9 @@ private class InputProviderImpl(o: Output)
         n match
           case Next.Continue    =>
           case Next.Done(value) => close(Completion.Finished(value))
-          case Next.Stop        => close(Completion.Interrupted)
-          case Next.Error(msg)  => close(Completion.Error(msg))
+          case Next.Stop => close(Completion.Fail(CompletionError.Interrupted))
+          case Next.Error(msg) =>
+            close(Completion.Fail(CompletionError.Error(msg)))
 
       def send(ev: Event) =
         whatNext(handler(ev))
@@ -97,7 +98,10 @@ private class InputProviderImpl(o: Output)
       stdin.on("keypress", keypress)
 
       fut
-    else Future.successful(Completion.Error("STDIN is not a TTY"))
+    else
+      Future.successful(
+        Completion.Fail(CompletionError.Error("STDIN is not a TTY"))
+      )
     end if
   end evaluateFuture
   override def close(): Unit = ()

@@ -48,8 +48,8 @@ private class InputProviderImpl(o: Output)
         n match
           case Next.Continue    =>
           case Next.Done(value) => break(Completion.Finished(value))
-          case Next.Stop        => break(Completion.Interrupted)
-          case Next.Error(msg)  => break(Completion.Error(msg))
+          case Next.Stop        => break(Completion.interrupted)
+          case Next.Error(msg)  => break(Completion.error(msg))
 
       def send(ev: Event) =
         whatNext(handler(ev))
@@ -70,7 +70,7 @@ private class InputProviderImpl(o: Output)
 
       end while
 
-      Completion.Interrupted
+      Completion.interrupted
 
   end evaluate
 

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package example.sync
+package cue4s_example
 
 import cue4s.*
 
-case class Info(
-    day: Option[String] = None,
-    work: Option[String] = None,
-    letters: Set[String] = Set.empty
-)
 
 @main def sync =
+  case class Info(
+      day: Option[String] = None,
+      work: Option[String] = None,
+      letters: Set[String] = Set.empty
+  )
+
   var info = Info()
 
   val prompts = Prompts()
@@ -33,10 +34,10 @@ case class Info(
     .sync(
       Prompt.SingleChoice("How was your day?", List("great", "okay"))
     )
-    .toResult
+    .toOption
   info = info.copy(day = day)
 
-  val work = prompts.sync(Prompt.Input("Where do you work?")).toResult
+  val work = prompts.sync(Prompt.Input("Where do you work?")).toOption
   info = info.copy(work = work)
 
   val letters = prompts
@@ -46,7 +47,7 @@ case class Info(
         ('A' to 'F').map(_.toString).toList
       )
     )
-    .toResult
+    .toOption
   info = info.copy(letters = letters.fold(Set.empty)(_.toSet))
 
   println(info)

@@ -28,11 +28,7 @@ class PromptsIO private (
 
   def io[A](
       prompt: Prompt[A],
-      out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true
   ): IO[Completion[A]] =
-    val terminal      = createTerminal(out)
     val inputProvider = InputProvider(out)
     val handler       = prompt.handler(terminal, out, colors)
 

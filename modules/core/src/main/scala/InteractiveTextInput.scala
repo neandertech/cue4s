@@ -16,10 +16,6 @@
 
 package cue4s
 
-case class Transition[R](current: R, last: Option[R] = None):
-  def next(r: R)        = copy(current = r, last = Some(current))
-  def nextFn(r: R => R) = copy(current = r(current), last = Some(current))
-
 private[cue4s] class InteractiveTextInput(
     prompt: Prompt.Input,
     terminal: Terminal,

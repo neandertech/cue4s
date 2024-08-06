@@ -16,6 +16,17 @@
 
 package cue4s
 
-trait PlatformStd extends Output:
-  override def logLn[A: AsString](a: A): Unit = System.err.println(a.render)
-  override def out[A: AsString](a: A): Unit   = System.out.print(a.render)
+import scala.deriving.Mirror
+
+trait PromptChain[R]:
+  def run(exec: [t] => Prompt[t] => Completion[t]): Completion[R]
+
+object PromptChain:
+  inline def apply[T] = compiletime.summonInline[PromptChain[T]]
+  class Impl[T](plan: PromptPlan[T]) extends PromptChain[T]:
+    override def run(exec: [t] => Prompt[t] => Completion[t]): Completion[T] =
+      plan.run(exec)
+
+  inline def derived[T: Mirror.ProductOf]: PromptChain[T] = ${
+    PromptChainMacros.derivedMacro[T]
+  }

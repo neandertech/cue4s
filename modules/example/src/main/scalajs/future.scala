@@ -34,9 +34,9 @@ case class Info(
       .future(
         Prompt.SingleChoice("How was your day?", List("great", "okay"))
       )
-      .map(_.toResult)
+      .map(_.toOption)
 
-    work <- prompts.future(Prompt.Input("Where do you work?")).map(_.toResult)
+    work <- prompts.future(Prompt.Input("Where do you work?")).map(_.toOption)
 
     letters <- prompts
       .future(
@@ -45,7 +45,7 @@ case class Info(
           ('A' to 'F').map(_.toString).toList
         )
       )
-      .map(_.toResult)
+      .map(_.toOption)
 
     info = Info(day, work, letters.fold(Set.empty)(_.toSet))
   yield println(info)

@@ -72,24 +72,10 @@ lazy val core = projectMatrix
     libraryDependencies += "com.lihaoyi" %%% "fansi" % Versions.fansi,
     libraryDependencies +=
       "net.java.dev.jna" % "jna" % Versions.jna,
-    (Compile / unmanagedSourceDirectories) ++= {
-      val allCombos = List("js", "jvm", "native").combinations(2).toList
-      val dis =
-        virtualAxes.value.collectFirst { case p: VirtualAxis.PlatformAxis =>
-          p.directorySuffix
-        }.get
-
-      allCombos
-        .filter(_.contains(dis))
-        .map { suff =>
-          val suffixes = "scala" + suff.mkString("-", "-", "")
-
-          (Compile / sourceDirectory).value / suffixes
-        }
-    },
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
   .enablePlugins(SnapshotsPlugin)
+  .settings(superMatrix)
 
 lazy val catsEffect = projectMatrix
   .in(file("modules/cats-effect"))
@@ -131,6 +117,23 @@ lazy val example = projectMatrix
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true))
   )
+  .settings(superMatrix)
+
+lazy val superMatrix = Seq((Compile / unmanagedSourceDirectories) ++= {
+  val allCombos = List("js", "jvm", "native").combinations(2).toList
+  val dis =
+    virtualAxes.value.collectFirst { case p: VirtualAxis.PlatformAxis =>
+      p.directorySuffix
+    }.get
+
+  allCombos
+    .filter(_.contains(dis))
+    .map { suff =>
+      val suffixes = "scala" + suff.mkString("-", "-", "")
+
+      (Compile / sourceDirectory).value / suffixes
+    }
+})
 
 lazy val exampleCatsEffect = projectMatrix
   .dependsOn(core, catsEffect)

@@ -15,9 +15,8 @@ private[cue4s] case class PromptPlan[Into](
     boundary[Completion[Into]]:
       prompts.foreach: step =>
         step.run(exec[Any], raw, System.err.println(_)) match
-          case t: Tuple               => raw = t
-          case Completion.Interrupted => boundary.break(Completion.Interrupted)
-          case Completion.Error(msg)  => boundary.break(Completion.Error(msg))
+          case t: Tuple              => raw = t
+          case what: CompletionError => boundary.break(Completion.Fail(what))
       Completion.Finished(finish(raw))
   end run
 end PromptPlan

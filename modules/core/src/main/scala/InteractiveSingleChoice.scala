@@ -30,17 +30,25 @@ private[cue4s] class InteractiveSingleChoice(
 
   val lab           = prompt.lab + " > "
   val altsWithIndex = prompt.alts.zipWithIndex
-  var state         = State("", Some(0), altsWithIndex)
+  var state         = Transition(State("", Some(0), altsWithIndex))
 
   def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
 
-  def clear(oldState: State, newState: State) =
-    import terminal.*
-    for _ <- 0 until state.showing.length - newState.showing.length do
-      moveNextLine(1)
-      moveHorizontalTo(1)
-      eraseToEndOfLine()
+  def clear() =
+    val showedPreviously = state.last.map(_.showing.length).getOrElse(0)
+    for _ <- 0 until showedPreviously - state.current.showing.length do
+      terminal.moveNextLine(1).moveHorizontalTo(1).eraseToEndOfLine()
+
+  // state.last.foreach:
+  // val
+
+  // def clear(oldState: State, newState: State) =
+  //   import terminal.*
+  //   for _ <- 0 until state.showing.length - newState.showing.length do
+  //     moveNextLine(1)
+  //     moveHorizontalTo(1)
+  //     eraseToEndOfLine()
 
   def printPrompt() =
 
@@ -50,51 +58,62 @@ private[cue4s] class InteractiveSingleChoice(
     eraseEntireLine()
 
     out.out("· ")
-    out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
+    out.out(colored(lab + state.current.text)(fansi.Color.Cyan(_)))
 
     withRestore:
       out.out("\n")
 
       val filteredAlts =
         altsWithIndex.filter: (txt, _) =>
-          state.text.isEmpty() || txt
+          state.current.text.isEmpty() || txt
             .toLowerCase()
             .contains(
-              state.text.toLowerCase()
+              state.current.text.toLowerCase()
             )
 
       if filteredAlts.isEmpty then
         moveHorizontalTo(0)
         eraseToEndOfLine()
         out.out(colored("  no matches")(fansi.Underlined.On(_)))
-        val newState = State(
-          state.text,
-          selected = None,
-          showing = Nil
-        )
-        clear(state, newState)
-        state = newState
+        state = state.nextFn(st => st.copy(selected = None, showing = Nil))
+        clear()
+        // val newState = State(
+        //   state.text,
+        //   selected = None,
+        //   showing = Nil
+        // )
+        // clear(state, newState)
+        // state = newState
       else
         filteredAlts.zipWithIndex.foreach:
           case ((alt, originalIdx), idx) =>
             moveHorizontalTo(0)
             eraseToEndOfLine()
             val view =
-              if state.selected.contains(idx) then
+              if state.current.selected.contains(idx) then
                 colored(s"  ‣ $alt")(fansi.Color.Green(_))
               else colored(s"    $alt")(fansi.Bold.On(_))
             out.out(view.toString)
             if idx != filteredAlts.length - 1 then out.out("\n")
 
-        val newState = state.copy(
-          showing = filteredAlts,
-          selected =
-            if state.showing == filteredAlts then state.selected
-            else Some(0)
+        // val newState = state.copy(
+        //   showing = filteredAlts,
+        //   selected =
+        //     if state.showing == filteredAlts then state.selected
+        //     else Some(0)
+        // )
+
+        // clear(state, newState)
+        state = state.nextFn(st =>
+          st.copy(
+            showing = filteredAlts,
+            selected =
+              if st.showing == filteredAlts then st.selected
+              else Some(0)
+          )
         )
 
-        clear(state, newState)
-        state = newState
+        clear()
 
       end if
   end printPrompt
@@ -124,12 +143,13 @@ private[cue4s] class InteractiveSingleChoice(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) => // enter
-          state.selected match
+          state.current.selected match
             case None => Next.Continue
             case Some(value) =>
+              val stringValue = state.current.showing(value)._1
               terminal.withRestore:
-                clear(state, state.copy(showing = Nil))
-              val stringValue = state.showing(value)._1
+                state = state.nextFn(st => st.copy(showing = Nil))
+                clear()
               printFinished(stringValue)
               Next.Done(stringValue)
 
@@ -148,15 +168,19 @@ private[cue4s] class InteractiveSingleChoice(
       end match
     end apply
 
-  def selectUp() = state =
-    state.copy(selected = state.selected.map(s => (s - 1).max(0)))
+  def selectUp() =
+    state = state.nextFn(st =>
+      st.copy(selected = st.selected.map(s => (s - 1).max(0)))
+    )
 
-  def selectDown() = state =
-    state.copy(selected = state.selected.map(s => (s + 1).min(1000)))
+  def selectDown() =
+    state = state.nextFn(st =>
+      st.copy(selected = st.selected.map(s => (s + 1).min(1000)))
+    )
 
   def appendText(t: Char) =
-    state = state.copy(text = state.text + t)
+    state = state.nextFn(st => st.copy(text = st.text + t))
 
   def trimText() =
-    state = state.copy(text = state.text.take(state.text.length - 1))
+    state = state.nextFn(st => st.copy(text = st.text.take(st.text.length - 1)))
 end InteractiveSingleChoice

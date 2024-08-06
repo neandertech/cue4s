@@ -23,14 +23,15 @@ transparent trait PromptsPlatform:
   self: Prompts =>
 
   def sync[R](
-      prompt: Prompt[R],
-      out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true
+      prompt: Prompt[R] | PromptChain[R],
   ): Completion[R] =
-    val handler = prompt.handler(terminal, out, colors)
+    prompt match
+      case p: Prompt[R] =>
+        val handler = p.handler(terminal, out, colors)
 
-    inputProvider.evaluate(handler)
+        inputProvider.evaluate(handler)
+      case c: PromptChain[R] =>
+        c.run([t] => (p: Prompt[t]) => sync(p))
   end sync
 
   def future[R](

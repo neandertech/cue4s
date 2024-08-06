@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package example.future
+package cue4s_example
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -23,48 +23,23 @@ import cue4s.*
 
 import concurrent.ExecutionContext.Implicits.global
 
-case class Info(
-    day: Option[String] = None,
-    work: Option[String] = None,
-    letters: Set[String] = Set.empty
-)
-
-enum Opts:
-  case Slap, Trap, Clap
-
-case class Test(
-    @cue(_.text("How's your day?"))
-    x: String,
-    @cue(_.validate(Test.validateY).text("Give me U"))
-    y: String,
-    z: Option[String],
-    @cue(_.options("yes", "no", "don't know"))
-    test: String,
-    @cue(_.options("get", "post", "patch"))
-    hello: List[String],
-    @cue(_.options(Opts.values.map(_.toString).toSeq*))
-    hello2: List[String]
-) derives Prompter
-
-object Test:
-  def validateY(y: String) =
-    if y.trim.isEmpty() then Some(PromptError("cannot be empty!"))
-    else if y.trim == "pasta" then Some(PromptError("stop talking about food"))
-    else None
-
 @main def future =
+  case class Info(
+      day: Option[String] = None,
+      work: Option[String] = None,
+      letters: Set[String] = Set.empty
+  )
+
   val prompts = Prompts()
-  println(prompts.runSync(summon[Prompter[Test]]))
-  sys.exit(0)
 
   val fut = for
     day <- prompts
       .future(
         Prompt.SingleChoice("How was your day?", List("great", "okay"))
       )
-      .map(_.toResult)
+      .map(_.toOption)
 
-    work <- prompts.future(Prompt.Input("Where do you work?")).map(_.toResult)
+    work <- prompts.future(Prompt.Input("Where do you work?")).map(_.toOption)
 
     letters <- prompts
       .future(
@@ -73,7 +48,7 @@ object Test:
           ('A' to 'F').map(_.toString).toList
         )
       )
-      .map(_.toResult)
+      .map(_.toOption)
 
     info = Info(day, work, letters.fold(Set.empty)(_.toSet))
   yield println(info)

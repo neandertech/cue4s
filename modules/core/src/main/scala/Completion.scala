@@ -18,11 +18,24 @@ package cue4s
 
 enum Completion[+Result]:
   case Finished(value: Result)
-  case Interrupted
-  case Error(msg: String)
+  case Fail(error: CompletionError)
 
-  def toResult: Option[Result] =
+  def toOption: Option[Result] =
     this match
       case Finished(value) => Some(value)
       case _               => None
+
+  def toEither: Either[CompletionError, Result] =
+    this match
+      case Finished(value) => Right(value)
+      case Fail(err)       => Left(err)
 end Completion
+
+object Completion:
+  private[cue4s] def interrupted = Completion.Fail(CompletionError.Interrupted)
+  private[cue4s] def error(msg: String) =
+    Completion.Fail(CompletionError.Error(msg))
+
+enum CompletionError extends Throwable:
+  case Interrupted
+  case Error(msg: String)

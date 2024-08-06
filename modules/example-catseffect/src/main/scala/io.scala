@@ -37,14 +37,14 @@ object ioExample extends IOApp.Simple:
           .io(
             Prompt.SingleChoice("How was your day?", List("great", "okay"))
           )
-          .map(_.toResult)
+          .map(_.toOption)
           .flatTap(day => ref.update(_.copy(day = day)))
 
         work <- prompts
           .io(
             Prompt.Input("Where do you work?")
           )
-          .map(_.toResult)
+          .map(_.toOption)
           .flatTap(work => ref.update(_.copy(work = work)))
 
         letter <- prompts
@@ -54,7 +54,7 @@ object ioExample extends IOApp.Simple:
               ('A' to 'F').map(_.toString).toList
             )
           )
-          .map(_.toResult)
+          .map(_.toOption)
           .flatTap(letter =>
             ref.update(_.copy(letters = letter.fold(Set.empty)(_.toSet)))
           )

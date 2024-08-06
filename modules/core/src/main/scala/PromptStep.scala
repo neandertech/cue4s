@@ -8,11 +8,12 @@ private[cue4s] case class PromptStep[S, T](
       exec: Prompt[T] => Completion[T],
       s: S,
       log: String => Unit
-  ): S | Completion.Interrupted.type | Completion.Error[T] =
+  ): S | CompletionError =
     exec(prompt) match
       case Completion.Finished(value) => set(s, value)
-      case Completion.Interrupted     => Completion.Interrupted
-      case err @ Completion.Error(_)  => err
+      case Completion.Fail(value)     => value
+      // case Completion.Interrupted     => Completion.Interrupted
+      // case err @ Completion.Error(_)  => err
   end run
 
   def toAny: PromptStep[S, Any] =
@@ -25,7 +26,7 @@ private[cue4s] case class PromptStep[S, T](
           exec: Prompt[Any] => Completion[Any],
           s: S,
           log: String => Unit
-      ): S | Completion.Interrupted.type | Completion.Error[Any] =
+      ): S | CompletionError =
         t.run(exec.asInstanceOf, s, log)
     end new
   end toAny

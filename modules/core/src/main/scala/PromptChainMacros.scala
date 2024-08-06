@@ -25,7 +25,7 @@ private[cue4s] object PromptChainMacros:
 
   end CueHintProvider
 
-  def derivedMacro[T: Type](using Quotes): Expr[Prompter[T]] =
+  def derivedMacro[T: Type](using Quotes): Expr[PromptChain[T]] =
     val ev: Expr[Mirror.ProductOf[T]] = Expr.summon[Mirror.ProductOf[T]].get
 
     import quotes.reflect.*
@@ -62,7 +62,7 @@ private[cue4s] object PromptChainMacros:
           Expr.ofList(fieldSteps[elementTypes](fieldNamesAndAnnotations))
 
         '{
-          new Prompter.Impl[T]($plan.withSteps($steps.asInstanceOf))
+          new PromptChain.Impl[T]($plan.withSteps($steps.asInstanceOf))
         }
 
     end match

@@ -16,7 +16,7 @@
 
 package cue4s
 
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
 import scala.util.boundary
 
 import scalanative.libc.stdio.getchar
@@ -41,8 +41,8 @@ private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
 
-  override def evaluateFuture[Result](handler: Handler[Result]) =
-    Future.successful(evaluate(handler))
+  override def evaluateFuture[Result](handler: Handler[Result])(using ExecutionContext) =
+    Future(evaluate(handler))
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     changemode(rawMode = true)
@@ -59,8 +59,8 @@ private class InputProviderImpl(o: Output)
         n match
           case Next.Continue    =>
           case Next.Done(value) => break(Completion.Finished(value))
-          case Next.Stop        => break(Completion.Interrupted)
-          case Next.Error(msg)  => break(Completion.Error(msg))
+          case Next.Stop        => break(Completion.interrupted)
+          case Next.Error(msg)  => break(Completion.error(msg))
 
       def send(ev: Event) =
         whatNext(handler(ev))
@@ -81,7 +81,7 @@ private class InputProviderImpl(o: Output)
 
       end while
 
-      Completion.Interrupted
+      Completion.interrupted
 
   end evaluate
 

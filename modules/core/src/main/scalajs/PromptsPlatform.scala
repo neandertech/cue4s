@@ -23,12 +23,9 @@ transparent trait PromptsPlatform:
   self: Prompts =>
 
   def future[R](
-      prompt: Prompt[R],
-      out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true
+      prompt: Prompt[R]
   )(using ExecutionContext): Future[Completion[R]] =
-    val handler = prompt.handler(createTerminal(out), out, colors)
+    val handler = prompt.handler(terminal, out, colors)
 
     inputProvider.evaluateFuture(handler)
   end future

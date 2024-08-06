@@ -47,10 +47,11 @@ private[cue4s] class InteractiveMultipleChoice(
 
     import terminal.*
 
+    moveHorizontalTo(0)
+    eraseEntireLine()
+    out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
+
     withRestore:
-      moveHorizontalTo(0)
-      eraseEntireLine()
-      out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
       out.out("\n")
       out.out(colored("Tab")(fansi.Bold.On(_)))
       out.out(" to toggle, ")
