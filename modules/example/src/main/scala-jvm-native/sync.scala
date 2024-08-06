@@ -18,7 +18,6 @@ package cue4s_example
 
 import cue4s.*
 
-
 @main def sync =
   case class Info(
       day: Option[String] = None,

@@ -27,7 +27,7 @@ class PromptsIO private (
   protected lazy val inputProvider = InputProvider(out)
 
   def io[A](
-      prompt: Prompt[A],
+      prompt: Prompt[A]
   ): IO[Completion[A]] =
     val inputProvider = InputProvider(out)
     val handler       = prompt.handler(terminal, out, colors)

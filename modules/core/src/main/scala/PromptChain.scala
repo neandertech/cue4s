@@ -30,3 +30,4 @@ object PromptChain:
   inline def derived[T: Mirror.ProductOf]: PromptChain[T] = ${
     PromptChainMacros.derivedMacro[T]
   }
+end PromptChain

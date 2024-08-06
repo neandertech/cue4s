@@ -23,7 +23,7 @@ transparent trait PromptsPlatform:
   self: Prompts =>
 
   def sync[R](
-      prompt: Prompt[R] | PromptChain[R],
+      prompt: Prompt[R] | PromptChain[R]
   ): Completion[R] =
     prompt match
       case p: Prompt[R] =>

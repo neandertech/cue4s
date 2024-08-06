@@ -16,7 +16,8 @@
 
 package cue4s
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 import scala.util.boundary
 
 import scalanative.libc.stdio.getchar
@@ -41,7 +42,9 @@ private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
 
-  override def evaluateFuture[Result](handler: Handler[Result])(using ExecutionContext) =
+  override def evaluateFuture[Result](handler: Handler[Result])(using
+      ExecutionContext
+  ) =
     Future(evaluate(handler))
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
