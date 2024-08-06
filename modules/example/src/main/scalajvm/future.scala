@@ -29,8 +29,33 @@ case class Info(
     letters: Set[String] = Set.empty
 )
 
+enum Opts:
+  case Slap, Trap, Clap
+
+case class Test(
+    @cue(_.text("How's your day?"))
+    x: String,
+    @cue(_.validate(Test.validateY).text("Give me U"))
+    y: String,
+    z: Option[String],
+    @cue(_.options("yes", "no", "don't know"))
+    test: String,
+    @cue(_.options("get", "post", "patch"))
+    hello: List[String],
+    @cue(_.options(Opts.values.map(_.toString).toSeq*))
+    hello2: List[String]
+) derives Prompter
+
+object Test:
+  def validateY(y: String) =
+    if y.trim.isEmpty() then Some(PromptError("cannot be empty!"))
+    else if y.trim == "pasta" then Some(PromptError("stop talking about food"))
+    else None
+
 @main def future =
   val prompts = Prompts()
+  println(prompts.runSync(summon[Prompter[Test]]))
+  sys.exit(0)
 
   val fut = for
     day <- prompts

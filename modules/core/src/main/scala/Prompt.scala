@@ -24,13 +24,17 @@ trait Prompt[Result]:
   ): Handler[Result]
 
 object Prompt:
-  case class Input(lab: String) extends Prompt[String]:
+  case class Input(
+      lab: String,
+      validate: String => Option[PromptError] = _ => None
+  ) extends Prompt[String]:
     override def handler(
         terminal: Terminal,
         output: Output,
         colors: Boolean
     ): Handler[String] =
       InteractiveTextInput(this, terminal, output, colors).handler
+  end Input
 
   case class SingleChoice(lab: String, alts: List[String])
       extends Prompt[String]:

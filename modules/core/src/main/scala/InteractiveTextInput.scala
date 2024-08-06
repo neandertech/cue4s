@@ -16,6 +16,10 @@
 
 package cue4s
 
+case class Transition[R](current: R, last: Option[R] = None):
+  def next(r: R)        = copy(current = r, last = Some(current))
+  def nextFn(r: R => R) = copy(current = r(current), last = Some(current))
+
 private[cue4s] class InteractiveTextInput(
     prompt: Prompt.Input,
     terminal: Terminal,
@@ -23,7 +27,7 @@ private[cue4s] class InteractiveTextInput(
     colors: Boolean
 ):
   val lab   = prompt.lab + " > "
-  var state = InteractiveTextInput.State("")
+  var state = Transition(InteractiveTextInput.State("", prompt.validate))
 
   def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
@@ -35,15 +39,36 @@ private[cue4s] class InteractiveTextInput(
     moveHorizontalTo(0)
     eraseToEndOfLine()
 
+    if state.current.error.isEmpty && state.last.flatMap(_.error).nonEmpty then
+      withRestore:
+        moveDown(1)
+        eraseToEndOfLine()
+
     out.out(colored(lab)(fansi.Color.Cyan(_)))
-    out.out(colored(state.text)(fansi.Bold.On(_)))
+    out.out(colored(state.current.text)(fansi.Bold.On(_)))
+    state.current.error match
+      case None =>
+      case Some(value) =>
+        withRestore:
+          out.out("\n")
+          out.out(colored(value.toString())(fansi.Color.Red(_)))
+
   end printPrompt
 
   def printFinished() =
-    terminal.moveHorizontalTo(0).eraseToEndOfLine()
+    import terminal.*
+    moveHorizontalTo(0)
+    eraseToEndOfLine()
+
+    if state.last.flatMap(_.error).nonEmpty then
+      withRestore:
+        moveDown(1)
+        eraseToEndOfLine()
+
     out.out(colored("✔ ")(fansi.Color.Green(_)))
     out.out(colored(prompt.lab + " ")(fansi.Color.Cyan(_)))
-    out.out(colored(state.text + "\n")(fansi.Bold.On(_)))
+    out.out(colored(state.current.text + "\n")(fansi.Bold.On(_)))
+  end printFinished
 
   val handler = new Handler[String]:
     def apply(event: Event): Next[String] =
@@ -53,8 +78,10 @@ private[cue4s] class InteractiveTextInput(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) => // enter
-          printFinished()
-          Next.Done(state.text)
+          if state.current.error.isEmpty then
+            printFinished()
+            Next.Done(state.current.text)
+          else Next.Continue
 
         case Event.Key(KeyEvent.DELETE) => // enter
           trimText()
@@ -72,11 +99,14 @@ private[cue4s] class InteractiveTextInput(
     end apply
 
   def appendText(t: Char) =
-    state = state.copy(text = state.text + t)
+    state = state.nextFn(r => r.copy(text = r.text + t))
 
   def trimText() =
-    state = state.copy(text = state.text.take(state.text.length - 1))
+    state = state.nextFn(r => r.copy(text = r.text.take(r.text.length - 1)))
 end InteractiveTextInput
 
 private[cue4s] object InteractiveTextInput:
-  case class State(text: String)
+  case class State(text: String, validate: String => Option[PromptError]):
+    lazy val error = validate(text)
+
+    override def toString(): String = s"State[text=`$text`, error=`$error`]"

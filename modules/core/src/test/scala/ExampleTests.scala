@@ -17,12 +17,18 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     Next.Done("flizza")
   )
 
-  terminalTest("input")(
-    Prompt.Input("how do you do fellow kids?"),
+  terminalTest("input".only)(
+    Prompt.Input(
+      "how do you do fellow kids?",
+      value =>
+        if value.length < 4 then Some(PromptError("too short!"))
+        else None
+    ),
     List(
       Event.Init,
       Event.Char('g'),
       Event.Char('o'),
+      Event.Key(KeyEvent.ENTER), // prevents submission
       Event.Char('o'),
       Event.Char('d'),
       Event.Key(KeyEvent.ENTER)

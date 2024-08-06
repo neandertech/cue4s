@@ -56,7 +56,7 @@ class TracingTerminal(out: Output) extends Terminal:
     this
 
   override def eraseToEndOfLine(): this.type =
-    log(s"Erasing to beginning of line")
+    log(s"Erasing to end of line")
     for column <- currentColumn to currentWidth do set(' ', currentLine, column)
     this
 

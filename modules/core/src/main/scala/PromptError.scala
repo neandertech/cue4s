@@ -16,18 +16,6 @@
 
 package cue4s
 
-private[cue4s] object PromptChain:
-  def future[A](
-      init: A,
-      terminal: Terminal = Terminal.ansi(Output.Std),
-      out: Output = Output.Std,
-      colors: Boolean = true
-  ): PromptChainFuture[A] =
-    new PromptChainFuture[A](
-      init = init,
-      terminal = terminal,
-      out = out,
-      colors = colors,
-      reversedSteps = Nil
-    )
-end PromptChain
+opaque type PromptError <: String = String
+object PromptError:
+  inline def apply(v: String): PromptError = v

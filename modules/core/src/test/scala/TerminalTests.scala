@@ -6,26 +6,35 @@ import com.indoorvivants.snapshots.munit_integration.*
 trait TerminalTests extends MunitSnapshotsIntegration:
   self: munit.FunSuite =>
 
+  case object LogTag extends munit.Tag("logtest")
+
   def terminalTest[R](
-      name: String
+      name: munit.TestOptions
   )(prompt: Prompt[R], events: List[Event], expected: Next[R])(implicit
       loc: munit.Location
   ): Unit =
     test(name) {
       val (snapshot, result) =
         terminalSession(
-          name,
+          name.name,
           prompt,
           events
         )
 
-      assertSnapshot(name, snapshot)
+      assertSnapshot(name.name, snapshot)
       assertEquals(result, expected)
     }
 
-  def terminalSession[R](name: String, prompt: Prompt[R], events: List[Event]) =
-    val sb        = new java.lang.StringBuilder
-    val term      = TracingTerminal(Output.DarkVoid)
+  def terminalSession[R](
+      name: String,
+      prompt: Prompt[R],
+      events: List[Event],
+      log: Boolean = false
+  ) =
+    val sb = new java.lang.StringBuilder
+    val logger: String => Unit =
+      if log then s => sb.append(s + "\n") else _ => ()
+    val term      = TracingTerminal(Output.Delegate(_ => (), logger))
     val capturing = Output.Delegate(term.writer, s => sb.append(s + "\n"))
 
     val handler = prompt.handler(term, capturing, colors = false)

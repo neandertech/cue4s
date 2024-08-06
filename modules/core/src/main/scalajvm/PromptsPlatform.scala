@@ -22,6 +22,19 @@ import scala.concurrent.Future
 transparent trait PromptsPlatform:
   self: Prompts =>
 
+  def runSync[R](
+      prompter: Prompter[R],
+      out: Output = Output.Std,
+      createTerminal: Output => Terminal = Terminal.ansi(_),
+      colors: Boolean = true
+  ): Completion[R] =
+    prompter.run:
+      [t] =>
+        (x: Prompt[t]) =>
+          val handler = x.handler(terminal, out, colors)
+
+          inputProvider.evaluate(handler)
+
   def sync[R](
       prompt: Prompt[R],
       out: Output = Output.Std,
