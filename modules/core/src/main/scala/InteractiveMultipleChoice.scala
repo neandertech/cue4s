@@ -28,10 +28,15 @@ private[cue4s] class InteractiveMultipleChoice(
       current: Option[Int],
       showing: List[(String, Int)]
   )
-
+  val preSelected   = prompt.alts.zipWithIndex.filter(_._1._2).map(_._2)
   val lab           = prompt.lab + " > "
-  val altsWithIndex = prompt.alts.zipWithIndex
-  var state         = State("", Nil, current = Some(0), altsWithIndex)
+  val altsWithIndex = prompt.alts.map(_._1).zipWithIndex
+  var state = State(
+    "",
+    preSelected,
+    current = Some(0),
+    altsWithIndex
+  )
 
   def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
@@ -138,7 +143,7 @@ private[cue4s] class InteractiveMultipleChoice(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) =>
-          val resolved = state.selected.map(prompt.alts.apply)
+          val resolved = state.selected.map(prompt.alts.apply).map(_._1)
           printFinished(resolved)
           Next.Done(resolved)
         // state.selected match

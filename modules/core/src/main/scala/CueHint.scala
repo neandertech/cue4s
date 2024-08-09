@@ -19,4 +19,5 @@ package cue4s
 enum CueHint:
   case Text(value: String)
   case Options(set: List[String])
+  case MultiSelect(set: List[(String, Boolean)])
   case Validate(f: String => Option[PromptError])
