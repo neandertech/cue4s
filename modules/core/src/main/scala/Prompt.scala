@@ -45,12 +45,15 @@ object Prompt:
     ): Handler[String] =
       InteractiveSingleChoice(this, terminal, output, colors).handler
 
-  case class MultipleChoice(lab: String, alts: List[String])
-      extends Prompt[List[String]]:
+  case class MultipleChoice(
+      lab: String,
+      alts: List[(String, Boolean)]
+  ) extends Prompt[List[String]]:
     override def handler(
         terminal: Terminal,
         output: Output,
         colors: Boolean
     ): Handler[List[String]] =
       InteractiveMultipleChoice(this, terminal, output, colors).handler
+  end MultipleChoice
 end Prompt

@@ -39,6 +39,10 @@ private[cue4s] object PromptChainMacros:
       getHint:
         case CueHint.Options(value) => value
 
+    def multi(using Quotes) =
+      getHint:
+        case CueHint.MultiSelect(value) => value
+
   end CueHintProvider
 
   def derivedMacro[T: Type](using Quotes): Expr[PromptChain[T]] =
@@ -116,7 +120,13 @@ private[cue4s] object PromptChainMacros:
       '{
         val label = ${ hints.name }.getOrElse($nm)
         val prompt =
-          Prompt.MultipleChoice(label, ${ hints.options }.getOrElse(Nil))
+          Prompt.MultipleChoice(
+            label,
+            ${ hints.options }
+              .map(_.map(_ -> false))
+              .orElse(${ hints.multi })
+              .getOrElse(Nil)
+          )
 
         PromptStep[Tuple, List[String]](
           prompt,
