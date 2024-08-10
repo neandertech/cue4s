@@ -3,6 +3,7 @@
   - [Installation](#installation)
   - [Platform support](#platform-support)
   - [Usage](#usage)
+  - [Auto-derivation for case classes](#auto-derivation-for-case-classes)
   - [Cats Effect integration](#cats-effect-integration)
 <!--toc:end-->
 
@@ -66,7 +67,7 @@ info = info.copy(work = work)
 
 val letters = prompts
   .sync(
-    Prompt.MultipleChoice(
+    Prompt.MultipleChoice.withAllSelected(
       "What are your favourite letters?",
       ('A' to 'F').map(_.toString).toList
     )
@@ -76,6 +77,40 @@ info = info.copy(letters = letters.fold(Set.empty)(_.toSet))
 
 prompts.close() // important to put the terminal back into line mode
 ```
+
+### Auto-derivation for case classes
+
+cue4s includes an experimental auto-derivation for case classes (and only them, currently),
+allowing you to create prompt chains:
+
+```scala mdoc:compile-only
+import cue4s.*
+val validateName: String => Option[PromptError] = s =>
+    Option.when(s.trim.isEmpty)(PromptError("name cannot be empty!"))
+
+case class Attributes(
+  @cue(_.text("Your name").validate(validateName))
+  name: String,
+  @cue(_.text("Checklist").multi("Wake up" -> true, "Grub a brush" -> true, "Put a little makeup" -> false))
+  doneToday: Set[String],
+  @cue(_.text("What did you have for breakfast").options("eggs", "sadness"))
+  breakfast: String
+) derives PromptChain
+
+val attributes: Attributes = 
+    Prompts.use(): p =>
+      p.sync(PromptChain[Attributes]).getOrThrow
+```
+
+There is no generic mechanism to define how parameters of different types will be handled, just a set of 
+rules that felt right at the time of writing this library:
+
+1. If the type is `String`, and `.options(...)` is present in annotation, the prompt will become `SingleChoice`
+2. If the type is `F[String]` where `F` is one of `List, Vector, Set`, and either `.options(...)` or `.multi(...)` are present,
+   then the prompt will become `MultipleChoice`
+3. If the type is `Option[String]`, then _empty_ value will be turned into `None` (check for emptiness will be run before any validation)
+
+In the future more combinations can be added.
 
 ### Cats Effect integration
 
@@ -123,7 +158,7 @@ object ioExample extends IOApp.Simple:
 
         letter <- prompts
           .io(
-            Prompt.MultipleChoice(
+            Prompt.MultipleChoice.withNoneSelected(
               "What are your favourite letters?",
               ('A' to 'F').map(_.toString).toList
             )
