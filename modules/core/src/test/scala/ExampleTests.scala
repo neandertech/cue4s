@@ -53,7 +53,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   )
 
   terminalTest("multiple.choice")(
-    Prompt.MultipleChoice(
+    Prompt.MultipleChoice.withNoneSelected(
       "What would you like for lunch",
       List("pizza", "steak", "sweet potato", "fried chicken")
     ),

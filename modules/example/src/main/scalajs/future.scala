@@ -40,7 +40,7 @@ case class Info(
 
     letters <- prompts
       .future(
-        Prompt.MultipleChoice(
+        Prompt.MultipleChoice.withNoneSelected(
           "What are your favourite letters?",
           ('A' to 'F').map(_.toString).toList
         )

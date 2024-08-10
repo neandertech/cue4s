@@ -41,7 +41,7 @@ import cue4s.*
 
   val letters = prompts
     .sync(
-      Prompt.MultipleChoice(
+      Prompt.MultipleChoice.withNoneSelected(
         "What are your favourite letters?",
         ('A' to 'F').map(_.toString).toList
       )
