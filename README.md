@@ -3,6 +3,7 @@
   - [Installation](#installation)
   - [Platform support](#platform-support)
   - [Usage](#usage)
+  - [Auto-derivation for case classes](#auto-derivation-for-case-classes)
   - [Cats Effect integration](#cats-effect-integration)
 <!--toc:end-->
 
