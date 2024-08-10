@@ -29,6 +29,11 @@ enum Completion[+Result]:
     this match
       case Finished(value) => Right(value)
       case Fail(err)       => Left(err)
+
+  def getOrThrow: Result =
+    this match
+      case Finished(value) => value
+      case Fail(err)       => throw err
 end Completion
 
 object Completion:
