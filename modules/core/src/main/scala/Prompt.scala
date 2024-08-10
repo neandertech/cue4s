@@ -45,7 +45,7 @@ object Prompt:
     ): Handler[String] =
       InteractiveSingleChoice(this, terminal, output, colors).handler
 
-  case class MultipleChoice(
+  case class MultipleChoice private (
       lab: String,
       alts: List[(String, Boolean)]
   ) extends Prompt[List[String]]:
@@ -55,5 +55,20 @@ object Prompt:
         colors: Boolean
     ): Handler[List[String]] =
       InteractiveMultipleChoice(this, terminal, output, colors).handler
+  end MultipleChoice
+
+  object MultipleChoice:
+    @deprecated(
+      "This constructor will be removed in the future, use `withNoneSelected` which is equivalent"
+    )
+    def apply(lab: String, variants: Seq[String]): MultipleChoice =
+      withNoneSelected(lab, variants)
+
+    def withNoneSelected(lab: String, variants: Seq[String]) =
+      new MultipleChoice(lab, variants.map(_ -> false).toList)
+    def withAllSelected(lab: String, variants: Seq[String]) =
+      new MultipleChoice(lab, variants.map(_ -> true).toList)
+    def withSomeSelected(lab: String, variants: Seq[(String, Boolean)]) =
+      new MultipleChoice(lab, variants.toList)
   end MultipleChoice
 end Prompt

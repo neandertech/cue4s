@@ -120,7 +120,7 @@ private[cue4s] object PromptChainMacros:
       '{
         val label = ${ hints.name }.getOrElse($nm)
         val prompt =
-          Prompt.MultipleChoice(
+          Prompt.MultipleChoice.withSomeSelected(
             label,
             ${ hints.options }
               .map(_.map(_ -> false))

@@ -43,7 +43,7 @@ import concurrent.ExecutionContext.Implicits.global
 
     letters <- prompts
       .future(
-        Prompt.MultipleChoice(
+        Prompt.MultipleChoice.withAllSelected(
           "What are your favourite letters?",
           ('A' to 'F').map(_.toString).toList
         )
