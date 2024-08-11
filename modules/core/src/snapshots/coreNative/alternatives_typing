@@ -14,7 +14,7 @@ Event.Char('z')
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How do you do fellow kids? > [30m[107m [39m[49m┃
+┃· How do you do fellow kids? > ▒┃
 ┃  ‣ killa                       ┃
 ┃    rizza                       ┃
 ┃    flizza                      ┃
@@ -36,7 +36,7 @@ Event.Char('i')
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃✔ How do you do fellow kids? flizza┃
-┃[30m[107m [39m[49m                                  ┃
+┃▒                                  ┃
 ┃                                   ┃
 ┃                                   ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
