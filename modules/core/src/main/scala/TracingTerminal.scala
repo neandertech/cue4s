@@ -192,6 +192,7 @@ class TracingTerminal(out: Output) extends Terminal:
           )
           cur.append(after.drop(1))
       else cur.append(line)
+      end if
       cur.append("┃")
       cur.append("\n")
 
