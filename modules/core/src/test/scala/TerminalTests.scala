@@ -12,7 +12,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
   def chars(str: String): List[Event] =
     str.map(Event.Char(_)).toList
 
-  def list(args: (Event | List[Event])*) =
+  def list(args: (KeyEvent | Event | List[Event])*) =
     flatten(args.toList)
 
   def terminalTestComplete[R](
@@ -36,10 +36,11 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       assertEquals(result, expected)
     }
 
-  def flatten(evs: List[Event | List[Event]]): List[Event] =
+  def flatten(evs: List[KeyEvent | Event | List[Event]]): List[Event] =
     evs.flatMap:
-      case ev: Event   => List(ev)
-      case ev: List[?] => ev
+      case ev: Event    => List(ev)
+      case ev: KeyEvent => List(Event.Key(ev))
+      case ev: List[?]  => ev
 
   def terminalTestComplete[R](
       name: munit.TestOptions

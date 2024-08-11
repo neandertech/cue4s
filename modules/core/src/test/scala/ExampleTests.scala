@@ -1,6 +1,7 @@
 package cue4s
 
 import cue4s.*
+import KeyEvent.*
 
 class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("alternatives.navigation")(
@@ -8,11 +9,11 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       "How do you do fellow kids?",
       List("killa", "rizza", "flizza")
     ),
-    List(
+    list(
       Event.Init,
-      Event.Key(KeyEvent.DOWN),
-      Event.Key(KeyEvent.DOWN),
-      Event.Key(KeyEvent.ENTER)
+      DOWN,
+      DOWN,
+      ENTER
     ),
     "flizza"
   )
@@ -24,14 +25,12 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
         if value.length < 4 then Some(PromptError("too short!"))
         else None
     ),
-    List(
+    list(
       Event.Init,
-      Event.Char('g'),
-      Event.Char('o'),
-      Event.Key(KeyEvent.ENTER), // prevents submission
-      Event.Char('o'),
-      Event.Char('d'),
-      Event.Key(KeyEvent.ENTER)
+      chars("go"),
+      ENTER, // prevents submission
+      chars("od"),
+      ENTER
     ),
     "good"
   )
@@ -41,13 +40,12 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       "How do you do fellow kids?",
       List("killa", "rizza", "flizza")
     ),
-    List(
+    list(
       Event.Init,
-      Event.Char('z'),
-      Event.Key(KeyEvent.DELETE),
-      Event.Char('l'),
-      Event.Char('i'),
-      Event.Key(KeyEvent.ENTER)
+      chars("z"),
+      DELETE,
+      chars("li"),
+      ENTER
     ),
     "flizza"
   )
@@ -57,16 +55,16 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       "What would you like for lunch",
       List("pizza", "steak", "sweet potato", "fried chicken")
     ),
-    List(
+    list(
       Event.Init,
-      Event.Key(KeyEvent.TAB),
-      Event.Key(KeyEvent.DOWN),
-      Event.Key(KeyEvent.TAB),
-      Event.Key(KeyEvent.DOWN),
-      Event.Char('h'), // skip sweet potato
-      Event.Key(KeyEvent.TAB),
-      Event.Key(KeyEvent.DELETE),
-      Event.Key(KeyEvent.ENTER)
+      TAB,
+      DOWN,
+      TAB,
+      DOWN,
+      chars("h"), // skip sweet potato
+      TAB,
+      DELETE,
+      ENTER
     ),
     List("pizza", "steak", "fried chicken")
   )
@@ -76,10 +74,10 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       "What would you like for lunch",
       List("pizza", "steak", "sweet potato", "fried chicken")
     ),
-    List(
+    list(
       Event.Init,
-      Event.Key(KeyEvent.TAB), // unselect pizza
-      Event.Key(KeyEvent.ENTER)
+      TAB, // unselect pizza
+      ENTER
     ),
     List("steak", "sweet potato", "fried chicken")
   )
@@ -96,9 +94,9 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     list(
       Event.Init,
       chars("hello"),
-      Event.Key(KeyEvent.ENTER),
+      ENTER,
       Event.Init,
-      Event.Key(KeyEvent.ENTER)
+      ENTER
     ),
     MyPrompt("hello", "yes")
   )
