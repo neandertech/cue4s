@@ -3,7 +3,7 @@ package cue4s
 import cue4s.*
 
 class ExampleTests extends munit.FunSuite, TerminalTests:
-  terminalTest("alternatives.navigation")(
+  terminalTestComplete("alternatives.navigation")(
     Prompt.SingleChoice(
       "How do you do fellow kids?",
       List("killa", "rizza", "flizza")
@@ -14,10 +14,10 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Key(KeyEvent.DOWN),
       Event.Key(KeyEvent.ENTER)
     ),
-    Next.Done("flizza")
+    "flizza"
   )
 
-  terminalTest("input")(
+  terminalTestComplete("input")(
     Prompt.Input(
       "how do you do fellow kids?",
       value =>
@@ -33,10 +33,10 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Char('d'),
       Event.Key(KeyEvent.ENTER)
     ),
-    Next.Done("good")
+    "good"
   )
 
-  terminalTest("alternatives.typing")(
+  terminalTestComplete("alternatives.typing")(
     Prompt.SingleChoice(
       "How do you do fellow kids?",
       List("killa", "rizza", "flizza")
@@ -49,10 +49,10 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Char('i'),
       Event.Key(KeyEvent.ENTER)
     ),
-    Next.Done("flizza")
+    "flizza"
   )
 
-  terminalTest("multiple.choice")(
+  terminalTestComplete("multiple.choice")(
     Prompt.MultipleChoice.withNoneSelected(
       "What would you like for lunch",
       List("pizza", "steak", "sweet potato", "fried chicken")
@@ -68,7 +68,39 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Key(KeyEvent.DELETE),
       Event.Key(KeyEvent.ENTER)
     ),
-    Next.Done(List("pizza", "steak", "fried chicken"))
+    List("pizza", "steak", "fried chicken")
+  )
+
+  terminalTestComplete("multiple.choice.allselected")(
+    Prompt.MultipleChoice.withAllSelected(
+      "What would you like for lunch",
+      List("pizza", "steak", "sweet potato", "fried chicken")
+    ),
+    List(
+      Event.Init,
+      Event.Key(KeyEvent.TAB), // unselect pizza
+      Event.Key(KeyEvent.ENTER)
+    ),
+    List("steak", "sweet potato", "fried chicken")
+  )
+
+  case class MyPrompt(
+      @cue(_.text("Sir...?"))
+      title: String,
+      @cue(_.options("yes", "no").text("What's up doc?"))
+      lab: String
+  ) derives PromptChain
+
+  terminalTestComplete("promptchain")(
+    PromptChain[MyPrompt],
+    list(
+      Event.Init,
+      chars("hello"),
+      Event.Key(KeyEvent.ENTER),
+      Event.Init,
+      Event.Key(KeyEvent.ENTER)
+    ),
+    MyPrompt("hello", "yes")
   )
 
 end ExampleTests
