@@ -187,10 +187,12 @@ class TracingTerminal(out: Output) extends Terminal:
         cur.append(pre)
         if currentColumn < currentWidth then
           cur.append(
-            fansi.Color.Black(fansi.Back.White(line(currentColumn).toString()))
+            // fansi.Color.Black(fansi.Back.White(line(currentColumn).toString()))
+            "▒"
           )
           cur.append(after.drop(1))
       else cur.append(line)
+      end if
       cur.append("┃")
       cur.append("\n")
 
