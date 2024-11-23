@@ -37,7 +37,7 @@ Event.Init
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━┓
 ┃✔ What's up doc? yes┃
-┃▒                   ┃
+┃                    ┃
 ┃                    ┃
 ┗━━━━━━━━━━━━━━━━━━━━┛
 

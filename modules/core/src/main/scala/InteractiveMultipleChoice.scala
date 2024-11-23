@@ -52,8 +52,10 @@ private[cue4s] class InteractiveMultipleChoice(
 
     import terminal.*
 
+    cursorHide()
     moveHorizontalTo(0)
     eraseEntireLine()
+
     out.out(colored(lab + state.text)(fansi.Color.Cyan(_)))
 
     withRestore:
