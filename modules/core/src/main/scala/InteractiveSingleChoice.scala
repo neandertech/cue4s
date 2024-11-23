@@ -152,6 +152,7 @@ private[cue4s] class InteractiveSingleChoice(
                 state = state.nextFn(st => st.copy(showing = Nil))
                 clear()
               printFinished(stringValue)
+              terminal.cursorShow()
               Next.Done(stringValue)
 
         case Event.Key(KeyEvent.DELETE) => // enter

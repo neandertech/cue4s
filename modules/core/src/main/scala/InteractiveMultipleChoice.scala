@@ -147,6 +147,7 @@ private[cue4s] class InteractiveMultipleChoice(
         case Event.Key(KeyEvent.ENTER) =>
           val resolved = state.selected.map(prompt.alts.apply).map(_._1)
           printFinished(resolved)
+          terminal.cursorShow()
           Next.Done(resolved)
         // state.selected match
         //   case None => Next.Continue
