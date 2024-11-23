@@ -56,6 +56,7 @@ private[cue4s] class InteractiveSingleChoice(
 
     moveHorizontalTo(0)
     eraseEntireLine()
+    cursorHide()
 
     out.out("· ")
     out.out(colored(lab + state.current.text)(fansi.Color.Cyan(_)))

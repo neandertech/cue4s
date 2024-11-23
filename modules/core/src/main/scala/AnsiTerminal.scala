@@ -29,7 +29,7 @@ class AnsiTerminal(out: Output) extends Terminal:
     writer(v)
     this
 
-  override inline def cursorHide(): this.type = call(s"$CSI?25h")
+  override inline def cursorHide(): this.type = call(s"$CSI?25l")
   override inline def cursorShow(): this.type = call(s"$CSI?25h")
 
   private inline def lineEraseMode(n: Int): this.type =
