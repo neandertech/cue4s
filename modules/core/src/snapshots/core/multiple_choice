@@ -63,7 +63,7 @@ Event.Key(TAB)
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃What would you like for lunch > ▒┃
+┃What would you like for lunch >  ┃
 ┃Tab to toggle, Enter to submit.  ┃
 ┃  ‣ pizza                        ┃
 ┃  ‣ steak                        ┃
@@ -76,7 +76,7 @@ Event.Key(ENTER)
 ┃  ‣ pizza                        ┃
 ┃  ‣ steak                        ┃
 ┃  ‣ fried chicken                ┃
-┃▒                                ┃
+┃                                 ┃
 ┃                                 ┃
 ┃                                 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛

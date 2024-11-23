@@ -25,6 +25,7 @@ class TracingTerminal(out: Output) extends Terminal:
   var currentWidth  = 0
   var currentLine   = 0
   var currentColumn = 0
+  var cursorHidden  = false
 
   var saved = Option.empty[(Int, Int)]
 
@@ -60,7 +61,9 @@ class TracingTerminal(out: Output) extends Terminal:
     for column <- currentColumn to currentWidth do set(' ', currentLine, column)
     this
 
-  override def cursorShow(): this.type = this
+  override def cursorShow(): this.type =
+    cursorHidden = true
+    this
 
   override def moveHorizontalTo(column: Int): this.type =
     log(s"Moving to column $column")
@@ -99,7 +102,9 @@ class TracingTerminal(out: Output) extends Terminal:
     saved = Some((currentLine, currentColumn))
     this
 
-  override def cursorHide(): this.type = ???
+  override def cursorHide(): this.type =
+    cursorHidden = true
+    this
 
   override def moveDown(n: Int): this.type =
     log(s"Moving down $n lines")
@@ -185,12 +190,12 @@ class TracingTerminal(out: Output) extends Terminal:
       if idx == currentLine then
         val (pre, after) = line.splitAt(currentColumn)
         cur.append(pre)
-        if currentColumn < currentWidth then
+        if currentColumn < currentWidth && !cursorHidden then
           cur.append(
-            // fansi.Color.Black(fansi.Back.White(line(currentColumn).toString()))
             "▒"
           )
           cur.append(after.drop(1))
+        else cur.append(after)
       else cur.append(line)
       end if
       cur.append("┃")

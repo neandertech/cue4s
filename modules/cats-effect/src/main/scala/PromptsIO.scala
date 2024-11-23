@@ -33,8 +33,12 @@ class PromptsIO private (
     val handler       = prompt.handler(terminal, out, colors)
 
     // TODO: provide native CE interface here
-    IO.executionContext.flatMap: ec =>
-      IO.fromFuture(IO(inputProvider.evaluateFuture(handler)(using ec)))
+    IO.executionContext
+      .flatMap: ec =>
+        IO.fromFuture(IO(inputProvider.evaluateFuture(handler)(using ec)))
+      .guarantee(IO(terminal.cursorShow()))
+      .guarantee(IO(inputProvider.close()))
+
   end io
 
   override def close(): Unit = inputProvider.close()

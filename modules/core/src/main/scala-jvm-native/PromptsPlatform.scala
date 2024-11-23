@@ -27,9 +27,16 @@ transparent trait PromptsPlatform:
   ): Completion[R] =
     prompt match
       case p: Prompt[R] =>
-        val handler = p.handler(terminal, out, colors)
+        try
+          val handler = p.handler(terminal, out, colors)
 
-        inputProvider.evaluate(handler)
+          inputProvider.evaluate(handler)
+        finally
+          terminal
+            .cursorShow()
+          inputProvider.close()
+      // ensure prompt doesn't forget cleaning up after itself
+
       case c: PromptChain[R] =>
         c.run([t] => (p: Prompt[t]) => sync(p))
   end sync
@@ -42,6 +49,9 @@ transparent trait PromptsPlatform:
   )(using ExecutionContext): Future[Completion[R]] =
     val handler = prompt.handler(createTerminal(out), out, colors)
 
-    inputProvider.evaluateFuture(handler)
+    val f = inputProvider.evaluateFuture(handler)
+    f.onComplete(_ => terminal.cursorShow())
+    f.onComplete(_ => inputProvider.close())
+    f
   end future
 end PromptsPlatform

@@ -56,6 +56,7 @@ private[cue4s] class InteractiveSingleChoice(
 
     moveHorizontalTo(0)
     eraseEntireLine()
+    cursorHide()
 
     out.out("· ")
     out.out(colored(lab + state.current.text)(fansi.Color.Cyan(_)))
@@ -151,6 +152,7 @@ private[cue4s] class InteractiveSingleChoice(
                 state = state.nextFn(st => st.copy(showing = Nil))
                 clear()
               printFinished(stringValue)
+              terminal.cursorShow()
               Next.Done(stringValue)
 
         case Event.Key(KeyEvent.DELETE) => // enter
