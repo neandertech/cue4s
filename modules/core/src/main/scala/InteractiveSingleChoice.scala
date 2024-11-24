@@ -64,7 +64,6 @@ private[cue4s] class InteractiveSingleChoice(
     end apply
   end handler
 
-
   private val altsWithIndex = prompt.alts.zipWithIndex
   private var state = Transition(
     State("", Some(altsWithIndex.map(_._2) -> 0), altsWithIndex, Status.Running)
@@ -126,11 +125,10 @@ private[cue4s] class InteractiveSingleChoice(
                 out.out(line)
               moveDown(1)
 
-
-        if state.current.status == Status.Running then 
+        if state.current.status == Status.Running then
           render
           moveUp(rendering.current.length).moveHorizontalTo(0)
-        else  // we are finished
+        else // we are finished
           render
           // do not leave empty lines behind - move cursor up
           moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length)
@@ -191,7 +189,7 @@ object InteractiveSingleChoice:
 
     private def changeText(newText: String) =
       val newFiltered = all.filter((alt, _) =>
-        newText.trim.isEmpty || alt.toLowerCase().contains(newText)
+        newText.trim.isEmpty || alt.toLowerCase().contains(newText.toLowerCase().trim())
       )
       if newFiltered.nonEmpty then
         showing match

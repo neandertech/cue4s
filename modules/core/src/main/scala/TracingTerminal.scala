@@ -90,11 +90,13 @@ class TracingTerminal(out: Output) extends Terminal:
   override def moveBack(n: Int): this.type =
     log(s"Back $n characters")
     currentColumn = (currentColumn - n) max 0
+    updateBounds()
     this
 
   override def moveUp(n: Int): this.type =
     log(s"Moving up $n lines")
     currentLine = (currentLine - n) max 0
+    updateBounds()
     this
 
   override def save(): this.type =
