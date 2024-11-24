@@ -47,6 +47,7 @@ private[cue4s] class InteractiveSingleChoice(
               val stringValue = altMapping(idx)
               printPrompt()
               Next.Done(stringValue)
+            case Status.Canceled => Next.Stop
 
         case Event.Key(KeyEvent.DELETE) => // enter
           stateTransition(_.trimText)

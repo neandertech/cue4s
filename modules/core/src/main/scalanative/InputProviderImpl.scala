@@ -141,12 +141,11 @@ object InputProviderImpl:
     this.synchronized:
       hooks.remove(f)
 
-  rt.addShutdownHook(Thread(() =>
-    hooks.foreach: hook =>
-      try hook()
-      catch case e: Throwable => ()
-
-    changemode(rawMode = false)
-    ()
-  ))
+  rt.addShutdownHook(
+    Thread(() =>
+      hooks.foreach: hook =>
+        try hook()
+        catch case e: Throwable => ()
+    )
+  )
 end InputProviderImpl
