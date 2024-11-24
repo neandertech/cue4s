@@ -49,7 +49,9 @@ object Process extends Process
 
 @js.native
 trait ReadlineInterface extends js.Object:
-  def close(): Unit = js.native
+  def on(eventName: String, listener: js.Function): Unit  = js.native
+  def off(eventName: String, listener: js.Function): Unit = js.native
+  def close(): Unit                                       = js.native
 
 @js.native
 trait Readline extends js.Object:

@@ -30,10 +30,26 @@ private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
 
+  private val rt                     = Runtime.getRuntime()
+  @volatile private var asyncHookSet = false
+
   override def evaluateFuture[Result](handler: Handler[Result])(using
       ExecutionContext
   ) =
-    Future(evaluate(handler))
+    val hook = new Thread(() =>
+      handler(Event.Interrupt)
+      close()
+    )
+    rt.addShutdownHook(hook)
+    asyncHookSet = true
+
+    val fut = Future(evaluate(handler))
+    fut.onComplete: _ =>
+      rt.removeShutdownHook(hook)
+      asyncHookSet = false
+
+    fut
+  end evaluateFuture
 
   private var flags = Option.empty[CLong]
 
@@ -59,41 +75,50 @@ private class InputProviderImpl(o: Output)
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     changemode(rawMode = true)
 
+    val hook = new Thread(() =>
+      handler(Event.Interrupt)
+      close()
+    )
+    if !asyncHookSet then rt.addShutdownHook(hook)
+
     var lastRead = 0
 
     inline def read() =
       lastRead = getchar()
       lastRead
 
-    boundary[Completion[Result]]:
+    try
+      boundary[Completion[Result]]:
 
-      def whatNext(n: Next[Result]) =
-        n match
-          case Next.Continue    =>
-          case Next.Done(value) => break(Completion.Finished(value))
-          case Next.Stop        => break(Completion.interrupted)
-          case Next.Error(msg)  => break(Completion.error(msg))
+        def whatNext(n: Next[Result]) =
+          n match
+            case Next.Continue    =>
+            case Next.Done(value) => break(Completion.Finished(value))
+            case Next.Stop        => break(Completion.interrupted)
+            case Next.Error(msg)  => break(Completion.error(msg))
 
-      def send(ev: Event) =
-        whatNext(handler(ev))
+        def send(ev: Event) =
+          whatNext(handler(ev))
 
-      var state = State.Init
+        var state = State.Init
 
-      whatNext(handler(Event.Init))
+        whatNext(handler(Event.Init))
 
-      while read() != 0 do
-        val (newState, result) = decode(state, lastRead)
+        while read() != 0 do
+          val (newState, result) = decode(state, lastRead)
 
-        result match
-          case n: DecodeResult => whatNext(n.toNext)
-          case e: Event =>
-            send(e)
+          result match
+            case n: DecodeResult => whatNext(n.toNext)
+            case e: Event =>
+              send(e)
 
-        state = newState
+          state = newState
 
-      end while
+        end while
 
-      Completion.interrupted
+        Completion.interrupted
+    finally if !asyncHookSet then rt.removeShutdownHook(hook)
+    end try
 
   end evaluate
 

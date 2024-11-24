@@ -86,6 +86,11 @@ private[cue4s] class InteractiveMultipleChoice(
             .map(altMapping)
             .foreach: value =>
               lines += s" ‣ " + value.bold
+
+      case Status.Canceled =>
+        lines += colored("× ")(fansi.Color.Red(_)) +
+          colored(prompt.lab + " ")(fansi.Color.Cyan(_))
+        lines += ""
     end match
 
     lines.result()
@@ -112,7 +117,8 @@ private[cue4s] class InteractiveMultipleChoice(
         case Event.Key(KeyEvent.ENTER) =>
           stateTransition(_.finish)
           state.current.status match
-            case Status.Running => Next.Continue
+            case Status.Canceled => Next.Stop
+            case Status.Running  => Next.Continue
             case Status.Finished(ids) =>
               val stringValues = ids.toList.sorted.map(altMapping.apply)
               printPrompt()
@@ -133,6 +139,12 @@ private[cue4s] class InteractiveMultipleChoice(
           stateTransition(_.addText(which.toChar))
           printPrompt()
           Next.Continue
+
+        case Event.Interrupt =>
+          stateTransition(_.cancel)
+          printPrompt()
+          terminal.cursorShow()
+          Next.Stop
 
         case _ =>
           Next.Continue
@@ -183,6 +195,7 @@ object InteractiveMultipleChoice:
   enum Status:
     case Running
     case Finished(ids: Set[Int])
+    case Canceled
 
   case class State(
       text: String,
@@ -195,6 +208,8 @@ object InteractiveMultipleChoice:
     def down = changeSelection(+1)
 
     def finish = copy(status = Status.Finished(selected))
+
+    def cancel = copy(status = Status.Canceled)
 
     def addText(t: Char) =
       changeText(text + t)

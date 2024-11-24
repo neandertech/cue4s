@@ -58,6 +58,12 @@ private[cue4s] class InteractiveSingleChoice(
           printPrompt()
           Next.Continue
 
+        case Event.Interrupt =>
+          stateTransition(_.cancel)
+          printPrompt()
+          terminal.cursorShow()
+          Next.Stop
+
         case _ =>
           Next.Continue
       end match
@@ -102,6 +108,11 @@ private[cue4s] class InteractiveSingleChoice(
           colored(prompt.lab + " ")(fansi.Color.Cyan(_)) +
           colored(value)(fansi.Bold.On(_))
         lines += ""
+      case Status.Canceled =>
+        lines += colored("× ")(fansi.Color.Red(_)) +
+          colored(prompt.lab + " ")(fansi.Color.Cyan(_))
+        lines += ""
+
     end match
 
     lines.result()
@@ -153,6 +164,7 @@ object InteractiveSingleChoice:
   enum Status:
     case Running
     case Finished(idx: Int)
+    case Canceled
 
   case class State(
       text: String,
@@ -165,6 +177,7 @@ object InteractiveSingleChoice:
         case None => this
         case Some((_, selected)) =>
           copy(status = Status.Finished(selected))
+    def cancel = copy(status = Status.Canceled)
 
     def up   = changeSelection(-1)
     def down = changeSelection(+1)
