@@ -146,6 +146,7 @@ object InputProviderImpl:
       try hook()
       catch case e: Throwable => ()
 
-    cue4s.ChangeMode.changemode(0)
+    changemode(rawMode = false)
+    ()
   ))
 end InputProviderImpl
