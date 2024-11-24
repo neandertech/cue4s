@@ -18,6 +18,47 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     "flizza"
   )
 
+  terminalTest("alternatives.cancel.single")(
+    Prompt.SingleChoice(
+      "How do you do fellow kids?",
+      List("killa", "rizza", "flizza")
+    ),
+    list(
+      Event.Init,
+      DOWN,
+      DOWN,
+      Event.Interrupt
+    ),
+    Next.Stop
+  )
+
+  terminalTest("alternatives.cancel.multiple")(
+    Prompt.MultipleChoice.withNoneSelected(
+      "What would you like for lunch",
+      List("pizza", "steak", "sweet potato", "fried chicken")
+    ),
+    list(
+      Event.Init,
+      TAB,
+      DOWN,
+      TAB,
+      DOWN,
+      Event.Interrupt
+    ),
+    Next.Stop
+  )
+
+  terminalTest("alternatives.cancel.input")(
+    Prompt.Input(
+      "how do you do fellow kids?",
+      value =>
+        if value.length < 4 then Some(PromptError("too short!"))
+        else None
+    ),
+    list(Event.Init, Event.Interrupt),
+    Next.Stop
+  )
+
   terminalTestComplete("input")(
     Prompt.Input(
       "how do you do fellow kids?",

@@ -18,11 +18,12 @@ package cue4s
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scala.reflect.Typeable
 
 transparent trait PromptsPlatform:
   self: Prompts =>
 
-  def sync[R](
+  def sync[R: Typeable](
       prompt: Prompt[R] | PromptChain[R]
   ): Completion[R] =
     prompt match
@@ -32,8 +33,7 @@ transparent trait PromptsPlatform:
 
           inputProvider.evaluate(handler)
         finally
-          terminal
-            .cursorShow()
+          terminal.cursorShow()
           inputProvider.close()
       // ensure prompt doesn't forget cleaning up after itself
 
