@@ -110,7 +110,6 @@ lazy val example = projectMatrix
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
-
   .jsPlatform(Versions.scalaVersions)
   .nativePlatform(Versions.scalaVersions)
   .settings(
