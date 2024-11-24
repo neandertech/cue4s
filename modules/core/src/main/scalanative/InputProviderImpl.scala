@@ -42,7 +42,7 @@ private class InputProviderImpl(o: Output)
     val STDIN_FILENO = 0
     if rawMode then
       tcgetattr(STDIN_FILENO, state)
-      flags.synchronized:
+      this.synchronized:
         flags = Some((!state)._4)
       (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
       assert(tcsetattr(STDIN_FILENO, TCSANOW, state) == 0)
@@ -50,11 +50,12 @@ private class InputProviderImpl(o: Output)
       flags.foreach: oldflags =>
         tcgetattr(STDIN_FILENO, state)
         (!state)._4 = oldflags
-        flags.synchronized:
+        this.synchronized:
           flags = None
         assert(tcsetattr(STDIN_FILENO, TCSANOW, state) == 0)
     end if
   end changemode
+
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     changemode(rawMode = true)
 
