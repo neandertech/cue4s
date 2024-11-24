@@ -110,13 +110,12 @@ private[cue4s] class InteractiveSingleChoice(
 
   private def printPrompt() =
     import terminal.*
-    // out.logLn(rendering.toString())
     cursorHide()
     rendering.last match
       case None =>
         // initial print
-        withRestore:
-          rendering.current.foreach(out.outLn)
+        rendering.current.foreach(out.outLn)
+        moveUp(rendering.current.length).moveHorizontalTo(0)
       case Some(value) =>
         def render =
           rendering.current
@@ -127,7 +126,10 @@ private[cue4s] class InteractiveSingleChoice(
                 out.out(line)
               moveDown(1)
 
-        if state.current.status == Status.Running then withRestore(render)
+
+        if state.current.status == Status.Running then 
+          render
+          moveUp(rendering.current.length).moveHorizontalTo(0)
         else  // we are finished
           render
           // do not leave empty lines behind - move cursor up
