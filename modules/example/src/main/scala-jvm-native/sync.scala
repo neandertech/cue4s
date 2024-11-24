@@ -31,7 +31,10 @@ import cue4s.*
 
   val day = prompts
     .sync(
-      Prompt.SingleChoice("How was your day?", List("great", "okay"))
+      Prompt.SingleChoice(
+        "How was your day?",
+        List("great", "okay", "decent", "spectacular")
+      )
     )
     .toOption
   info = info.copy(day = day)
