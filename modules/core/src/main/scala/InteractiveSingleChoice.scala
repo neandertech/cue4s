@@ -189,7 +189,9 @@ object InteractiveSingleChoice:
 
     private def changeText(newText: String) =
       val newFiltered = all.filter((alt, _) =>
-        newText.trim.isEmpty || alt.toLowerCase().contains(newText.toLowerCase().trim())
+        newText.trim.isEmpty || alt
+          .toLowerCase()
+          .contains(newText.toLowerCase().trim())
       )
       if newFiltered.nonEmpty then
         showing match
