@@ -32,8 +32,7 @@ transparent trait PromptsPlatform:
 
           inputProvider.evaluate(handler)
         finally
-          terminal
-            .cursorShow()
+          terminal.cursorShow()
           inputProvider.close()
       // ensure prompt doesn't forget cleaning up after itself
 

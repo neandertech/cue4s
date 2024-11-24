@@ -21,6 +21,7 @@ private[cue4s] enum Event:
   case Key(which: KeyEvent)
   case Char(which: Int)
   case CSICode(bytes: List[Byte])
+  case Interrupt
 
   override def toString(): String =
     this match
@@ -28,6 +29,7 @@ private[cue4s] enum Event:
       case Key(which)     => s"Event.Key($which)"
       case Char(which)    => s"Event.Char('${which.toChar}')"
       case CSICode(bytes) => s"Event.CSICode(${bytes.mkString("[", ", ", "]")})"
+      case Interrupt      => "Event.Interrupt"
 end Event
 
 private[cue4s] object Event:
