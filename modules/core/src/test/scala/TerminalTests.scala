@@ -44,12 +44,12 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   def terminalTestComplete[R](
       name: munit.TestOptions
-  )(prompt: Prompt[R], events: List[Event], expected: R)(implicit
-      loc: munit.Location
+  )(prompt: Prompt[R], events: List[Event], expected: R, log: Boolean = false)(
+      implicit loc: munit.Location
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
-        runToCompletion(events)(
+        runToCompletion(events, log)(
           prompt
         )
 
@@ -65,12 +65,17 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   def terminalTest[R](
       name: munit.TestOptions
-  )(prompt: Prompt[R], events: List[Event], expected: Next[R])(implicit
+  )(
+      prompt: Prompt[R],
+      events: List[Event],
+      expected: Next[R],
+      log: Boolean = false
+  )(implicit
       loc: munit.Location
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
-        run(events)(
+        run(events, log)(
           prompt
         )
 
