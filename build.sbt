@@ -1,3 +1,4 @@
+import scala.scalanative.build.SourceLevelDebuggingConfig
 import scala.io.StdIn
 Global / excludeLintKeys += logManager
 Global / excludeLintKeys += scalaJSUseMainModuleInitializer
@@ -109,13 +110,16 @@ lazy val example = projectMatrix
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
+
   .jsPlatform(Versions.scalaVersions)
   .nativePlatform(Versions.scalaVersions)
   .settings(
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    nativeConfig ~= (_.withIncrementalCompilation(true))
+    nativeConfig ~= (_.withIncrementalCompilation(true)
+      .withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
+    nativeLink / mainClass := Some("cue4s_example.sync")
   )
   .settings(superMatrix)
 
