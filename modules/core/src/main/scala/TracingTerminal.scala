@@ -36,7 +36,9 @@ class TracingTerminal(out: Output) extends Terminal:
   var INTERNAL       = Array.fill[Char](WIDTH * HEIGHT)(' ')
 
   def log(msg: String): Unit =
-    out.logLn(s"[LINE=$currentLine, COL=$currentColumn] $msg")
+    out.logLn(
+      s"[LINE=$currentLine, COL=$currentColumn, H=$currentHeight, W=$currentWidth] $msg"
+    )
 
   def updateBounds() =
     currentWidth = currentWidth max currentColumn
