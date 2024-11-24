@@ -59,7 +59,7 @@ private object CharCollector:
             emit(Event.Key(KeyEvent.TAB))
           case 127 =>
             emit(Event.Key(KeyEvent.DELETE))
-          case -1 => 
+          case -1 =>
             error("Invalid character -1")
           case _ =>
             emit(Event.Char(char))

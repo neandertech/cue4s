@@ -17,9 +17,9 @@
 package cue4s
 
 trait PlatformStd extends Output:
-  override def logLn[A: AsString](a: A): Unit = 
+  override def logLn[A: AsString](a: A): Unit =
     System.err.println(a.render)
     System.err.flush()
-  override def out[A: AsString](a: A): Unit   = 
+  override def out[A: AsString](a: A): Unit =
     System.out.print(a.render)
     System.out.flush()
