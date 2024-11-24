@@ -4,6 +4,7 @@ Event.Init
 ┃  ‣ killa                      ┃
 ┃    rizza                      ┃
 ┃    flizza                     ┃
+┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('z')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -11,19 +12,22 @@ Event.Char('z')
 ┃  ‣ rizza                       ┃
 ┃    flizza                      ┃
 ┃                                ┃
+┃                                ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃· How do you do fellow kids? >  ┃
-┃  ‣ killa                       ┃
-┃    rizza                       ┃
+┃    killa                       ┃
+┃  ‣ rizza                       ┃
 ┃    flizza                      ┃
+┃                                ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('l')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃· How do you do fellow kids? > l┃
 ┃  ‣ killa                       ┃
 ┃    flizza                      ┃
+┃                                ┃
 ┃                                ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('i')
@@ -32,10 +36,12 @@ Event.Char('i')
 ┃  ‣ flizza                       ┃
 ┃                                 ┃
 ┃                                 ┃
+┃                                 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃✔ How do you do fellow kids? flizza┃
+┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃

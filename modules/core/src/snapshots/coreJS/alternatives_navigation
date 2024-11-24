@@ -4,6 +4,7 @@ Event.Init
 ┃  ‣ killa                      ┃
 ┃    rizza                      ┃
 ┃    flizza                     ┃
+┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -11,6 +12,7 @@ Event.Key(DOWN)
 ┃    killa                      ┃
 ┃  ‣ rizza                      ┃
 ┃    flizza                     ┃
+┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -18,10 +20,12 @@ Event.Key(DOWN)
 ┃    killa                      ┃
 ┃    rizza                      ┃
 ┃  ‣ flizza                     ┃
+┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃✔ How do you do fellow kids? flizza┃
+┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃
