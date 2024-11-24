@@ -26,18 +26,6 @@ import scalanative.posix.termios.*
 import boundary.break
 import CharCollector.*
 
-def changemode(rawMode: Boolean) =
-  val oldt         = stackalloc[termios]()
-  val newt         = stackalloc[termios]()
-  val STDIN_FILENO = 0
-  if rawMode then
-    tcgetattr(STDIN_FILENO, oldt)
-    !newt = !oldt
-    (!newt)._4 = (!newt)._4 & ~(ICANON | ECHO)
-    tcsetattr(STDIN_FILENO, TCSANOW, newt)
-  else tcsetattr(STDIN_FILENO, TCSANOW, oldt)
-end changemode
-
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
@@ -47,6 +35,26 @@ private class InputProviderImpl(o: Output)
   ) =
     Future(evaluate(handler))
 
+  private var flags = Option.empty[CLong]
+
+  private def changemode(rawMode: Boolean) =
+    val state        = stackalloc[termios]()
+    val STDIN_FILENO = 0
+    if rawMode then
+      tcgetattr(STDIN_FILENO, state)
+      flags.synchronized:
+        flags = Some((!state)._4)
+      (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
+      assert(tcsetattr(STDIN_FILENO, TCSANOW, state) == 0)
+    else
+      flags.foreach: oldflags =>
+        tcgetattr(STDIN_FILENO, state)
+        (!state)._4 = oldflags
+        flags.synchronized:
+          flags = None
+        assert(tcsetattr(STDIN_FILENO, TCSANOW, state) == 0)
+    end if
+  end changemode
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     changemode(rawMode = true)
 
