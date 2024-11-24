@@ -27,34 +27,35 @@ private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
 
-  private val rt                     = Runtime.getRuntime()
   @volatile private var asyncHookSet = false
 
   override def evaluateFuture[Result](handler: Handler[Result])(using
       ExecutionContext
   ) =
-    val hook = new Thread(() =>
+    val hook = () =>
       handler(Event.Interrupt)
       close()
-    )
-    rt.addShutdownHook(hook)
-    asyncHookSet = true
+
+    InputProviderImpl.addShutdownHook(hook)
+    this.synchronized:
+      asyncHookSet = true
 
     val fut = Future(evaluate(handler))
     fut.onComplete: _ =>
-      rt.removeShutdownHook(hook)
-      asyncHookSet = false
+      InputProviderImpl.removeShutdownHook(hook)
+      this.synchronized:
+        asyncHookSet = false
 
     fut
   end evaluateFuture
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     cue4s.ChangeMode.changemode(1)
-    val hook = new Thread(() =>
+    val hook = () =>
       handler(Event.Interrupt)
       close()
-    )
-    if !asyncHookSet then rt.addShutdownHook(hook)
+
+    if !asyncHookSet then InputProviderImpl.addShutdownHook(hook)
 
     var lastRead = 0
 
@@ -93,11 +94,34 @@ private class InputProviderImpl(o: Output)
 
         Completion.interrupted
     finally
-      if !asyncHookSet then rt.removeShutdownHook(hook)
+      if !asyncHookSet then InputProviderImpl.removeShutdownHook(hook)
     end try
 
   end evaluate
 
   override def close() = cue4s.ChangeMode.changemode(0)
 
+end InputProviderImpl
+
+object InputProviderImpl:
+  import scala.collection.mutable
+
+  private val rt                             = Runtime.getRuntime()
+  private val hooks: mutable.Set[() => Unit] = mutable.Set.empty
+
+  def addShutdownHook(f: () => Unit): Unit =
+    this.synchronized:
+      hooks.add(f)
+
+  def removeShutdownHook(f: () => Unit): Unit =
+    this.synchronized:
+      hooks.remove(f)
+
+  rt.addShutdownHook(Thread(() =>
+    hooks.foreach: hook =>
+      try hook()
+      catch case e: Throwable => ()
+
+    cue4s.ChangeMode.changemode(0)
+  ))
 end InputProviderImpl
