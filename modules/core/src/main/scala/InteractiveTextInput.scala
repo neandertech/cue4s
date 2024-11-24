@@ -89,6 +89,14 @@ private[cue4s] class InteractiveTextInput(
           printPrompt()
           Next.Continue
 
+        case Event.Interrupt =>
+          terminal.moveHorizontalTo(0)
+          terminal.eraseToEndOfLine()
+          out.out(colored("× ")(fansi.Color.Red(_)))
+          out.out(colored(lab + " ")(fansi.Color.Cyan(_)))
+          terminal.cursorShow()
+          Next.Stop
+
         case _ =>
           Next.Continue
       end match
