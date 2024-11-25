@@ -81,37 +81,45 @@ private[cue4s] class InteractiveSingleChoice(
   private def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
 
+  extension (t: String)
+    private def bold =
+      colored(t)(fansi.Bold.On(_))
+    private def green =
+      colored(t)(fansi.Color.Green(_))
+    private def cyan =
+      colored(t)(fansi.Color.Cyan(_))
+    private def red =
+      colored(t)(fansi.Color.Red(_))
+  end extension
+
   private def renderState(st: State): List[String] =
     val lines = List.newBuilder[String]
 
     st.status match
       case Status.Running =>
         // prompt question
-        lines += "· " + colored(prompt.lab + " > ")(
-          fansi.Color.Cyan(_)
-        ) + state.current.text
+        lines += "· " + (prompt.lab + " > ").cyan + state.current.text
 
         st.showing match
           case None =>
-            lines += colored("no matches...")(fansi.Bold.On(_))
+            lines += "no matches...".bold
           case Some((filtered, selected)) =>
             filtered.foreach: id =>
               val alt = altMapping(id)
               lines.addOne(
-                if id == selected then
-                  colored(s"  ‣ $alt")(fansi.Color.Green(_))
-                else colored(s"    $alt")(fansi.Bold.On(_))
+                if id == selected then s"  ‣ $alt".green
+                else s"    $alt".bold
               )
         end match
       case Status.Finished(idx) =>
         val value = altMapping(idx)
-        lines += colored("✔ ")(fansi.Color.Green(_)) +
-          colored(prompt.lab + " ")(fansi.Color.Cyan(_)) +
-          colored(value)(fansi.Bold.On(_))
+        lines += "✔ ".green +
+          (prompt.lab + " ").cyan +
+          value.bold
         lines += ""
       case Status.Canceled =>
-        lines += colored("× ")(fansi.Color.Red(_)) +
-          colored(prompt.lab + " ")(fansi.Color.Cyan(_))
+        lines += "× ".red +
+          (prompt.lab + " ").cyan
         lines += ""
 
     end match

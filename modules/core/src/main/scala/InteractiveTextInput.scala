@@ -23,68 +23,6 @@ private[cue4s] class InteractiveTextInput(
     colors: Boolean
 ):
   import InteractiveTextInput.*
-  private var state     = Transition(State("", prompt.validate, Status.Running))
-  private var rendering = Transition(renderState(state.current))
-
-  private def renderState(st: State): List[String] =
-    val lines = List.newBuilder[String]
-
-    extension (t: String)
-      def bold =
-        colored(t)(fansi.Bold.On(_))
-      def green =
-        colored(t)(fansi.Color.Green(_))
-      def cyan =
-        colored(t)(fansi.Color.Cyan(_))
-      def red =
-        colored(t)(fansi.Color.Red(_))
-    end extension
-
-    st.status match
-      case Status.Running =>
-        lines += prompt.lab.cyan + " > " + state.current.text.bold
-        st.error.foreach: err =>
-          lines += err.red
-      case Status.Finished(result) =>
-        lines += "✔ ".green + prompt.lab.cyan + " " + state.current.text.bold
-      case Status.Canceled =>
-        lines += "× ".red + prompt.lab.cyan
-    end match
-
-    lines.result()
-  end renderState
-
-  private def colored(msg: String)(f: String => fansi.Str) =
-    if colors then f(msg).toString else msg
-
-  private def printPrompt() =
-    import terminal.*
-    cursorHide()
-    rendering.last match
-      case None =>
-        // initial print
-        rendering.current.foreach(out.outLn)
-        moveUp(rendering.current.length).moveHorizontalTo(0)
-      case Some(value) =>
-        def render =
-          rendering.current
-            .zip(value)
-            .foreach: (line, oldLine) =>
-              if line != oldLine then
-                moveHorizontalTo(0).eraseEntireLine()
-                out.out(line)
-              moveDown(1)
-
-        if state.current.status == Status.Running then
-          render
-          moveUp(rendering.current.length).moveHorizontalTo(0)
-        else // we are finished
-          render
-          // do not leave empty lines behind - move cursor up
-          moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length)
-    end match
-
-  end printPrompt
 
   val handler = new Handler[String]:
     def apply(event: Event): Next[String] =
@@ -124,6 +62,73 @@ private[cue4s] class InteractiveTextInput(
           Next.Continue
       end match
     end apply
+  end handler
+
+  private var state     = Transition(State("", prompt.validate, Status.Running))
+  private var rendering = Transition(renderState(state.current))
+
+  extension (t: String)
+    private def bold =
+      colored(t)(fansi.Bold.On(_))
+    private def green =
+      colored(t)(fansi.Color.Green(_))
+    private def cyan =
+      colored(t)(fansi.Color.Cyan(_))
+    private def red =
+      colored(t)(fansi.Color.Red(_))
+  end extension
+
+  private def renderState(st: State): List[String] =
+    val lines = List.newBuilder[String]
+
+    st.status match
+      case Status.Running =>
+        lines += prompt.lab.cyan + " > " + state.current.text.bold
+        st.error.foreach: err =>
+          lines += err.red
+      case Status.Finished(result) =>
+        lines += "✔ ".green + prompt.lab.cyan + " " + state.current.text.bold
+        lines += ""
+      case Status.Canceled =>
+        lines += "× ".red + prompt.lab.cyan
+        lines += ""
+    end match
+
+    lines.result()
+  end renderState
+
+  private def colored(msg: String)(f: String => fansi.Str) =
+    if colors then f(msg).toString else msg
+
+  private def printPrompt() =
+    import terminal.*
+    cursorHide()
+    rendering.last match
+      case None =>
+        // initial print
+        rendering.current.foreach(out.outLn)
+        moveUp(rendering.current.length).moveHorizontalTo(0)
+      case Some(value) =>
+        def render =
+          rendering.current
+            .zip(value)
+            .foreach: (line, oldLine) =>
+              if line != oldLine then
+                moveHorizontalTo(0).eraseEntireLine()
+                out.out(line)
+              moveDown(1)
+
+        if state.current.status == Status.Running then
+          render
+          moveUp(rendering.current.length).moveHorizontalTo(0)
+        else // we are finished
+          render
+          // do not leave empty lines behind - move cursor up
+          moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length)
+            .moveHorizontalTo(0)
+    end match
+
+  end printPrompt
 
   private def stateTransition(s: State => State) =
     state = state.nextFn(s)
