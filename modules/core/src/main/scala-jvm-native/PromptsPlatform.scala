@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.reflect.Typeable
 
-transparent trait PromptsPlatform:
+private trait PromptsPlatform:
   self: Prompts =>
 
   def sync[R: Typeable](

@@ -103,7 +103,7 @@ private class InputProviderImpl(o: Output)
 
 end InputProviderImpl
 
-object InputProviderImpl:
+private object InputProviderImpl:
   import scala.collection.mutable
 
   private val rt                             = Runtime.getRuntime()

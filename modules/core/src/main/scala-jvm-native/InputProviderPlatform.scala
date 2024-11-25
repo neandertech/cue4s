@@ -19,7 +19,7 @@ package cue4s
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-trait InputProviderPlatform:
+private trait InputProviderPlatform:
   self: InputProvider =>
 
   def evaluate[Result](f: Handler[Result]): Completion[Result]
@@ -27,7 +27,7 @@ trait InputProviderPlatform:
       ExecutionContext
   ): Future[Completion[Result]]
 
-trait InputProviderCompanionPlatform:
+private trait InputProviderCompanionPlatform:
   def apply(o: Output): InputProvider = InputProviderImpl(o)
 
 end InputProviderCompanionPlatform

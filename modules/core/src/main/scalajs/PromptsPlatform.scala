@@ -19,7 +19,7 @@ package cue4s
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-transparent trait PromptsPlatform:
+private trait PromptsPlatform:
   self: Prompts =>
 
   def future[R](
