@@ -18,12 +18,11 @@ package cue4s
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import scala.reflect.Typeable
 
 private trait PromptsPlatform:
   self: Prompts =>
 
-  def sync[R: Typeable](
+  def sync[R](
       prompt: Prompt[R] | PromptChain[R]
   ): Completion[R] =
     prompt match
