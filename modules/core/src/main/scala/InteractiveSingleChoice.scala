@@ -21,84 +21,75 @@ private[cue4s] class InteractiveSingleChoice(
     terminal: Terminal,
     out: Output,
     colors: Boolean
-):
+) extends PromptFramework(terminal, out):
   import InteractiveSingleChoice.*
 
-  val handler = new Handler[String]:
-    def apply(event: Event): Next[String] =
-      event match
-        case Event.Init =>
-          printPrompt()
-          Next.Continue
-        case Event.Key(KeyEvent.UP) =>
-          stateTransition(_.up)
-          printPrompt()
-          Next.Continue
-        case Event.Key(KeyEvent.DOWN) =>
-          stateTransition(_.down)
-          printPrompt()
-          Next.Continue
+  override type PromptState = State
+  override type Result      = String
 
-        case Event.Key(KeyEvent.ENTER) => // enter
-          stateTransition(_.finish)
-          state.current.status match
-            case Status.Running => Next.Continue
-            case Status.Finished(idx) =>
-              val stringValue = altMapping(idx)
-              printPrompt()
-              Next.Done(stringValue)
-            case Status.Canceled => Next.Stop
+  override def isRunning(state: State): Boolean = state.status == Status.Running
 
-        case Event.Key(KeyEvent.DELETE) => // enter
-          stateTransition(_.trimText)
-          printPrompt()
-          Next.Continue
-
-        case Event.Char(which) =>
-          stateTransition(_.addText(which.toChar))
-          printPrompt()
-          Next.Continue
-
-        case Event.Interrupt =>
-          stateTransition(_.cancel)
-          printPrompt()
-          terminal.cursorShow()
-          Next.Stop
-
-        case _ =>
-          Next.Continue
-      end match
-    end apply
-  end handler
-
-  private val altsWithIndex = prompt.alts.zipWithIndex
-  private var state = Transition(
-    State("", Some(altsWithIndex.map(_._2) -> 0), altsWithIndex, Status.Running)
-  )
-  private var rendering       = Transition(renderState(state.current))
+  private lazy val altsWithIndex   = prompt.alts.zipWithIndex
   private lazy val altMapping = altsWithIndex.map(_.swap).toMap
 
-  private def colored(msg: String)(f: String => fansi.Str) =
-    if colors then f(msg).toString else msg
+  override def initialState =
+    State("", Some(altsWithIndex.map(_._2) -> 0), altsWithIndex, Status.Running)
 
-  extension (t: String)
-    private def bold =
-      colored(t)(fansi.Bold.On(_))
-    private def green =
-      colored(t)(fansi.Color.Green(_))
-    private def cyan =
-      colored(t)(fansi.Color.Cyan(_))
-    private def red =
-      colored(t)(fansi.Color.Red(_))
-  end extension
+  override def handleEvent(event: Event): Next[String] =
+    event match
+      case Event.Init =>
+        printPrompt()
+        Next.Continue
+      case Event.Key(KeyEvent.UP) =>
+        stateTransition(_.up)
+        printPrompt()
+        Next.Continue
+      case Event.Key(KeyEvent.DOWN) =>
+        stateTransition(_.down)
+        printPrompt()
+        Next.Continue
 
-  private def renderState(st: State): List[String] =
+      case Event.Key(KeyEvent.ENTER) => // enter
+        stateTransition(_.finish)
+        currentState().status match
+          case Status.Running => Next.Continue
+          case Status.Finished(idx) =>
+            val stringValue = altMapping(idx)
+            printPrompt()
+            Next.Done(stringValue)
+          case Status.Canceled => Next.Stop
+
+      case Event.Key(KeyEvent.DELETE) => // enter
+        stateTransition(_.trimText)
+        printPrompt()
+        Next.Continue
+
+      case Event.Char(which) =>
+        stateTransition(_.addText(which.toChar))
+        printPrompt()
+        Next.Continue
+
+      case Event.Interrupt =>
+        stateTransition(_.cancel)
+        printPrompt()
+        terminal.cursorShow()
+        Next.Stop
+
+      case _ =>
+        Next.Continue
+    end match
+  end handleEvent
+
+  private lazy val formatting = TextFormatting(colors)
+  import formatting.*
+
+  override def renderState(st: State): List[String] =
     val lines = List.newBuilder[String]
 
     st.status match
       case Status.Running =>
         // prompt question
-        lines += "· " + (prompt.lab + " > ").cyan + state.current.text
+        lines += "· " + (prompt.lab + " > ").cyan + st.text
 
         st.showing match
           case None =>
@@ -126,50 +117,9 @@ private[cue4s] class InteractiveSingleChoice(
 
     lines.result()
   end renderState
-
-  private def printPrompt() =
-    import terminal.*
-    cursorHide()
-    rendering.last match
-      case None =>
-        // initial print
-        rendering.current.foreach(out.outLn)
-        moveUp(rendering.current.length).moveHorizontalTo(0)
-      case Some(value) =>
-        def render =
-          rendering.current
-            .zip(value)
-            .foreach: (line, oldLine) =>
-              if line != oldLine then
-                moveHorizontalTo(0).eraseEntireLine()
-                out.out(line)
-              moveDown(1)
-
-        if state.current.status == Status.Running then
-          render
-          moveUp(rendering.current.length).moveHorizontalTo(0)
-        else // we are finished
-          render
-          // do not leave empty lines behind - move cursor up
-          moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length)
-    end match
-
-  end printPrompt
-
-  private def stateTransition(s: State => State) =
-    state = state.nextFn(s)
-    rendering = rendering.nextFn: currentRendering =>
-      val newRendering = renderState(state.current)
-      if newRendering.length < currentRendering.length then
-        newRendering ++ List.fill(
-          currentRendering.length - newRendering.length
-        )("")
-      else newRendering
-  end stateTransition
-
 end InteractiveSingleChoice
 
-object InteractiveSingleChoice:
+private[cue4s] object InteractiveSingleChoice:
   enum Status:
     case Running
     case Finished(idx: Int)
