@@ -21,73 +21,67 @@ private[cue4s] class InteractiveTextInput(
     terminal: Terminal,
     out: Output,
     colors: Boolean
-):
+) extends PromptFramework(terminal, out):
+
   import InteractiveTextInput.*
 
-  val handler = new Handler[String]:
-    def apply(event: Event): Next[String] =
-      event match
-        case Event.Init =>
-          printPrompt()
-          Next.Continue
+  override type PromptState = State
+  override type Result      = String
 
-        case Event.Key(KeyEvent.ENTER) => // enter
-          stateTransition(_.finish)
-          state.current.status match
-            case Status.Running => Next.Continue
-            case Status.Finished(result) =>
-              printPrompt()
-              terminal.cursorShow()
-              Next.Done(result)
-            case Status.Canceled =>
-              Next.Stop
+  override def initialState: State = State("", prompt.validate, Status.Running)
+  override def isRunning(state: State): Boolean = state.status == Status.Running
 
-        case Event.Key(KeyEvent.DELETE) => // enter
-          stateTransition(_.trimText)
-          printPrompt()
-          Next.Continue
+  override def handleEvent(event: Event): Next[Result] =
+    event match
+      case Event.Init =>
+        printPrompt()
+        Next.Continue
 
-        case Event.Char(which) =>
-          stateTransition(_.addText(which.toChar))
-          printPrompt()
-          Next.Continue
+      case Event.Key(KeyEvent.ENTER) => // enter
+        stateTransition(_.finish)
+        currentState().status match
+          case Status.Running => Next.Continue
+          case Status.Finished(result) =>
+            printPrompt()
+            terminal.cursorShow()
+            Next.Done(result)
+          case Status.Canceled =>
+            Next.Stop
 
-        case Event.Interrupt =>
-          stateTransition(_.cancel)
-          printPrompt()
-          terminal.cursorShow()
-          Next.Stop
+      case Event.Key(KeyEvent.DELETE) => // enter
+        stateTransition(_.trimText)
+        printPrompt()
+        Next.Continue
 
-        case _ =>
-          Next.Continue
-      end match
-    end apply
-  end handler
+      case Event.Char(which) =>
+        stateTransition(_.addText(which.toChar))
+        printPrompt()
+        Next.Continue
 
-  private var state     = Transition(State("", prompt.validate, Status.Running))
-  private var rendering = Transition(renderState(state.current))
+      case Event.Interrupt =>
+        stateTransition(_.cancel)
+        printPrompt()
+        terminal.cursorShow()
+        Next.Stop
 
-  extension (t: String)
-    private def bold =
-      colored(t)(fansi.Bold.On(_))
-    private def green =
-      colored(t)(fansi.Color.Green(_))
-    private def cyan =
-      colored(t)(fansi.Color.Cyan(_))
-    private def red =
-      colored(t)(fansi.Color.Red(_))
-  end extension
+      case _ =>
+        Next.Continue
+    end match
+  end handleEvent
 
-  private def renderState(st: State): List[String] =
+  private lazy val formatting = TextFormatting(colors)
+  import formatting.*
+
+  override def renderState(st: State): List[String] =
     val lines = List.newBuilder[String]
 
     st.status match
       case Status.Running =>
-        lines += prompt.lab.cyan + " > " + state.current.text.bold
+        lines += prompt.lab.cyan + " > " + st.text.bold
         st.error.foreach: err =>
           lines += err.red
       case Status.Finished(result) =>
-        lines += "✔ ".green + prompt.lab.cyan + " " + state.current.text.bold
+        lines += "✔ ".green + prompt.lab.cyan + " " + st.text.bold
         lines += ""
       case Status.Canceled =>
         lines += "× ".red + prompt.lab.cyan
@@ -96,50 +90,6 @@ private[cue4s] class InteractiveTextInput(
 
     lines.result()
   end renderState
-
-  private def colored(msg: String)(f: String => fansi.Str) =
-    if colors then f(msg).toString else msg
-
-  private def printPrompt() =
-    import terminal.*
-    cursorHide()
-    rendering.last match
-      case None =>
-        // initial print
-        rendering.current.foreach(out.outLn)
-        moveUp(rendering.current.length).moveHorizontalTo(0)
-      case Some(value) =>
-        def render =
-          rendering.current
-            .zip(value)
-            .foreach: (line, oldLine) =>
-              if line != oldLine then
-                moveHorizontalTo(0).eraseEntireLine()
-                out.out(line)
-              moveDown(1)
-
-        if state.current.status == Status.Running then
-          render
-          moveUp(rendering.current.length).moveHorizontalTo(0)
-        else // we are finished
-          render
-          // do not leave empty lines behind - move cursor up
-          moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length)
-            .moveHorizontalTo(0)
-    end match
-
-  end printPrompt
-
-  private def stateTransition(s: State => State) =
-    state = state.nextFn(s)
-    rendering = rendering.nextFn: currentRendering =>
-      val newRendering = renderState(state.current)
-      if newRendering.length < currentRendering.length then
-        newRendering ++ List.fill(
-          currentRendering.length - newRendering.length
-        )("")
-      else newRendering
-  end stateTransition
 
 end InteractiveTextInput
 
