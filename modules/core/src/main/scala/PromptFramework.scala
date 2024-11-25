@@ -49,7 +49,7 @@ private[cue4s] trait PromptFramework(terminal: Terminal, out: Output):
         else // we are finished
           render
           // do not leave empty lines behind - move cursor up
-          moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length)
+          moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length).moveHorizontalTo(0)
     end match
 
   end printPrompt
