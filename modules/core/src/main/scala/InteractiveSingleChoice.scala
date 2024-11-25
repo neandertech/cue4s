@@ -29,8 +29,8 @@ private[cue4s] class InteractiveSingleChoice(
 
   override def isRunning(state: State): Boolean = state.status == Status.Running
 
-  private lazy val altsWithIndex   = prompt.alts.zipWithIndex
-  private lazy val altMapping = altsWithIndex.map(_.swap).toMap
+  private lazy val altsWithIndex = prompt.alts.zipWithIndex
+  private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
 
   override def initialState =
     State("", Some(altsWithIndex.map(_._2) -> 0), altsWithIndex, Status.Running)
