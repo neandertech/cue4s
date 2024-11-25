@@ -22,49 +22,69 @@ private[cue4s] class InteractiveTextInput(
     out: Output,
     colors: Boolean
 ):
-  val lab   = prompt.lab + " > "
-  var state = Transition(InteractiveTextInput.State("", prompt.validate))
+  import InteractiveTextInput.*
+  private var state     = Transition(State("", prompt.validate, Status.Running))
+  private var rendering = Transition(renderState(state.current))
 
-  def colored(msg: String)(f: String => fansi.Str) =
+  private def renderState(st: State): List[String] =
+    val lines = List.newBuilder[String]
+
+    extension (t: String)
+      def bold =
+        colored(t)(fansi.Bold.On(_))
+      def green =
+        colored(t)(fansi.Color.Green(_))
+      def cyan =
+        colored(t)(fansi.Color.Cyan(_))
+      def red =
+        colored(t)(fansi.Color.Red(_))
+    end extension
+
+    st.status match
+      case Status.Running =>
+        lines += prompt.lab.cyan + " > " + state.current.text.bold
+        st.error.foreach: err =>
+          lines += err.red
+      case Status.Finished(result) =>
+        lines += "✔ ".green + prompt.lab.cyan + " " + state.current.text.bold
+      case Status.Canceled =>
+        lines += "× ".red + prompt.lab.cyan
+    end match
+
+    lines.result()
+  end renderState
+
+  private def colored(msg: String)(f: String => fansi.Str) =
     if colors then f(msg).toString else msg
 
-  def printPrompt() =
-
+  private def printPrompt() =
     import terminal.*
-
-    moveHorizontalTo(0)
-    eraseToEndOfLine()
-
-    if state.current.error.isEmpty && state.last.flatMap(_.error).nonEmpty then
-      withRestore:
-        moveDown(1)
-        eraseToEndOfLine()
-
-    out.out(colored(lab)(fansi.Color.Cyan(_)))
-    out.out(colored(state.current.text)(fansi.Bold.On(_)))
-    state.current.error match
+    cursorHide()
+    rendering.last match
       case None =>
+        // initial print
+        rendering.current.foreach(out.outLn)
+        moveUp(rendering.current.length).moveHorizontalTo(0)
       case Some(value) =>
-        withRestore:
-          out.out("\n")
-          out.out(colored(value.toString())(fansi.Color.Red(_)))
+        def render =
+          rendering.current
+            .zip(value)
+            .foreach: (line, oldLine) =>
+              if line != oldLine then
+                moveHorizontalTo(0).eraseEntireLine()
+                out.out(line)
+              moveDown(1)
+
+        if state.current.status == Status.Running then
+          render
+          moveUp(rendering.current.length).moveHorizontalTo(0)
+        else // we are finished
+          render
+          // do not leave empty lines behind - move cursor up
+          moveUp(rendering.current.reverse.takeWhile(_.isEmpty()).length)
+    end match
 
   end printPrompt
-
-  def printFinished() =
-    import terminal.*
-    moveHorizontalTo(0)
-    eraseToEndOfLine()
-
-    if state.last.flatMap(_.error).nonEmpty then
-      withRestore:
-        moveDown(1)
-        eraseToEndOfLine()
-
-    out.out(colored("✔ ")(fansi.Color.Green(_)))
-    out.out(colored(prompt.lab + " ")(fansi.Color.Cyan(_)))
-    out.out(colored(state.current.text + "\n")(fansi.Bold.On(_)))
-  end printFinished
 
   val handler = new Handler[String]:
     def apply(event: Event): Next[String] =
@@ -74,26 +94,29 @@ private[cue4s] class InteractiveTextInput(
           Next.Continue
 
         case Event.Key(KeyEvent.ENTER) => // enter
-          if state.current.error.isEmpty then
-            printFinished()
-            Next.Done(state.current.text)
-          else Next.Continue
+          stateTransition(_.finish)
+          state.current.status match
+            case Status.Running => Next.Continue
+            case Status.Finished(result) =>
+              printPrompt()
+              terminal.cursorShow()
+              Next.Done(result)
+            case Status.Canceled =>
+              Next.Stop
 
         case Event.Key(KeyEvent.DELETE) => // enter
-          trimText()
+          stateTransition(_.trimText)
           printPrompt()
           Next.Continue
 
         case Event.Char(which) =>
-          appendText(which.toChar)
+          stateTransition(_.addText(which.toChar))
           printPrompt()
           Next.Continue
 
         case Event.Interrupt =>
-          terminal.moveHorizontalTo(0)
-          terminal.eraseToEndOfLine()
-          out.out(colored("× ")(fansi.Color.Red(_)))
-          out.out(colored(lab + " ")(fansi.Color.Cyan(_)))
+          stateTransition(_.cancel)
+          printPrompt()
           terminal.cursorShow()
           Next.Stop
 
@@ -102,15 +125,40 @@ private[cue4s] class InteractiveTextInput(
       end match
     end apply
 
-  def appendText(t: Char) =
-    state = state.nextFn(r => r.copy(text = r.text + t))
+  private def stateTransition(s: State => State) =
+    state = state.nextFn(s)
+    rendering = rendering.nextFn: currentRendering =>
+      val newRendering = renderState(state.current)
+      if newRendering.length < currentRendering.length then
+        newRendering ++ List.fill(
+          currentRendering.length - newRendering.length
+        )("")
+      else newRendering
+  end stateTransition
 
-  def trimText() =
-    state = state.nextFn(r => r.copy(text = r.text.take(r.text.length - 1)))
 end InteractiveTextInput
 
 private[cue4s] object InteractiveTextInput:
-  case class State(text: String, validate: String => Option[PromptError]):
+  enum Status:
+    case Running
+    case Finished(result: String)
+    case Canceled
+
+  case class State(
+      text: String,
+      validate: String => Option[PromptError],
+      status: Status
+  ):
     lazy val error = validate(text)
 
-    override def toString(): String = s"State[text=`$text`, error=`$error`]"
+    def cancel = copy(status = Status.Canceled)
+
+    def finish =
+      error match
+        case None        => copy(status = Status.Finished(text))
+        case Some(value) => this
+
+    def addText(t: Char) = copy(text = text + t)
+    def trimText         = copy(text = text.dropRight(1))
+  end State
+end InteractiveTextInput
