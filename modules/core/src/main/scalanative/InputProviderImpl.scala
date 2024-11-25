@@ -127,7 +127,7 @@ private class InputProviderImpl(o: Output)
   override def close() = changemode(rawMode = false)
 end InputProviderImpl
 
-object InputProviderImpl:
+private object InputProviderImpl:
   import scala.collection.mutable
 
   private val rt                             = Runtime.getRuntime()
