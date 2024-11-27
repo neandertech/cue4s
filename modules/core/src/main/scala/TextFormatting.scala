@@ -19,6 +19,9 @@ package cue4s
 object TextFormatting:
   private def colored(msg: String)(f: String => fansi.Str) = f(msg).toString
 
+  def rgb(r: Int, g: Int, b: Int): String => String =
+    s => fansi.Color.True(r, g, b)(s).toString
+
   extension (t: String)
     def bold      = colored(t)(fansi.Bold.On(_))
     def underline = colored(t)(fansi.Underlined.On(_))
@@ -41,6 +44,8 @@ object TextFormatting:
     def lightCyan    = colored(t)(fansi.Color.LightCyan(_))
     def white        = colored(t)(fansi.Color.White(_))
 
+    def rbg(r: Int, g: Int, b: Int) = colored(t)(fansi.Color.True(r, g, b)(_))
+
     def bgReset        = colored(t)(fansi.Back.Reset(_))
     def bgBlack        = colored(t)(fansi.Back.Black(_))
     def bgRed          = colored(t)(fansi.Back.Red(_))
@@ -58,5 +63,6 @@ object TextFormatting:
     def bgLightMagenta = colored(t)(fansi.Back.LightMagenta(_))
     def bgLightCyan    = colored(t)(fansi.Back.LightCyan(_))
     def bgWhite        = colored(t)(fansi.Back.White(_))
+
   end extension
 end TextFormatting
