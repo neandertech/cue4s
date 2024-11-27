@@ -16,9 +16,9 @@
 
 package cue4s
 
-class TextFormatting(enabled: Boolean):
-  private def colored(msg: String)(f: String => fansi.Str) =
-    if enabled then f(msg).toString else msg
+object TextFormatting:
+  private def colored(msg: String)(f: String => fansi.Str) = f(msg).toString
+
   extension (t: String)
     def bold      = colored(t)(fansi.Bold.On(_))
     def underline = colored(t)(fansi.Underlined.On(_))

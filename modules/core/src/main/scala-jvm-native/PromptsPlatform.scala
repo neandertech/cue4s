@@ -43,8 +43,7 @@ private trait PromptsPlatform:
   def future[R](
       prompt: Prompt[R],
       out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true
+      createTerminal: Output => Terminal = Terminal.ansi(_)
   )(using ExecutionContext): Future[Completion[R]] =
     val handler = prompt.handler(createTerminal(out), out, theme)
 
