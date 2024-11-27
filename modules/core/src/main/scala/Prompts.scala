@@ -19,8 +19,7 @@ package cue4s
 class Prompts private (
     protected val out: Output,
     protected val terminal: Terminal,
-    protected val colors: Boolean,
-    protected val windowSize: Int
+    protected val colors: Boolean
 ) extends AutoCloseable
     with PromptsPlatform:
 
@@ -35,7 +34,7 @@ object Prompts:
       createTerminal: Output => Terminal = Terminal.ansi,
       colors: Boolean = true,
       windowSize: Int = 10
-  ) = new Prompts(out, createTerminal(out), colors, windowSize)
+  ) = new Prompts(out, createTerminal(out), colors)
 
   def use[A](
       out: Output = Output.Std,

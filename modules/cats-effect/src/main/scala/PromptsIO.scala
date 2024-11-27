@@ -31,7 +31,7 @@ class PromptsIO private (
       prompt: Prompt[A]
   ): IO[Completion[A]] =
     val inputProvider = InputProvider(out)
-    val handler       = prompt.handler(terminal, out, colors, windowSize)
+    val handler       = prompt.handler(terminal, out, colors)
 
     // TODO: provide native CE interface here
     IO.executionContext
