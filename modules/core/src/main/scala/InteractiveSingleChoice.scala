@@ -20,7 +20,8 @@ private[cue4s] class InteractiveSingleChoice(
     prompt: Prompt.SingleChoice,
     terminal: Terminal,
     out: Output,
-    colors: Boolean
+    colors: Boolean,
+    windowSize: Int
 ) extends PromptFramework(terminal, out):
   import InteractiveSingleChoice.*
 
@@ -32,15 +33,14 @@ private[cue4s] class InteractiveSingleChoice(
   private lazy val altsWithIndex = prompt.alts.zipWithIndex
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
 
-  override def initialState =
-    State(
-      text = "",
-      showing = Some(altsWithIndex.map(_._2) -> 0),
-      all = altsWithIndex,
-      status = Status.Running,
-      windowStart = 0,
-      windowSize = 10
-    )
+  override def initialState = State(
+    text = "",
+    showing = Some(altsWithIndex.map(_._2) -> 0),
+    all = altsWithIndex,
+    status = Status.Running,
+    windowStart = 0,
+    windowSize = windowSize
+  )
 
   override def handleEvent(event: Event): Next[String] =
     event match

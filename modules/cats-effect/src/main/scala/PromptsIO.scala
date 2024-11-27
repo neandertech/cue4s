@@ -22,7 +22,8 @@ import cue4s.*
 class PromptsIO private (
     protected val out: Output,
     protected val terminal: Terminal,
-    protected val colors: Boolean
+    protected val colors: Boolean,
+    protected val windowSize: Int
 ) extends AutoCloseable:
   protected lazy val inputProvider = InputProvider(out)
 
@@ -30,7 +31,7 @@ class PromptsIO private (
       prompt: Prompt[A]
   ): IO[Completion[A]] =
     val inputProvider = InputProvider(out)
-    val handler       = prompt.handler(terminal, out, colors)
+    val handler       = prompt.handler(terminal, out, colors, windowSize)
 
     // TODO: provide native CE interface here
     IO.executionContext
@@ -48,7 +49,9 @@ object PromptsIO:
   def apply(
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
-      colors: Boolean = true
+      colors: Boolean = true,
+      windowSize: Int = 10
   ): Resource[IO, PromptsIO] = Resource.fromAutoCloseable(
-    IO(new PromptsIO(out, createTerminal(out), colors))
+    IO(new PromptsIO(out, createTerminal(out), colors, windowSize))
   )
+end PromptsIO

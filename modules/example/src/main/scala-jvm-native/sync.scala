@@ -27,7 +27,7 @@ import cue4s.*
 
   var info = Info()
 
-  val prompts = Prompts()
+  val prompts = Prompts(windowSize = 7)
 
   val day = prompts
     .sync(
