@@ -32,6 +32,30 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     Next.Stop
   )
 
+  terminalTestComplete("alternatives.infiniscroll.single")(
+    Prompt.SingleChoice(
+      "How was your day?",
+      List(
+        "amazing",
+        "productive",
+        "relaxing",
+        "stressful",
+        "exhausting"
+      ),
+      windowSize = 3
+    ),
+    list(
+      Event.Init,
+      DOWN,
+      DOWN,
+      DOWN,
+      DOWN,
+      UP,
+      ENTER
+    ),
+    "stressful"
+  )
+
   terminalTest("alternatives.cancel.multiple")(
     Prompt.MultipleChoice.withNoneSelected(
       "What would you like for lunch",
@@ -46,6 +70,27 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       Event.Interrupt
     ),
     Next.Stop
+  )
+
+  terminalTestComplete("alternatives.infiniscroll.multiple")(
+    Prompt.MultipleChoice.withNoneSelected(
+      "What would you like for lunch",
+      List("pizza", "steak", "sweet potato", "fried chicken", "sushi"),
+      windowSize = 3
+    ),
+    list(
+      Event.Init,
+      TAB,
+      DOWN,
+      TAB,
+      DOWN,
+      DOWN,
+      TAB,
+      DOWN,
+      TAB,
+      ENTER
+    ),
+    List("pizza", "steak", "fried chicken", "sushi")
   )
 
   terminalTest("alternatives.cancel.input")(

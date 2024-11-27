@@ -1,0 +1,90 @@
+Event.Init
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ‣ pizza                        ┃
+┃   steak                        ┃
+┃ ↓ sweet potato                 ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(TAB)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ✔ pizza                        ┃
+┃   steak                        ┃
+┃ ↓ sweet potato                 ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(DOWN)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ✔ pizza                        ┃
+┃ ‣ steak                        ┃
+┃ ↓ sweet potato                 ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(TAB)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ✔ pizza                        ┃
+┃ ✔ steak                        ┃
+┃ ↓ sweet potato                 ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(DOWN)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ✔ steak                        ┃
+┃ ‣ sweet potato                 ┃
+┃ ↓ fried chicken                ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(DOWN)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ↑ sweet potato                 ┃
+┃ ‣ fried chicken                ┃
+┃   sushi                        ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(TAB)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ↑ sweet potato                 ┃
+┃ ✔ fried chicken                ┃
+┃   sushi                        ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(DOWN)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ↑ sweet potato                 ┃
+┃ ✔ fried chicken                ┃
+┃ ‣ sushi                        ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(TAB)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃What would you like for lunch > ┃
+┃Tab to toggle, Enter to submit. ┃
+┃ ↑ sweet potato                 ┃
+┃ ✔ fried chicken                ┃
+┃ ✔ sushi                        ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(ENTER)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃✔ What would you like for lunch ┃
+┃ ‣ pizza                        ┃
+┃ ‣ steak                        ┃
+┃ ‣ fried chicken                ┃
+┃ ‣ sushi                        ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
