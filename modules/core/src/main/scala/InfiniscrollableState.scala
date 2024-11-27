@@ -22,6 +22,7 @@ private[cue4s] trait InfiniscrollableState[A <: InfiniscrollableState[A]]:
   def showing: Option[(List[Int], Int)]
   def windowStart: Int
   def windowSize: Int
+
   protected def changeSelection(move: Int): A
 
   // implement as copy(windowStart = computeWindowStartAfterSearch)
