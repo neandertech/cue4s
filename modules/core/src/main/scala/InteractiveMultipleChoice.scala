@@ -20,7 +20,7 @@ private[cue4s] class InteractiveMultipleChoice(
     prompt: Prompt.MultipleChoice,
     terminal: Terminal,
     out: Output,
-    colors: Boolean,
+    theme: Theme,
     windowSize: Int,
 ) extends PromptFramework[List[String]](terminal, out):
   import InteractiveMultipleChoice.*
@@ -47,8 +47,7 @@ private[cue4s] class InteractiveMultipleChoice(
 
   private lazy val altMapping = altsWithIndex.map(_.swap).toMap
 
-  private lazy val formatting = TextFormatting(colors)
-  import formatting.*
+  import theme.*
 
   override def renderState(
       st: State,
@@ -58,12 +57,12 @@ private[cue4s] class InteractiveMultipleChoice(
 
     st.status match
       case Status.Running =>
-        lines += prompt.lab + " > ".cyan + st.text
-        lines += "Tab".bold + " to toggle, " + "Enter".bold + " to submit."
+        lines += prompt.lab.prompt + " > ".prompt + st.text.input
+        lines += "Tab".emphasis + " to toggle, " + "Enter".emphasis + " to submit."
 
         st.display.showing match
           case None =>
-            lines += "no matches...".bold
+            lines += "no matches...".noMatches
           case Some((filtered, selected)) =>
             st.display
               .visibleEntries(filtered)
@@ -72,33 +71,33 @@ private[cue4s] class InteractiveMultipleChoice(
                 case (id, idx) =>
                   val alt = altMapping(id)
                   if st.selected(id) then
-                    if id == selected then lines += s" ✔ " + alt.underline.green
-                    else lines += s" ✔ " + alt.underline
+                    if id == selected then lines += s" ✔ " + alt.selectedMany
+                    else lines += s" ✔ " + alt.selectedManyInactive
                   else
                     lines.addOne(
-                      if id == selected then s" ‣ $alt".green
+                      if id == selected then s" ‣ $alt".selected
                       else if st.display.windowStart > 0 && idx == 0 then
-                        s" ↑ $alt".bold
+                        s" ↑ $alt".optionMany
                       else if filtered.size > st.display.windowSize && idx == st.display.windowSize - 1 &&
                         filtered.indexOf(id) != filtered.size - 1
-                      then s" ↓ $alt".bold
-                      else s"   $alt",
+                      then s" ↓ $alt".optionMany
+                      else s"   $alt".optionMany,
                     )
                   end if
         end match
 
       case Status.Finished(ids) =>
-        lines += "✔ ".green + prompt.lab.cyan
+        lines += "✔ ".selected + prompt.lab.prompt
 
-        if ids.isEmpty then lines += "nothing selected".underline
+        if ids.isEmpty then lines += "nothing selected".nothingSelected
         else
           ids
             .foreach: value =>
-              lines += s" ‣ " + value.bold
+              lines += s" ‣ " + value.emphasis
 
       case Status.Canceled =>
-        lines += "× ".red +
-          (prompt.lab + " ").cyan
+        lines += "× ".canceled +
+          (prompt.lab + " ").prompt
         lines += ""
     end match
 

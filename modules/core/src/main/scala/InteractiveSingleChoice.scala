@@ -20,7 +20,7 @@ private[cue4s] class InteractiveSingleChoice(
     prompt: Prompt.SingleChoice,
     terminal: Terminal,
     out: Output,
-    colors: Boolean,
+    theme: Theme,
     windowSize: Int,
 ) extends PromptFramework[String](terminal, out):
   import InteractiveSingleChoice.*
@@ -76,8 +76,7 @@ private[cue4s] class InteractiveSingleChoice(
     end match
   end handleEvent
 
-  private lazy val formatting = TextFormatting(colors)
-  import formatting.*
+  import theme.*
 
   override def renderState(
       st: State,
@@ -88,11 +87,11 @@ private[cue4s] class InteractiveSingleChoice(
     st.status match
       case Status.Running =>
         // prompt question
-        lines += "· " + (prompt.lab + " > ").cyan + st.text
+        lines += "· " + (prompt.lab + " > ").prompt + st.text.input
 
         st.display.showing match
           case None =>
-            lines += "no matches...".bold
+            lines += "no matches...".noMatches
           case Some((filtered, selected)) =>
             // Render only the visible window
             st.display
@@ -102,9 +101,9 @@ private[cue4s] class InteractiveSingleChoice(
                 case (id, idx) =>
                   val alt = altMapping(id)
                   lines.addOne(
-                    if id == selected then s"  ‣ $alt".green
+                    if id == selected then s"  ‣ $alt".selected
                     else if st.display.windowStart > 0 && idx == 0 then
-                      s"  ↑ $alt".bold
+                      s"  ↑ $alt".option
                     else if filtered.size > st.display.windowSize &&
                       idx == st.display.windowSize - 1 &&
                       filtered.indexOf(id) != filtered.size - 1
@@ -113,12 +112,12 @@ private[cue4s] class InteractiveSingleChoice(
                   )
         end match
       case Status.Finished(value) =>
-        lines += "✔ ".green +
-          (prompt.lab + " ").cyan +
-          value.bold
+        lines += "✔ ".selected +
+          (prompt.lab + " ").prompt +
+          value.emphasis
       case Status.Canceled =>
-        lines += "× ".red +
-          (prompt.lab + " ").cyan
+        lines += "× ".canceled +
+          (prompt.lab + " ").prompt
     end match
 
     lines.result()
