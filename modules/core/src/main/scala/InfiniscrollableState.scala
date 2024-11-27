@@ -38,10 +38,11 @@ private[cue4s] trait InfiniscrollableState[A <: InfiniscrollableState[A]]:
   protected def scrollDown: A
 
   def atTopScrollingPoint(position: Int) =
-    position > windowStart && position == windowStart + 2
+    position > windowStart && position == windowStart + (windowSize / 2).min(2)
 
   def atBottomScrollingPoint(position: Int, filtered: List[Int]) =
-    position == windowStart + windowSize - 3 && !(windowStart + windowSize > filtered.length - 1)
+    position == windowStart + windowSize - (windowSize / 2).max(2).min(3) &&
+      !(windowStart + windowSize > filtered.length - 1)
 
   def visibleEntries(filtered: List[Int]): List[Int] =
     filtered.slice(windowStart, windowStart + windowSize)
