@@ -163,7 +163,8 @@ private[cue4s] object InteractiveSingleChoice:
     def trimText =
       changeText(text.dropRight(1)).resetWindow()
 
-    override protected def resetWindow() = copy(windowStart = 0)
+    override protected def resetWindow() =
+      copy(windowStart = computeWindowStartAfterSearch)
 
     override protected def changeSelection(move: Int) =
       showing match
@@ -183,10 +184,20 @@ private[cue4s] object InteractiveSingleChoice:
           .contains(newText.toLowerCase().trim())
       )
       if newFiltered.nonEmpty then
-        val newShowing = Some(
-          newFiltered.map(_._2) -> newFiltered.head._2
-        )
-        copy(text = newText, showing = newShowing)
+        showing match
+          case None =>
+            val newShowing = newFiltered.headOption.map: (_, id) =>
+              newFiltered.map(_._2) -> id
+
+            copy(text = newText, showing = newShowing)
+
+          case Some((_, selected)) =>
+            val newShowing = newFiltered.headOption.map: (_, id) =>
+              val newSelected =
+                newFiltered.find(_._2 == selected).map(_._2).getOrElse(id)
+              newFiltered.map(_._2) -> newSelected
+
+            copy(text = newText, showing = newShowing)
       else copy(showing = None, text = newText)
       end if
     end changeText

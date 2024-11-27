@@ -24,7 +24,8 @@ private[cue4s] trait InfiniscrollableState[A <: InfiniscrollableState[A]]:
   def windowSize: Int
   protected def changeSelection(move: Int): A
 
-  // implement as copy(windowStart = 0), use it after any filtering operation
+  // implement as copy(windowStart = computeWindowStartAfterSearch)
+  // use it after any filtering operation
   protected def resetWindow(): A
 
   protected def scrolledUpWindowStart: Int = (windowStart - 1).max(0)
@@ -46,6 +47,16 @@ private[cue4s] trait InfiniscrollableState[A <: InfiniscrollableState[A]]:
 
   def visibleEntries(filtered: List[Int]): List[Int] =
     filtered.slice(windowStart, windowStart + windowSize)
+
+  protected def computeWindowStartAfterSearch: Int =
+    showing match
+      case None => 0
+      case Some((filtered, selected)) =>
+        val position = filtered.indexOf(selected)
+        val newWindowStart =
+          (position - windowSize / 2).max(0).min(filtered.length - windowSize)
+
+        newWindowStart
 
   def up: A =
     showing match
