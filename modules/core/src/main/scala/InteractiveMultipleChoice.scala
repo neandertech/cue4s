@@ -62,16 +62,24 @@ private[cue4s] class InteractiveMultipleChoice(
             lines += "no matches...".bold
           case Some((filtered, selected)) =>
             st.visibleEntries(filtered)
-              .foreach: id =>
-                val alt = altMapping(id)
-                if st.selected(id) then
-                  if id == selected then lines += s" ✔ " + alt.underline.green
-                  else lines += s" ✔ " + alt.underline
-                else
-                  lines.addOne(
-                    if id == selected then s" ‣ $alt".green
-                    else s"   $alt"
-                  )
+              .zipWithIndex
+              .foreach:
+                case (id, idx) =>
+                  val alt = altMapping(id)
+                  if st.selected(id) then
+                    if id == selected then lines += s" ✔ " + alt.underline.green
+                    else lines += s" ✔ " + alt.underline
+                  else
+                    lines.addOne(
+                      if id == selected then s" ‣ $alt".green
+                      else if st.windowStart > 0 && idx == 0 then
+                        s" ↑ $alt".bold
+                      else if filtered.size > st.windowSize && idx == st.windowSize - 1 &&
+                        filtered.indexOf(id) != filtered.size - 1
+                      then s" ↓ $alt".bold
+                      else s"   $alt"
+                    )
+                  end if
         end match
 
       case Status.Finished(ids) =>
