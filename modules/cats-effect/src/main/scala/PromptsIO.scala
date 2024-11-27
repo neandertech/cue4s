@@ -50,9 +50,8 @@ object PromptsIO:
   def apply(
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
-      colors: Boolean = true,
-      theme: Theme.ThemeMaker = Theme.Default,
+      theme: Theme = Theme.Default,
   ): Resource[IO, PromptsIO] = Resource.fromAutoCloseable(
-    IO(new PromptsIO(out, createTerminal(out), theme.apply(colors))),
+    IO(new PromptsIO(out, createTerminal(out), theme)),
   )
 end PromptsIO

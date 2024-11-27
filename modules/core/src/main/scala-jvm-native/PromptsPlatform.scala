@@ -44,7 +44,6 @@ private trait PromptsPlatform:
       prompt: Prompt[R],
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true,
   )(using ExecutionContext): Future[Completion[R]] =
     val framework = prompt.framework(createTerminal(out), out, theme)
 

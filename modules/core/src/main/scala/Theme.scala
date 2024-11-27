@@ -16,11 +16,7 @@
 
 package cue4s
 
-trait Theme(colors: Boolean):
-  self =>
-
-  protected val formatting = TextFormatting(colors)
-
+trait Theme:
   extension (s: String)
     def prompt: String
     def emphasis: String
@@ -38,140 +34,142 @@ trait Theme(colors: Boolean):
 end Theme
 
 object Theme:
-  opaque type ThemeMaker <: Boolean => Theme = Boolean => Theme
+  import TextFormatting.*
 
-  def fromFunction(f: Boolean => Theme): ThemeMaker = f
+  val Default: Theme = new Theme:
 
-  def Default: ThemeMaker = (colors: Boolean) =>
-    new Theme(colors):
-      import formatting.*
-      extension (s: String)
-        def prompt: String               = s.cyan
-        def emphasis: String             = s.bold
-        def input: String                = s
-        def option: String               = s.bold
-        def optionMany: String           = s
-        def noMatches: String            = s.bold
-        def nothingSelected: String      = s.underline
-        def selected: String             = s.green
-        def selectedMany: String         = s.underline.green
-        def selectedManyInactive: String = s.underline
-        def canceled: String             = s.red
-        def error: String                = s.red
-      end extension
+    extension (s: String)
+      def prompt: String               = s.cyan
+      def emphasis: String             = s.bold
+      def input: String                = s
+      def option: String               = s.bold
+      def optionMany: String           = s
+      def noMatches: String            = s.bold
+      def nothingSelected: String      = s.underline
+      def selected: String             = s.green
+      def selectedMany: String         = s.underline.green
+      def selectedManyInactive: String = s.underline
+      def canceled: String             = s.red
+      def error: String                = s.red
+    end extension
   end Default
 
-  def Solarized: ThemeMaker = (colors: Boolean) =>
-    new Theme(colors):
-      import formatting.*
-      extension (s: String)
-        def prompt: String               = s.cyan
-        def emphasis: String             = s.bold.yellow
-        def input: String                = s
-        def option: String               = s.bold
-        def optionMany: String           = s
-        def noMatches: String            = s.lightBlue
-        def nothingSelected: String      = s.underline.lightGray
-        def selected: String             = s.lightGreen
-        def selectedMany: String         = s.bold.lightGreen
-        def selectedManyInactive: String = s.underline.lightGray
-        def canceled: String             = s.lightRed
-        def error: String                = s.red
-      end extension
+  val NoColors: Theme = new Theme:
+    extension (s: String)
+      def prompt: String               = s
+      def emphasis: String             = s
+      def input: String                = s
+      def option: String               = s
+      def optionMany: String           = s
+      def noMatches: String            = s
+      def nothingSelected: String      = s
+      def selected: String             = s
+      def selectedMany: String         = s
+      def selectedManyInactive: String = s
+      def canceled: String             = s
+      def error: String                = s
+    end extension
+  end NoColors
+
+  def Solarized: Theme = new Theme:
+    extension (s: String)
+      def prompt: String               = s.cyan
+      def emphasis: String             = s.bold.yellow
+      def input: String                = s
+      def option: String               = s.bold
+      def optionMany: String           = s
+      def noMatches: String            = s.lightBlue
+      def nothingSelected: String      = s.underline.lightGray
+      def selected: String             = s.lightGreen
+      def selectedMany: String         = s.bold.lightGreen
+      def selectedManyInactive: String = s.underline.lightGray
+      def canceled: String             = s.lightRed
+      def error: String                = s.red
+    end extension
   end Solarized
 
-  def Monokai: ThemeMaker = (colors: Boolean) =>
-    new Theme(colors):
-      import formatting.*
-      extension (s: String)
-        def prompt: String               = s.green
-        def emphasis: String             = s.bold.magenta
-        def input: String                = s
-        def option: String               = s.bold
-        def optionMany: String           = s
-        def noMatches: String            = s.yellow
-        def nothingSelected: String      = s.underline.darkGray
-        def selected: String             = s.lightCyan
-        def selectedMany: String         = s.bold.lightCyan
-        def selectedManyInactive: String = s.underline.lightGray
-        def canceled: String             = s.red
-        def error: String                = s.bold.red
-      end extension
+  def Monokai: Theme = new Theme:
+    extension (s: String)
+      def prompt: String               = s.green
+      def emphasis: String             = s.bold.magenta
+      def input: String                = s
+      def option: String               = s.bold
+      def optionMany: String           = s
+      def noMatches: String            = s.yellow
+      def nothingSelected: String      = s.underline.darkGray
+      def selected: String             = s.lightCyan
+      def selectedMany: String         = s.bold.lightCyan
+      def selectedManyInactive: String = s.underline.lightGray
+      def canceled: String             = s.red
+      def error: String                = s.bold.red
+    end extension
   end Monokai
 
-  def Darcula: ThemeMaker = (colors: Boolean) =>
-    new Theme(colors):
-      import formatting.*
-      extension (s: String)
-        def prompt: String               = s.yellow
-        def emphasis: String             = s.bold.lightRed
-        def input: String                = s.bold
-        def option: String               = s.lightBlue
-        def optionMany: String           = s.lightBlue
-        def noMatches: String            = s.magenta
-        def nothingSelected: String      = s.underline.lightGray
-        def selected: String             = s.green
-        def selectedMany: String         = s.bold.green
-        def selectedManyInactive: String = s.underline.green
-        def canceled: String             = s.red
-        def error: String                = s.bold.red
-      end extension
+  def Darcula: Theme = new Theme:
+    extension (s: String)
+      def prompt: String               = s.yellow
+      def emphasis: String             = s.bold.lightRed
+      def input: String                = s.bold
+      def option: String               = s.lightBlue
+      def optionMany: String           = s.lightBlue
+      def noMatches: String            = s.magenta
+      def nothingSelected: String      = s.underline.lightGray
+      def selected: String             = s.green
+      def selectedMany: String         = s.bold.green
+      def selectedManyInactive: String = s.underline.green
+      def canceled: String             = s.red
+      def error: String                = s.bold.red
+    end extension
   end Darcula
 
-  def Gruvbox: ThemeMaker = (colors: Boolean) =>
-    new Theme(colors):
-      import formatting.*
-      extension (s: String)
-        def prompt: String               = s.lightYellow
-        def emphasis: String             = s.bold.lightRed
-        def input: String                = s
-        def option: String               = s.bold
-        def optionMany: String           = s
-        def noMatches: String            = s.lightBlue
-        def nothingSelected: String      = s.underline.darkGray
-        def selected: String             = s.green
-        def selectedMany: String         = s.bold.lightGreen
-        def selectedManyInactive: String = s.underline.lightGray
-        def canceled: String             = s.red
-        def error: String                = s.bold.red
-      end extension
+  def Gruvbox: Theme = new Theme:
+    extension (s: String)
+      def prompt: String               = s.lightYellow
+      def emphasis: String             = s.bold.lightRed
+      def input: String                = s
+      def option: String               = s.bold
+      def optionMany: String           = s
+      def noMatches: String            = s.lightBlue
+      def nothingSelected: String      = s.underline.darkGray
+      def selected: String             = s.green
+      def selectedMany: String         = s.bold.lightGreen
+      def selectedManyInactive: String = s.underline.lightGray
+      def canceled: String             = s.red
+      def error: String                = s.bold.red
+    end extension
   end Gruvbox
 
-  def Nord: ThemeMaker = (colors: Boolean) =>
-    new Theme(colors):
-      import formatting.*
-      extension (s: String)
-        def prompt: String               = s.cyan
-        def emphasis: String             = s.bold.lightCyan
-        def input: String                = s
-        def option: String               = s.bold
-        def optionMany: String           = s
-        def noMatches: String            = s.lightGray
-        def nothingSelected: String      = s.underline.lightGray
-        def selected: String             = s.lightBlue
-        def selectedMany: String         = s.bold.lightBlue
-        def selectedManyInactive: String = s.underline.darkGray
-        def canceled: String             = s.red
-        def error: String                = s.bold.red
-      end extension
+  def Nord: Theme = new Theme:
+    extension (s: String)
+      def prompt: String               = s.cyan
+      def emphasis: String             = s.bold.lightCyan
+      def input: String                = s
+      def option: String               = s.bold
+      def optionMany: String           = s
+      def noMatches: String            = s.lightGray
+      def nothingSelected: String      = s.underline.lightGray
+      def selected: String             = s.lightBlue
+      def selectedMany: String         = s.bold.lightBlue
+      def selectedManyInactive: String = s.underline.darkGray
+      def canceled: String             = s.red
+      def error: String                = s.bold.red
+    end extension
   end Nord
 
-  def Dracula: ThemeMaker = (colors: Boolean) =>
-    new Theme(colors):
-      import formatting.*
-      extension (s: String)
-        def prompt: String               = s.lightMagenta
-        def emphasis: String             = s.bold.lightRed
-        def input: String                = s
-        def option: String               = s.bold
-        def optionMany: String           = s
-        def noMatches: String            = s.lightBlue
-        def nothingSelected: String      = s.underline.lightGray
-        def selected: String             = s.lightCyan
-        def selectedMany: String         = s.bold.lightCyan
-        def selectedManyInactive: String = s.underline.darkGray
-        def canceled: String             = s.red
-        def error: String                = s.bold.red
-      end extension
+  def Dracula: Theme = new Theme:
+    extension (s: String)
+      def prompt: String               = s.lightMagenta
+      def emphasis: String             = s.bold.lightRed
+      def input: String                = s
+      def option: String               = s.bold
+      def optionMany: String           = s
+      def noMatches: String            = s.lightBlue
+      def nothingSelected: String      = s.underline.lightGray
+      def selected: String             = s.lightCyan
+      def selectedMany: String         = s.bold.lightCyan
+      def selectedManyInactive: String = s.underline.darkGray
+      def canceled: String             = s.red
+      def error: String                = s.bold.red
+    end extension
   end Dracula
 end Theme
