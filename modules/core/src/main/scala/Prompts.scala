@@ -32,16 +32,15 @@ object Prompts:
   def apply(
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
-      colors: Boolean = true,
-      theme: Theme.ThemeMaker = Theme.Default,
-  ) = new Prompts(out, createTerminal(out), theme.apply(colors))
+      theme: Theme = Theme.Default,
+  ) = new Prompts(out, createTerminal(out), theme)
 
   def use[A](
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
-      colors: Boolean = true,
+      theme: Theme = Theme.Default,
   )(f: Prompts => A): A =
-    val prompts = apply(out, createTerminal, colors)
+    val prompts = apply(out, createTerminal, theme)
     try f(prompts)
     finally prompts.close()
   end use
