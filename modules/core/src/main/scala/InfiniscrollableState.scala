@@ -16,28 +16,35 @@
 
 package cue4s
 
-private[cue4s] trait InfiniscrollableState[A <: InfiniscrollableState[A]]:
-  self: A =>
+private[cue4s] case class InfiniscrollableState(
+    showing: Option[(List[Int], Int)],
+    windowStart: Int,
+    windowSize: Int
+):
+  def changeSelection(move: Int) =
+    showing match
+      case None => this // do nothing, no alternatives are showing
+      case a @ Some((filtered, showing)) =>
+        val position = filtered.indexOf(showing)
 
-  def showing: Option[(List[Int], Int)]
-  def windowStart: Int
-  def windowSize: Int
+        val newSelected =
+          (position + move).max(0).min(filtered.length - 1)
 
-  protected def changeSelection(move: Int): A
+        copy(showing = a.map(_ => (filtered, filtered(newSelected))))
 
-  // implement as copy(windowStart = computeWindowStartAfterSearch)
-  // use it after any filtering operation
-  protected def resetWindow(): A
+  def resetWindow() =
+    showing match
+      case None => this
+      case Some((filtered, selected)) =>
+        val position = filtered.indexOf(selected)
+        val newWindowStart =
+          (position - windowSize / 2).max(0).min(filtered.length - windowSize)
 
-  protected def scrolledUpWindowStart: Int = (windowStart - 1).max(0)
+        copy(windowStart = newWindowStart)
 
-  // implement as copy(windowStart = scrolledUpWindowStart)
-  protected def scrollUp: A
+  def scrollUp = copy(windowStart = (windowStart - 1).max(0))
 
-  protected def scrolledDownWindowStart: Int = windowStart + 1
-
-  // implement as copy(windowStart = scrolledDownWindowStart)
-  protected def scrollDown: A
+  def scrollDown = copy(windowStart = windowStart + 1)
 
   def atTopScrollingPoint(position: Int) =
     position > windowStart && position == windowStart + (windowSize / 2).min(2)
@@ -49,17 +56,7 @@ private[cue4s] trait InfiniscrollableState[A <: InfiniscrollableState[A]]:
   def visibleEntries(filtered: List[Int]): List[Int] =
     filtered.slice(windowStart, windowStart + windowSize)
 
-  protected def computeWindowStartAfterSearch: Int =
-    showing match
-      case None => 0
-      case Some((filtered, selected)) =>
-        val position = filtered.indexOf(selected)
-        val newWindowStart =
-          (position - windowSize / 2).max(0).min(filtered.length - windowSize)
-
-        newWindowStart
-
-  def up: A =
+  def up =
     showing match
       case None => this
       case Some((filtered, selected)) =>
@@ -71,7 +68,7 @@ private[cue4s] trait InfiniscrollableState[A <: InfiniscrollableState[A]]:
     end match
   end up
 
-  def down: A =
+  def down =
     showing match
       case None => this
       case Some((filtered, selected)) =>
