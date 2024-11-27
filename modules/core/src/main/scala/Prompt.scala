@@ -20,8 +20,7 @@ trait Prompt[Result]:
   private[cue4s] def handler(
       terminal: Terminal,
       output: Output,
-      colors: Boolean,
-      windowSize: Int
+      colors: Boolean
   ): Handler[Result]
 
 object Prompt:
@@ -32,19 +31,17 @@ object Prompt:
     override def handler(
         terminal: Terminal,
         output: Output,
-        colors: Boolean,
-        windowSize: Int
+        colors: Boolean
     ): Handler[String] =
       InteractiveTextInput(this, terminal, output, colors).handler
   end Input
 
-  case class SingleChoice(lab: String, alts: List[String])
+  case class SingleChoice(lab: String, alts: List[String], windowSize: Int = 10)
       extends Prompt[String]:
     override def handler(
         terminal: Terminal,
         output: Output,
-        colors: Boolean,
-        windowSize: Int
+        colors: Boolean
     ): Handler[String] =
       InteractiveSingleChoice(
         this,
@@ -57,13 +54,13 @@ object Prompt:
 
   case class MultipleChoice private (
       lab: String,
-      alts: List[(String, Boolean)]
+      alts: List[(String, Boolean)],
+      windowSize: Int
   ) extends Prompt[List[String]]:
     override def handler(
         terminal: Terminal,
         output: Output,
-        colors: Boolean,
-        windowSize: Int = 10
+        colors: Boolean
     ): Handler[List[String]] =
       InteractiveMultipleChoice(
         this,
@@ -78,14 +75,30 @@ object Prompt:
     @deprecated(
       "This constructor will be removed in the future, use `withNoneSelected` which is equivalent"
     )
-    def apply(lab: String, variants: Seq[String]): MultipleChoice =
-      withNoneSelected(lab, variants)
+    def apply(
+        lab: String,
+        variants: Seq[String],
+        windowSize: Int = 10
+    ): MultipleChoice =
+      withNoneSelected(lab, variants, windowSize)
 
-    def withNoneSelected(lab: String, variants: Seq[String]) =
-      new MultipleChoice(lab, variants.map(_ -> false).toList)
-    def withAllSelected(lab: String, variants: Seq[String]) =
-      new MultipleChoice(lab, variants.map(_ -> true).toList)
-    def withSomeSelected(lab: String, variants: Seq[(String, Boolean)]) =
-      new MultipleChoice(lab, variants.toList)
+    def withNoneSelected(
+        lab: String,
+        variants: Seq[String],
+        windowSize: Int = 10
+    ) =
+      new MultipleChoice(lab, variants.map(_ -> false).toList, windowSize)
+    def withAllSelected(
+        lab: String,
+        variants: Seq[String],
+        windowSize: Int = 10
+    ) =
+      new MultipleChoice(lab, variants.map(_ -> true).toList, windowSize)
+    def withSomeSelected(
+        lab: String,
+        variants: Seq[(String, Boolean)],
+        windowSize: Int = 10
+    ) =
+      new MultipleChoice(lab, variants.toList, windowSize)
   end MultipleChoice
 end Prompt

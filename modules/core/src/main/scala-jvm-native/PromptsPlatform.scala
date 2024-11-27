@@ -28,7 +28,7 @@ private trait PromptsPlatform:
     prompt match
       case p: Prompt[R] =>
         try
-          val handler = p.handler(terminal, out, colors, windowSize)
+          val handler = p.handler(terminal, out, colors)
 
           inputProvider.evaluate(handler)
         finally
@@ -46,7 +46,7 @@ private trait PromptsPlatform:
       createTerminal: Output => Terminal = Terminal.ansi(_),
       colors: Boolean = true
   )(using ExecutionContext): Future[Completion[R]] =
-    val handler = prompt.handler(createTerminal(out), out, colors, windowSize)
+    val handler = prompt.handler(createTerminal(out), out, colors)
 
     val f = inputProvider.evaluateFuture(handler)
     f.onComplete(_ => terminal.cursorShow())

@@ -27,7 +27,7 @@ import cue4s.*
 
   var info = Info()
 
-  val prompts = Prompts(windowSize = 7)
+  val prompts = Prompts()
 
   val day = prompts
     .sync(
@@ -58,7 +58,8 @@ import cue4s.*
           "fantastic",
           "rewarding",
           "chaotic"
-        )
+        ),
+        windowSize = 7
       )
     )
     .toOption
@@ -71,7 +72,8 @@ import cue4s.*
     .sync(
       Prompt.MultipleChoice.withNoneSelected(
         "What are your favourite letters?",
-        ('A' to 'Z').map(_.toString).toList
+        ('A' to 'Z').map(_.toString).toList,
+        windowSize = 7
       )
     )
     .toOption

@@ -95,7 +95,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     val capturing = Output.Delegate(term.writer, s => sb.append(s + "\n"))
 
     val handler =
-      prompt.handler(term, capturing, colors = false, windowSize = 10)
+      prompt.handler(term, capturing, colors = false)
 
     var result          = Option.empty[Next[T]]
     val eventsProcessed = List.newBuilder[Event]
