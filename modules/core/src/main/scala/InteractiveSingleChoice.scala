@@ -35,11 +35,13 @@ private[cue4s] class InteractiveSingleChoice(
 
   override def initialState = State(
     text = "",
-    showing = Some(altsWithIndex.map(_._2) -> 0),
     all = altsWithIndex,
     status = Status.Running,
-    windowStart = 0,
-    windowSize = windowSize
+    display = InfiniscrollableState(
+      showing = Some(altsWithIndex.map(_._2) -> 0),
+      windowStart = 0,
+      windowSize = windowSize
+    )
   )
 
   override def handleEvent(event: Event): Next[String] =
@@ -48,11 +50,11 @@ private[cue4s] class InteractiveSingleChoice(
         printPrompt()
         Next.Continue
       case Event.Key(KeyEvent.UP) =>
-        stateTransition(_.up)
+        stateTransition(_.updateDisplay(_.up))
         printPrompt()
         Next.Continue
       case Event.Key(KeyEvent.DOWN) =>
-        stateTransition(_.down)
+        stateTransition(_.updateDisplay(_.down))
         printPrompt()
         Next.Continue
 
@@ -98,20 +100,23 @@ private[cue4s] class InteractiveSingleChoice(
         // prompt question
         lines += "· " + (prompt.lab + " > ").cyan + st.text
 
-        st.showing match
+        st.display.showing match
           case None =>
             lines += "no matches...".bold
           case Some((filtered, selected)) =>
             // Render only the visible window
-            st.visibleEntries(filtered)
+            st.display
+              .visibleEntries(filtered)
               .zipWithIndex
               .foreach:
                 case (id, idx) =>
                   val alt = altMapping(id)
                   lines.addOne(
                     if id == selected then s"  ‣ $alt".green
-                    else if st.windowStart > 0 && idx == 0 then s"  ↑ $alt".bold
-                    else if filtered.size > st.windowSize && idx == st.windowSize - 1 &&
+                    else if st.display.windowStart > 0 && idx == 0 then
+                      s"  ↑ $alt".bold
+                    else if filtered.size > st.display.windowSize &&
+                      idx == st.display.windowSize - 1 &&
                       filtered.indexOf(id) != filtered.size - 1
                     then s"  ↓ $alt".bold
                     else s"    $alt".bold
@@ -141,21 +146,15 @@ private[cue4s] object InteractiveSingleChoice:
 
   case class State(
       text: String,
-      showing: Option[(List[Int], Int)],
       all: List[(String, Int)],
       status: Status,
-      windowStart: Int,
-      windowSize: Int
-  ) extends InfiniscrollableState[State]:
-
-    override protected def scrollUp =
-      copy(windowStart = scrolledUpWindowStart)
-
-    override protected def scrollDown =
-      copy(windowStart = scrolledDownWindowStart)
+      display: InfiniscrollableState
+  ):
+    def updateDisplay(f: InfiniscrollableState => InfiniscrollableState) =
+      copy(display = f(display))
 
     def finish =
-      showing match
+      display.showing match
         case None => this
         case Some((_, selected)) =>
           copy(status = Status.Finished(selected))
@@ -164,24 +163,10 @@ private[cue4s] object InteractiveSingleChoice:
 
     def addText(t: Char) =
       val newText = text + t
-      changeText(newText).resetWindow()
+      changeText(newText).updateDisplay(_.resetWindow())
 
     def trimText =
-      changeText(text.dropRight(1)).resetWindow()
-
-    override protected def resetWindow() =
-      copy(windowStart = computeWindowStartAfterSearch)
-
-    override protected def changeSelection(move: Int) =
-      showing match
-        case None => this // do nothing, no alternatives are showing
-        case a @ Some((filtered, showing)) =>
-          val position = filtered.indexOf(showing)
-
-          val newSelected =
-            (position + move).max(0).min(filtered.length - 1)
-
-          copy(showing = a.map(_ => (filtered, filtered(newSelected))))
+      changeText(text.dropRight(1)).updateDisplay(_.resetWindow())
 
     private def changeText(newText: String) =
       val newFiltered = all.filter((alt, _) =>
@@ -190,12 +175,12 @@ private[cue4s] object InteractiveSingleChoice:
           .contains(newText.toLowerCase().trim())
       )
       if newFiltered.nonEmpty then
-        showing match
+        display.showing match
           case None =>
             val newShowing = newFiltered.headOption.map: (_, id) =>
               newFiltered.map(_._2) -> id
 
-            copy(text = newText, showing = newShowing)
+            updateDisplay(_.copy(showing = newShowing)).copy(text = newText)
 
           case Some((_, selected)) =>
             val newShowing = newFiltered.headOption.map: (_, id) =>
@@ -203,8 +188,8 @@ private[cue4s] object InteractiveSingleChoice:
                 newFiltered.find(_._2 == selected).map(_._2).getOrElse(id)
               newFiltered.map(_._2) -> newSelected
 
-            copy(text = newText, showing = newShowing)
-      else copy(showing = None, text = newText)
+            updateDisplay(_.copy(showing = newShowing)).copy(text = newText)
+      else updateDisplay(_.copy(showing = None)).copy(text = newText)
       end if
     end changeText
   end State
