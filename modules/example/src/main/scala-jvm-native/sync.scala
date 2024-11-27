@@ -33,7 +33,32 @@ import cue4s.*
     .sync(
       Prompt.SingleChoice(
         "How was your day?",
-        List("great", "okay", "decent", "spectacular")
+        List(
+          "amazing",
+          "productive",
+          "relaxing",
+          "stressful",
+          "exhausting",
+          "challenging",
+          "wonderful",
+          "uneventful",
+          "interesting",
+          "exciting",
+          "boring",
+          "demanding",
+          "satisfying",
+          "frustrating",
+          "peaceful",
+          "overwhelming",
+          "busy",
+          "calm",
+          "enjoyable",
+          "memorable",
+          "ordinary",
+          "fantastic",
+          "rewarding",
+          "chaotic"
+        )
       )
     )
     .toOption
@@ -46,7 +71,7 @@ import cue4s.*
     .sync(
       Prompt.MultipleChoice.withNoneSelected(
         "What are your favourite letters?",
-        ('A' to 'F').map(_.toString).toList
+        ('A' to 'Z').map(_.toString).toList
       )
     )
     .toOption

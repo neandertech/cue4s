@@ -60,19 +60,17 @@ private[cue4s] class InteractiveMultipleChoice(
           case None =>
             lines += "no matches...".bold
           case Some((filtered, selected)) =>
-            val visibleEntries =
-              filtered.slice(st.windowStart, st.windowStart + st.windowSize)
-
-            visibleEntries.foreach: id =>
-              val alt = altMapping(id)
-              if st.selected(id) then
-                if id == selected then lines += s" ✔ " + alt.underline.green
-                else lines += s" ✔ " + alt.underline
-              else
-                lines.addOne(
-                  if id == selected then s" ‣ $alt".green
-                  else s"   $alt"
-                )
+            st.visibleEntries(filtered)
+              .foreach: id =>
+                val alt = altMapping(id)
+                if st.selected(id) then
+                  if id == selected then lines += s" ✔ " + alt.underline.green
+                  else lines += s" ✔ " + alt.underline
+                else
+                  lines.addOne(
+                    if id == selected then s" ‣ $alt".green
+                    else s"   $alt"
+                  )
         end match
 
       case Status.Finished(ids) =>
@@ -164,53 +162,19 @@ private[cue4s] object InteractiveMultipleChoice:
       status: Status,
       windowStart: Int,
       windowSize: Int
-  ):
-    def up =
-      showing match
-        case None => this
-        case Some((filtered, selected)) =>
-          val position = filtered.indexOf(selected)
-
-          if atTopScrollingPoint(position) then scrollUp.changeSelection(-1)
-          else if position == 0 then this // no scrolling beyond the top
-          else changeSelection(-1)
-      end match
-    end up
-
-    def down =
-      showing match
-        case None => this
-        case Some((filtered, selected)) =>
-          val position = filtered.indexOf(selected)
-
-          if position == filtered.length - 1 then
-            this // no scrolling beyond the bottom
-          else if atBottomScrollingPoint(position, filtered)
-          then scrollDown.changeSelection(+1)
-          else changeSelection(+1)
-
-          end if
-      end match
-    end down
+  ) extends InfiniscrollableState[State]:
 
     def finish = copy(status = Status.Finished(selected))
 
     def cancel = copy(status = Status.Canceled)
 
-    def scrollUp = copy(windowStart = (windowStart - 1).max(0))
+    override protected def scrollUp =
+      copy(windowStart = (windowStart - 1).max(0))
 
-    def scrollDown = copy(windowStart = windowStart + 1)
-
-    def atTopScrollingPoint(position: Int) =
-      position > windowStart && position == windowStart + 2
-
-    def atBottomScrollingPoint(position: Int, filtered: List[Int]) =
-      position == windowStart + windowSize - 3 && !(windowStart + windowSize > filtered.length - 1)
+    override protected def scrollDown = copy(windowStart = windowStart + 1)
 
     def addText(t: Char) =
       changeText(text + t).resetWindow()
-
-    end addText
 
     def trimText =
       changeText(text.dropRight(1)).resetWindow()
@@ -222,7 +186,7 @@ private[cue4s] object InteractiveMultipleChoice:
           if selected(cursor) then copy(selected = selected - cursor)
           else copy(selected = selected + cursor)
 
-    private def resetWindow() =
+    override protected def resetWindow() =
       copy(windowStart = 0)
 
     private def changeText(newText: String) =
@@ -240,7 +204,7 @@ private[cue4s] object InteractiveMultipleChoice:
       end if
     end changeText
 
-    private def changeSelection(move: Int) =
+    override protected def changeSelection(move: Int) =
       showing match
         case None => this // do nothing, no alternatives are showing
         case a @ Some((filtered, showing)) =>
