@@ -104,12 +104,18 @@ private[cue4s] class InteractiveSingleChoice(
           case Some((filtered, selected)) =>
             // Render only the visible window
             st.visibleEntries(filtered)
-              .foreach: id =>
-                val alt = altMapping(id)
-                lines.addOne(
-                  if id == selected then s"  ‣ $alt".green
-                  else s"    $alt".bold
-                )
+              .zipWithIndex
+              .foreach:
+                case (id, idx) =>
+                  val alt = altMapping(id)
+                  lines.addOne(
+                    if id == selected then s"  ‣ $alt".green
+                    else if st.windowStart > 0 && idx == 0 then s"  ↑ $alt".bold
+                    else if filtered.size > st.windowSize && idx == st.windowSize - 1 &&
+                      filtered.indexOf(id) != filtered.size - 1
+                    then s"  ↓ $alt".bold
+                    else s"    $alt".bold
+                  )
         end match
       case Status.Finished(idx) =>
         val value = altMapping(idx)
