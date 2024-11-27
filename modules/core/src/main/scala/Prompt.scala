@@ -20,7 +20,7 @@ trait Prompt[Result]:
   private[cue4s] def handler(
       terminal: Terminal,
       output: Output,
-      colors: Boolean
+      theme: Theme
   ): Handler[Result]
 
 object Prompt:
@@ -31,9 +31,9 @@ object Prompt:
     override def handler(
         terminal: Terminal,
         output: Output,
-        colors: Boolean
+        theme: Theme
     ): Handler[String] =
-      InteractiveTextInput(this, terminal, output, colors).handler
+      InteractiveTextInput(this, terminal, output, theme).handler
   end Input
 
   case class SingleChoice(lab: String, alts: List[String], windowSize: Int = 10)
@@ -41,13 +41,13 @@ object Prompt:
     override def handler(
         terminal: Terminal,
         output: Output,
-        colors: Boolean
+        theme: Theme
     ): Handler[String] =
       InteractiveSingleChoice(
         this,
         terminal,
         output,
-        colors,
+        theme,
         windowSize
       ).handler
   end SingleChoice
@@ -60,13 +60,13 @@ object Prompt:
     override def handler(
         terminal: Terminal,
         output: Output,
-        colors: Boolean
+        theme: Theme
     ): Handler[List[String]] =
       InteractiveMultipleChoice(
         this,
         terminal,
         output,
-        colors,
+        theme,
         windowSize
       ).handler
   end MultipleChoice

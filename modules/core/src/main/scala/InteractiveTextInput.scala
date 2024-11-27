@@ -20,7 +20,7 @@ private[cue4s] class InteractiveTextInput(
     prompt: Prompt.Input,
     terminal: Terminal,
     out: Output,
-    colors: Boolean
+    theme: Theme
 ) extends PromptFramework(terminal, out):
 
   import InteractiveTextInput.*
@@ -69,22 +69,21 @@ private[cue4s] class InteractiveTextInput(
     end match
   end handleEvent
 
-  private lazy val formatting = TextFormatting(colors)
-  import formatting.*
+  import theme.*
 
   override def renderState(st: State): List[String] =
     val lines = List.newBuilder[String]
 
     st.status match
       case Status.Running =>
-        lines += prompt.lab.cyan + " > " + st.text.bold
+        lines += prompt.lab.prompt + " > " + st.text.input
         st.error.foreach: err =>
-          lines += err.red
+          lines += err.error
       case Status.Finished(result) =>
-        lines += "✔ ".green + prompt.lab.cyan + " " + st.text.bold
+        lines += "✔ ".selected + prompt.lab.prompt + " " + st.text.emphasis
         lines += ""
       case Status.Canceled =>
-        lines += "× ".red + prompt.lab.cyan
+        lines += "× ".canceled + prompt.lab.prompt
         lines += ""
     end match
 
