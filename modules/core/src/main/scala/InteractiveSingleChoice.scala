@@ -33,7 +33,14 @@ private[cue4s] class InteractiveSingleChoice(
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
 
   override def initialState =
-    State("", Some(altsWithIndex.map(_._2) -> 0), altsWithIndex, Status.Running)
+    State(
+      "",
+      Some(altsWithIndex.map(_._2) -> 0),
+      altsWithIndex,
+      Status.Running,
+      0,
+      10
+    )
 
   override def handleEvent(event: Event): Next[String] =
     event match
@@ -95,7 +102,11 @@ private[cue4s] class InteractiveSingleChoice(
           case None =>
             lines += "no matches...".bold
           case Some((filtered, selected)) =>
-            filtered.foreach: id =>
+            // Render only the visible window
+            val visibleEntries =
+              filtered.slice(st.windowStart, st.windowStart + st.windowSize)
+
+            visibleEntries.foreach: id =>
               val alt = altMapping(id)
               lines.addOne(
                 if id == selected then s"  ‣ $alt".green
@@ -112,7 +123,6 @@ private[cue4s] class InteractiveSingleChoice(
         lines += "× ".red +
           (prompt.lab + " ").cyan
         lines += ""
-
     end match
 
     lines.result()
@@ -129,24 +139,65 @@ private[cue4s] object InteractiveSingleChoice:
       text: String,
       showing: Option[(List[Int], Int)],
       all: List[(String, Int)],
-      status: Status
+      status: Status,
+      windowStart: Int,
+      windowSize: Int
   ):
     def finish =
       showing match
         case None => this
         case Some((_, selected)) =>
           copy(status = Status.Finished(selected))
+
     def cancel = copy(status = Status.Canceled)
 
-    def up   = changeSelection(-1)
-    def down = changeSelection(+1)
+    def scrollUp = copy(windowStart = (windowStart - 1).max(0))
+
+    def scrollDown = copy(windowStart = windowStart + 1)
+
+    def atTopScrollingPoint(position: Int) =
+      position > windowStart && position == windowStart + 2
+
+    def atBottomScrollingPoint(position: Int, filtered: List[Int]) =
+      position == windowStart + windowSize - 3 && !(windowStart + windowSize > filtered.length - 1)
+
+    def up =
+      showing match
+        case None => this
+        case Some((filtered, selected)) =>
+          val position = filtered.indexOf(selected)
+
+          if atTopScrollingPoint(position) then scrollUp.changeSelection(-1)
+          else if position == 0 then this // no scrolling beyond the top
+          else changeSelection(-1)
+      end match
+    end up
+
+    def down =
+      showing match
+        case None => this
+        case Some((filtered, selected)) =>
+          val position = filtered.indexOf(selected)
+
+          if position == filtered.length - 1 then
+            this // no scrolling beyond the bottom
+          else if atBottomScrollingPoint(position, filtered)
+          then scrollDown.changeSelection(+1)
+          else changeSelection(+1)
+
+          end if
+      end match
+    end down
 
     def addText(t: Char) =
-      changeText(text + t)
-    end addText
+      val newText = text + t
+      changeText(newText).resetWindow()
 
     def trimText =
-      changeText(text.dropRight(1))
+      changeText(text.dropRight(1)).resetWindow()
+
+    private def resetWindow() =
+      copy(windowStart = 0)
 
     private def changeSelection(move: Int) =
       showing match
@@ -166,23 +217,12 @@ private[cue4s] object InteractiveSingleChoice:
           .contains(newText.toLowerCase().trim())
       )
       if newFiltered.nonEmpty then
-        showing match
-          case None =>
-            val newShowing = newFiltered.headOption.map: (_, id) =>
-              newFiltered.map(_._2) -> id
-
-            copy(text = newText, showing = newShowing)
-
-          case Some((_, selected)) =>
-            val newShowing = newFiltered.headOption.map: (_, id) =>
-              val newSelected =
-                newFiltered.find(_._2 == selected).map(_._2).getOrElse(id)
-              newFiltered.map(_._2) -> newSelected
-
-            copy(text = newText, showing = newShowing)
+        val newShowing = Some(
+          newFiltered.map(_._2) -> newFiltered.head._2
+        )
+        copy(text = newText, showing = newShowing)
       else copy(showing = None, text = newText)
       end if
     end changeText
-
   end State
 end InteractiveSingleChoice
