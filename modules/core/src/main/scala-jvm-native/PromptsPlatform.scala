@@ -29,7 +29,7 @@ private trait PromptsPlatform:
       case p: Prompt[?] =>
         try
           val framework =
-            p.asInstanceOf[Prompt[R]].framework(terminal, out, colors)
+            p.asInstanceOf[Prompt[R]].framework(terminal, out, theme)
 
           inputProvider.evaluate(framework.handler)
         finally
@@ -46,7 +46,7 @@ private trait PromptsPlatform:
       createTerminal: Output => Terminal = Terminal.ansi(_),
       colors: Boolean = true,
   )(using ExecutionContext): Future[Completion[R]] =
-    val framework = prompt.framework(createTerminal(out), out, colors)
+    val framework = prompt.framework(createTerminal(out), out, theme)
 
     val f = inputProvider.evaluateFuture(framework.handler)
     f.onComplete(_ => terminal.cursorShow())

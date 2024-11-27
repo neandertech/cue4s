@@ -21,7 +21,7 @@ trait Prompt[Result]:
   private[cue4s] def framework(
       terminal: Terminal,
       output: Output,
-      colors: Boolean,
+      theme: Theme,
   ): PromptFramework[Result]
 
   def map[Derived](f: Result => Derived): Prompt[Derived] =
@@ -34,9 +34,9 @@ trait Prompt[Result]:
       override def framework(
           terminal: Terminal,
           output: Output,
-          colors: Boolean,
+          theme: Theme,
       ): PromptFramework[Derived] =
-        self.framework(terminal, output, colors).mapValidated(f)
+        self.framework(terminal, output, theme).mapValidated(f)
 end Prompt
 
 object Prompt:
@@ -53,8 +53,8 @@ object Prompt:
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean,
-    ) = InteractiveTextInput(lab, terminal, output, colors, validate)
+        theme: Theme,
+    ) = InteractiveTextInput(lab, terminal, output, theme, validate)
   end Input
 
   object Input:
@@ -94,7 +94,7 @@ object Prompt:
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean,
+        theme: Theme,
     ) =
       val lifted = (n: N) => validateNumber(n).toLeft(n)
 
@@ -106,7 +106,7 @@ object Prompt:
 
       val stringValidate = transform(_: String).left.toOption
 
-      InteractiveTextInput(lab, terminal, output, colors, stringValidate)
+      InteractiveTextInput(lab, terminal, output, theme, stringValidate)
         .mapValidated(transform)
     end framework
   end NumberInput
@@ -120,13 +120,13 @@ object Prompt:
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean,
+        theme: Theme,
     ) =
       InteractiveSingleChoice(
         this,
         terminal,
         output,
-        colors,
+        theme,
         windowSize,
       )
   end SingleChoice
@@ -139,15 +139,15 @@ object Prompt:
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean,
-    ) =
+        theme: Theme,
+    ): Handler[List[String]] =
       InteractiveMultipleChoice(
         this,
         terminal,
         output,
-        colors,
+        theme,
         windowSize,
-      )
+      ).handler
   end MultipleChoice
 
   object MultipleChoice:
