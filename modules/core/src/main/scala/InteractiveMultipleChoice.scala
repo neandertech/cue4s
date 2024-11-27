@@ -20,7 +20,8 @@ private[cue4s] class InteractiveMultipleChoice(
     prompt: Prompt.MultipleChoice,
     terminal: Terminal,
     out: Output,
-    colors: Boolean
+    colors: Boolean,
+    windowSize: Int
 ) extends PromptFramework(terminal, out):
   import InteractiveMultipleChoice.*
 
@@ -39,8 +40,8 @@ private[cue4s] class InteractiveMultipleChoice(
     showing = Some(altsWithIndex.map(_._2) -> 0),
     all = altsWithIndex,
     status = Status.Running,
-    0,
-    10
+    windowStart = 0,
+    windowSize = windowSize
   )
 
   private lazy val altMapping = altsWithIndex.map(_.swap).toMap

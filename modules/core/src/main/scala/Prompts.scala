@@ -19,7 +19,8 @@ package cue4s
 class Prompts private (
     protected val out: Output,
     protected val terminal: Terminal,
-    protected val colors: Boolean
+    protected val colors: Boolean,
+    protected val windowSize: Int
 ) extends AutoCloseable
     with PromptsPlatform:
 
@@ -32,15 +33,18 @@ object Prompts:
   def apply(
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
-      colors: Boolean = true
-  ) = new Prompts(out, createTerminal(out), colors)
+      colors: Boolean = true,
+      windowSize: Int = 10
+  ) = new Prompts(out, createTerminal(out), colors, windowSize)
 
   def use[A](
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
-      colors: Boolean = true
+      colors: Boolean = true,
+      windowSize: Int = 10
   )(f: Prompts => A): A =
-    val prompts = apply(out, createTerminal, colors)
+    val prompts = apply(out, createTerminal, colors, windowSize)
     try f(prompts)
     finally prompts.close()
+  end use
 end Prompts
