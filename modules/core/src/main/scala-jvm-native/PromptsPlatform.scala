@@ -26,18 +26,17 @@ private trait PromptsPlatform:
       prompt: Prompt[R] | PromptChain[R]
   ): Completion[R] =
     prompt match
-      case p: Prompt[R] =>
+      case p: Prompt[?] =>
         try
-          val handler = p.handler(terminal, out, colors)
+          val handler = p.asInstanceOf[Prompt[R]].handler(terminal, out, colors)
 
           inputProvider.evaluate(handler)
         finally
           terminal.cursorShow()
           inputProvider.close()
-      // ensure prompt doesn't forget cleaning up after itself
 
-      case c: PromptChain[R] =>
-        c.run([t] => (p: Prompt[t]) => sync(p))
+      case c: PromptChain[?] =>
+        c.asInstanceOf[PromptChain[R]].run([t] => (p: Prompt[t]) => sync(p))
   end sync
 
   def future[R](

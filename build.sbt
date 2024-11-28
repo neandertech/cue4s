@@ -118,7 +118,7 @@ lazy val example = projectMatrix
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true)
       .withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
-    nativeLink / mainClass := Some("cue4s_example.sync")
+    Compile / mainClass := Some("cue4s_example.sync")
   )
   .settings(superMatrix)
 
