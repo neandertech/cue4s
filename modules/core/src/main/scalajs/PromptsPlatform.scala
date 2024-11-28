@@ -23,7 +23,7 @@ private trait PromptsPlatform:
   self: Prompts =>
 
   def future[R](
-      prompt: Prompt[R]
+      prompt: Prompt[R],
   )(using ExecutionContext): Future[Completion[R]] =
     val framework = prompt.framework(terminal, out, colors)
 

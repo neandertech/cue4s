@@ -22,12 +22,12 @@ import cue4s.*
 class PromptsIO private (
     protected val out: Output,
     protected val terminal: Terminal,
-    protected val colors: Boolean
+    protected val colors: Boolean,
 ) extends AutoCloseable:
   protected lazy val inputProvider = InputProvider(out)
 
   def io[A](
-      prompt: Prompt[A]
+      prompt: Prompt[A],
   ): IO[Completion[A]] =
     val inputProvider = InputProvider(out)
     val framework     = prompt.framework(terminal, out, colors)
@@ -36,7 +36,7 @@ class PromptsIO private (
     IO.executionContext
       .flatMap: ec =>
         IO.fromFuture(
-          IO(inputProvider.evaluateFuture(framework.handler)(using ec))
+          IO(inputProvider.evaluateFuture(framework.handler)(using ec)),
         )
       .guarantee(IO(terminal.cursorShow()))
       .guarantee(IO(inputProvider.close()))
@@ -50,8 +50,8 @@ object PromptsIO:
   def apply(
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
-      colors: Boolean = true
+      colors: Boolean = true,
   ): Resource[IO, PromptsIO] = Resource.fromAutoCloseable(
-    IO(new PromptsIO(out, createTerminal(out), colors))
+    IO(new PromptsIO(out, createTerminal(out), colors)),
   )
 end PromptsIO

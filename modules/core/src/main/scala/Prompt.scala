@@ -21,20 +21,20 @@ trait Prompt[Result]:
   private[cue4s] def framework(
       terminal: Terminal,
       output: Output,
-      colors: Boolean
+      colors: Boolean,
   ): PromptFramework[Result]
 
   def map[Derived](f: Result => Derived): Prompt[Derived] =
     mapValidated(r => Right(f(r)))
 
   def mapValidated[Derived](
-      f: Result => Either[PromptError, Derived]
+      f: Result => Either[PromptError, Derived],
   ): Prompt[Derived] =
     new Prompt[Derived]:
       override def framework(
           terminal: Terminal,
           output: Output,
-          colors: Boolean
+          colors: Boolean,
       ): PromptFramework[Derived] =
         self.framework(terminal, output, colors).mapValidated(f)
 end Prompt
@@ -42,7 +42,7 @@ end Prompt
 object Prompt:
   case class Input private (
       lab: String,
-      validate: String => Option[PromptError] = _ => None
+      validate: String => Option[PromptError] = _ => None,
   ) extends Prompt[String]:
 
     def this(lab: String) = this(lab, _ => None)
@@ -53,7 +53,7 @@ object Prompt:
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean
+        colors: Boolean,
     ) = InteractiveTextInput(lab, terminal, output, colors, validate)
   end Input
 
@@ -62,7 +62,7 @@ object Prompt:
 
   case class NumberInput[N: Numeric] private (
       lab: String,
-      validateNumber: N => Option[PromptError] = (_: N) => None
+      validateNumber: N => Option[PromptError] = (_: N) => None,
   ) extends Prompt[N]:
     private val num = Numeric[N]
 
@@ -72,25 +72,25 @@ object Prompt:
       copy(validateNumber = (n: N) => validateNumber(n).orElse(f(n)))
 
     def positive = validate(n =>
-      Option.when(num.lteq(n, num.zero))(PromptError("must be positive"))
+      Option.when(num.lteq(n, num.zero))(PromptError("must be positive")),
     )
 
     def negative = validate(n =>
-      Option.when(num.lteq(n, num.zero))(PromptError("must be negative"))
+      Option.when(num.lteq(n, num.zero))(PromptError("must be negative")),
     )
 
     def min(value: N): NumberInput[N] = validate(n =>
-      Option.when(num.lt(n, value))(PromptError(s"must be no less than $value"))
+      Option.when(num.lt(n, value))(PromptError(s"must be no less than $value")),
     )
 
     def max(value: N): NumberInput[N] = validate(n =>
-      Option.when(num.gt(n, value))(PromptError(s"must be no more than $value"))
+      Option.when(num.gt(n, value))(PromptError(s"must be no more than $value")),
     )
 
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean
+        colors: Boolean,
     ) =
       val lifted = (n: N) => validateNumber(n).toLeft(n)
 
@@ -116,63 +116,63 @@ object Prompt:
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean
+        colors: Boolean,
     ) =
       InteractiveSingleChoice(
         this,
         terminal,
         output,
         colors,
-        windowSize
+        windowSize,
       )
   end SingleChoice
 
   case class MultipleChoice private (
       lab: String,
       alts: List[(String, Boolean)],
-      windowSize: Int
+      windowSize: Int,
   ) extends Prompt[List[String]]:
     override def framework(
         terminal: Terminal,
         output: Output,
-        colors: Boolean
+        colors: Boolean,
     ) =
       InteractiveMultipleChoice(
         this,
         terminal,
         output,
         colors,
-        windowSize
+        windowSize,
       )
   end MultipleChoice
 
   object MultipleChoice:
     @deprecated(
-      "This constructor will be removed in the future, use `withNoneSelected` which is equivalent"
+      "This constructor will be removed in the future, use `withNoneSelected` which is equivalent",
     )
     def apply(
         lab: String,
         variants: Seq[String],
-        windowSize: Int = 10
+        windowSize: Int = 10,
     ): MultipleChoice =
       withNoneSelected(lab, variants, windowSize)
 
     def withNoneSelected(
         lab: String,
         variants: Seq[String],
-        windowSize: Int = 10
+        windowSize: Int = 10,
     ) =
       new MultipleChoice(lab, variants.map(_ -> false).toList, windowSize)
     def withAllSelected(
         lab: String,
         variants: Seq[String],
-        windowSize: Int = 10
+        windowSize: Int = 10,
     ) =
       new MultipleChoice(lab, variants.map(_ -> true).toList, windowSize)
     def withSomeSelected(
         lab: String,
         variants: Seq[(String, Boolean)],
-        windowSize: Int = 10
+        windowSize: Int = 10,
     ) =
       new MultipleChoice(lab, variants.toList, windowSize)
   end MultipleChoice

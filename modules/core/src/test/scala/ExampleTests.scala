@@ -7,29 +7,29 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("alternatives.navigation")(
     Prompt.SingleChoice(
       "How do you do fellow kids?",
-      List("killa", "rizza", "flizza")
+      List("killa", "rizza", "flizza"),
     ),
     list(
       Event.Init,
       DOWN,
       DOWN,
-      ENTER
+      ENTER,
     ),
-    "flizza"
+    "flizza",
   )
 
   terminalTest("alternatives.cancel.single")(
     Prompt.SingleChoice(
       "How do you do fellow kids?",
-      List("killa", "rizza", "flizza")
+      List("killa", "rizza", "flizza"),
     ),
     list(
       Event.Init,
       DOWN,
       DOWN,
-      Event.Interrupt
+      Event.Interrupt,
     ),
-    Next.Stop
+    Next.Stop,
   )
 
   terminalTestComplete("alternatives.infiniscroll.single")(
@@ -40,9 +40,9 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
         "productive",
         "relaxing",
         "stressful",
-        "exhausting"
+        "exhausting",
       ),
-      windowSize = 3
+      windowSize = 3,
     ),
     list(
       Event.Init,
@@ -51,15 +51,15 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       DOWN,
       DOWN,
       UP,
-      ENTER
+      ENTER,
     ),
-    "stressful"
+    "stressful",
   )
 
   terminalTest("alternatives.cancel.multiple")(
     Prompt.MultipleChoice.withNoneSelected(
       "What would you like for lunch",
-      List("pizza", "steak", "sweet potato", "fried chicken")
+      List("pizza", "steak", "sweet potato", "fried chicken"),
     ),
     list(
       Event.Init,
@@ -67,16 +67,16 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       DOWN,
       TAB,
       DOWN,
-      Event.Interrupt
+      Event.Interrupt,
     ),
-    Next.Stop
+    Next.Stop,
   )
 
   terminalTestComplete("alternatives.infiniscroll.multiple")(
     Prompt.MultipleChoice.withNoneSelected(
       "What would you like for lunch",
       List("pizza", "steak", "sweet potato", "fried chicken", "sushi"),
-      windowSize = 3
+      windowSize = 3,
     ),
     list(
       Event.Init,
@@ -88,22 +88,22 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       TAB,
       DOWN,
       TAB,
-      ENTER
+      ENTER,
     ),
-    List("pizza", "steak", "fried chicken", "sushi")
+    List("pizza", "steak", "fried chicken", "sushi"),
   )
 
   terminalTest("alternatives.cancel.input")(
     Prompt
       .Input(
-        "how do you do fellow kids?"
+        "how do you do fellow kids?",
       )
       .validate(value =>
         if value.length < 4 then Some(PromptError("too short!"))
-        else None
+        else None,
       ),
     list(Event.Init, Event.Interrupt),
-    Next.Stop
+    Next.Stop,
   )
 
   terminalTestComplete("input")(
@@ -111,16 +111,16 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       .Input("how do you do fellow kids?")
       .validate(value =>
         if value.length < 4 then Some(PromptError("too short!"))
-        else None
+        else None,
       ),
     list(
       Event.Init,
       chars("go"),
       ENTER, // prevents submission
       chars("od"),
-      ENTER
+      ENTER,
     ),
-    "good"
+    "good",
   )
 
   terminalTestComplete("derived.validated.input")(
@@ -138,9 +138,9 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
       delete("good"),
       chars("blue"),
-      ENTER
+      ENTER,
     ),
-    true
+    true,
   )
 
   terminalTestComplete("number.input")(
@@ -162,30 +162,30 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
       delete("31.0"),
       chars("25.0"),
-      ENTER
+      ENTER,
     ),
-    25.0f
+    25.0f,
   )
 
   terminalTestComplete("alternatives.typing")(
     Prompt.SingleChoice(
       "How do you do fellow kids?",
-      List("killa", "rizza", "flizza")
+      List("killa", "rizza", "flizza"),
     ),
     list(
       Event.Init,
       chars("z"),
       DELETE,
       chars("li"),
-      ENTER
+      ENTER,
     ),
-    "flizza"
+    "flizza",
   )
 
   terminalTestComplete("multiple.choice")(
     Prompt.MultipleChoice.withNoneSelected(
       "What would you like for lunch",
-      List("pizza", "steak", "sweet potato", "fried chicken")
+      List("pizza", "steak", "sweet potato", "fried chicken"),
     ),
     list(
       Event.Init,
@@ -196,29 +196,29 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       chars("h"), // skip sweet potato
       TAB,
       DELETE,
-      ENTER
+      ENTER,
     ),
-    List("pizza", "steak", "fried chicken")
+    List("pizza", "steak", "fried chicken"),
   )
 
   terminalTestComplete("multiple.choice.allselected")(
     Prompt.MultipleChoice.withAllSelected(
       "What would you like for lunch",
-      List("pizza", "steak", "sweet potato", "fried chicken")
+      List("pizza", "steak", "sweet potato", "fried chicken"),
     ),
     list(
       Event.Init,
       TAB, // unselect pizza
-      ENTER
+      ENTER,
     ),
-    List("steak", "sweet potato", "fried chicken")
+    List("steak", "sweet potato", "fried chicken"),
   )
 
   case class MyPrompt(
       @cue(_.text("Sir...?"))
       title: String,
       @cue(_.options("yes", "no").text("What's up doc?"))
-      lab: String
+      lab: String,
   ) derives PromptChain
 
   terminalTestComplete("promptchain")(
@@ -228,9 +228,9 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       chars("hello"),
       ENTER,
       Event.Init,
-      ENTER
+      ENTER,
     ),
-    MyPrompt("hello", "yes")
+    MyPrompt("hello", "yes"),
   )
 
 end ExampleTests

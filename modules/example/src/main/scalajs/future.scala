@@ -23,7 +23,7 @@ import concurrent.ExecutionContext.Implicits.global
 case class Info(
     day: Option[String] = None,
     work: Option[String] = None,
-    letters: Set[String] = Set.empty
+    letters: Set[String] = Set.empty,
 )
 
 @main def future =
@@ -32,7 +32,7 @@ case class Info(
   for
     day <- prompts
       .future(
-        Prompt.SingleChoice("How was your day?", List("great", "okay"))
+        Prompt.SingleChoice("How was your day?", List("great", "okay")),
       )
       .map(_.toOption)
 
@@ -42,8 +42,8 @@ case class Info(
       .future(
         Prompt.MultipleChoice.withNoneSelected(
           "What are your favourite letters?",
-          ('A' to 'F').map(_.toString).toList
-        )
+          ('A' to 'F').map(_.toString).toList,
+        ),
       )
       .map(_.toOption)
 

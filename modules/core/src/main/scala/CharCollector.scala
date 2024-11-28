@@ -80,7 +80,7 @@ private object CharCollector:
 
           case b
               if isCSIParameterByte(b) || isCSIIntermediateByte(
-                b
+                b,
               ) =>
             (State.CSI_Collecting(b.toByte :: Nil), DecodeResult.Continue)
 

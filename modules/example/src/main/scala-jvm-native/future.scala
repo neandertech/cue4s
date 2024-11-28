@@ -27,7 +27,7 @@ import concurrent.ExecutionContext.Implicits.global
   case class Info(
       day: Option[String] = None,
       work: Option[String] = None,
-      letters: Set[String] = Set.empty
+      letters: Set[String] = Set.empty,
   )
 
   val prompts = Prompts()
@@ -35,7 +35,7 @@ import concurrent.ExecutionContext.Implicits.global
   val fut = for
     day <- prompts
       .future(
-        Prompt.SingleChoice("How was your day?", List("great", "okay"))
+        Prompt.SingleChoice("How was your day?", List("great", "okay")),
       )
       .map(_.toOption)
 
@@ -45,8 +45,8 @@ import concurrent.ExecutionContext.Implicits.global
       .future(
         Prompt.MultipleChoice.withAllSelected(
           "What are your favourite letters?",
-          ('A' to 'F').map(_.toString).toList
-        )
+          ('A' to 'F').map(_.toString).toList,
+        ),
       )
       .map(_.toOption)
 

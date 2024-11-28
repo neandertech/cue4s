@@ -23,7 +23,7 @@ trait InputProviderPlatform:
   self: InputProvider =>
 
   def evaluateFuture[Result](
-      f: Handler[Result]
+      f: Handler[Result],
   )(using ExecutionContext): Future[Completion[Result]]
 
 trait InputProviderCompanionPlatform:

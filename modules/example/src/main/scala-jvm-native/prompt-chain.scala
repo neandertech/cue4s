@@ -32,7 +32,7 @@ case class Test(
     @cue(_.options("get", "post", "patch"))
     hello: List[String],
     @cue(_.options(Opts.values.map(_.toString).toSeq*))
-    hello2: List[String]
+    hello2: List[String],
 ) derives PromptChain
 
 object Test:
