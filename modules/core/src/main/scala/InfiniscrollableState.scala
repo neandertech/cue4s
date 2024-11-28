@@ -19,7 +19,7 @@ package cue4s
 private[cue4s] case class InfiniscrollableState(
     showing: Option[(List[Int], Int)],
     windowStart: Int,
-    windowSize: Int
+    windowSize: Int,
 ):
   def changeSelection(move: Int) =
     showing match

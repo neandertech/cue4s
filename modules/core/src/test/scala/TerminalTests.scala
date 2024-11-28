@@ -19,20 +19,20 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     flatten(args.toList)
 
   def terminalTestComplete[R](
-      name: munit.TestOptions
+      name: munit.TestOptions,
   )(prompt: PromptChain[R], events: List[Event | List[Event]], expected: R)(
-      implicit loc: munit.Location
+      implicit loc: munit.Location,
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
         runChain(flatten(events))(
-          prompt
+          prompt,
         )
 
       assertEquals(
         processed,
         flatten(events),
-        s"Redundant events in tests (prompt completed before processing all of them): ${processed}"
+        s"Redundant events in tests (prompt completed before processing all of them): ${processed}",
       )
 
       assertSnapshot(name.name, snapshot)
@@ -46,20 +46,20 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       case ev: List[?]  => ev
 
   def terminalTestComplete[R](
-      name: munit.TestOptions
+      name: munit.TestOptions,
   )(prompt: Prompt[R], events: List[Event], expected: R, log: Boolean = false)(
-      implicit loc: munit.Location
+      implicit loc: munit.Location,
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
         runToCompletion(events, log)(
-          prompt
+          prompt,
         )
 
       assertEquals(
         processed,
         events,
-        s"Redundant events in tests (prompt completed before processing all of them): ${processed}"
+        s"Redundant events in tests (prompt completed before processing all of them): ${processed}",
       )
 
       assertSnapshot(name.name, snapshot)
@@ -67,19 +67,19 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     }
 
   def terminalTest[R](
-      name: munit.TestOptions
+      name: munit.TestOptions,
   )(
       prompt: Prompt[R],
       events: List[Event],
       expected: Next[R],
-      log: Boolean = false
+      log: Boolean = false,
   )(implicit
-      loc: munit.Location
+      loc: munit.Location,
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
         run(events, log)(
-          prompt
+          prompt,
         )
 
       assertSnapshot(name.name, snapshot)
@@ -89,7 +89,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
   case class Result[T](value: T, snapshot: String, eventsProcessed: List[Event])
 
   def run[T](events: Seq[Event], log: Boolean = false)(
-      prompt: Prompt[T]
+      prompt: Prompt[T],
   ): Result[Next[T]] =
     val sb = new java.lang.StringBuilder
     val logger: String => Unit =
@@ -117,12 +117,12 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     Result(
       result.getOrElse(fail("No events were processed")),
       sb.toString(),
-      eventsProcessed.result()
+      eventsProcessed.result(),
     )
   end run
 
   def runToCompletion[T](events: Seq[Event], log: Boolean = false)(
-      prompt: Prompt[T]
+      prompt: Prompt[T],
   ): Result[T] =
     val Result(result, sb, processed) = run(events, log)(prompt)
 
@@ -132,7 +132,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
   end runToCompletion
 
   def runChain[T](events: Seq[Event], log: Boolean = false)(
-      prompt: PromptChain[T]
+      prompt: PromptChain[T],
   ): Result[T] =
     val totalLog     = new java.lang.StringBuilder
     var eventsOffset = 0

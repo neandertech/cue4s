@@ -23,12 +23,13 @@ private trait PromptsPlatform:
   self: Prompts =>
 
   def sync[R](
-      prompt: Prompt[R] | PromptChain[R]
+      prompt: Prompt[R] | PromptChain[R],
   ): Completion[R] =
     prompt match
       case p: Prompt[?] =>
         try
-          val framework = p.asInstanceOf[Prompt[R]].framework(terminal, out, colors)
+          val framework =
+            p.asInstanceOf[Prompt[R]].framework(terminal, out, colors)
 
           inputProvider.evaluate(framework.handler)
         finally
@@ -43,7 +44,7 @@ private trait PromptsPlatform:
       prompt: Prompt[R],
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi(_),
-      colors: Boolean = true
+      colors: Boolean = true,
   )(using ExecutionContext): Future[Completion[R]] =
     val framework = prompt.framework(createTerminal(out), out, colors)
 

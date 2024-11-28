@@ -20,14 +20,14 @@ class CueBuilder private[cue4s] (hints: List[CueHint] = Nil):
   inline def getHints: List[CueHint] = hints
 
   private def add(hint: CueHint): CueBuilder = new CueBuilder(
-    hint +: hints
+    hint +: hints,
   )
   inline def text(inline name: String)     = add(CueHint.Text(name))
   inline def options(inline name: String*) = add(CueHint.Options(name.toList))
   inline def multi(inline name: (String, Boolean)*) = add(
-    CueHint.MultiSelect(name.toList)
+    CueHint.MultiSelect(name.toList),
   )
   inline def validate(f: String => Option[PromptError]) = add(
-    CueHint.Validate(f)
+    CueHint.Validate(f),
   )
 end CueBuilder

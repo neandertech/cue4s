@@ -30,7 +30,7 @@ private class InputProviderImpl(o: Output)
   @volatile private var asyncHookSet = false
 
   override def evaluateFuture[Result](handler: Handler[Result])(using
-      ExecutionContext
+      ExecutionContext,
   ) =
     val hook = () =>
       handler(Event.Interrupt)
@@ -122,6 +122,6 @@ private object InputProviderImpl:
       try hook()
       catch case e: Throwable => ()
 
-    cue4s.ChangeMode.changemode(0)
+    cue4s.ChangeMode.changemode(0),
   ))
 end InputProviderImpl

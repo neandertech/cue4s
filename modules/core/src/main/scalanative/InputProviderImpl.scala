@@ -33,7 +33,7 @@ private class InputProviderImpl(o: Output)
   @volatile private var asyncHookSet = false
 
   override def evaluateFuture[Result](handler: Handler[Result])(using
-      ExecutionContext
+      ExecutionContext,
   ) =
     val hook = () =>
       handler(Event.Interrupt)
@@ -145,7 +145,7 @@ private object InputProviderImpl:
     Thread(() =>
       hooks.foreach: hook =>
         try hook()
-        catch case e: Throwable => ()
-    )
+        catch case e: Throwable => (),
+    ),
   )
 end InputProviderImpl

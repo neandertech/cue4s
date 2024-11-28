@@ -24,7 +24,7 @@ private trait InputProviderPlatform:
 
   def evaluate[Result](f: Handler[Result]): Completion[Result]
   def evaluateFuture[Result](f: Handler[Result])(using
-      ExecutionContext
+      ExecutionContext,
   ): Future[Completion[Result]]
 
 private trait InputProviderCompanionPlatform:

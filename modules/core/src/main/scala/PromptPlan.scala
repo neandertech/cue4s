@@ -20,7 +20,7 @@ import scala.util.boundary
 
 private[cue4s] case class PromptPlan[Into](
     prompts: List[PromptStep[Tuple, Any]],
-    finish: Tuple => Into
+    finish: Tuple => Into,
 ):
 
   def withSteps(step: Seq[PromptStep[Tuple, Any]]) =

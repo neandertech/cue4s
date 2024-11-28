@@ -29,7 +29,7 @@ private class InputProviderImpl(o: Output)
     extends InputProvider(o),
       InputProviderPlatform:
   override def evaluateFuture[Result](
-      handler: Handler[Result]
+      handler: Handler[Result],
   )(using ExecutionContext): Future[Completion[Result]] =
 
     val stdin = Process.stdin
@@ -41,8 +41,8 @@ private class InputProviderImpl(o: Output)
       val rl = Readline.createInterface(
         js.Dynamic.literal(
           input = stdin,
-          escapeCodeTimeout = 50
-        )
+          escapeCodeTimeout = 50,
+        ),
       )
 
       Readline.emitKeypressEvents(stdin, rl)
@@ -101,7 +101,7 @@ private class InputProviderImpl(o: Output)
       fut
     else
       Future.successful(
-        Completion.Fail(CompletionError.Error("STDIN is not a TTY"))
+        Completion.Fail(CompletionError.Error("STDIN is not a TTY")),
       )
     end if
   end evaluateFuture

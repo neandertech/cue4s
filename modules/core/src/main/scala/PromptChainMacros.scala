@@ -21,7 +21,7 @@ private[cue4s] object PromptChainMacros:
 
   case class CueHintProvider(e: Expr[Seq[CueHint]]):
     inline def getHint[T: Type](
-        inline f: PartialFunction[CueHint, T]
+        inline f: PartialFunction[CueHint, T],
     )(using Quotes): Expr[Option[T]] =
       '{ $e.collectFirst(f) }
 
@@ -75,7 +75,7 @@ private[cue4s] object PromptChainMacros:
                 if sym.hasAnnotation(cueAnnot) then
                   val annotExpr = sym.getAnnotation(cueAnnot).get.asExprOf[cue]
                   Some(annotExpr)
-                else None
+                else None,
               )
 
         val steps =
@@ -89,7 +89,7 @@ private[cue4s] object PromptChainMacros:
   end derivedMacro
 
   def fieldSteps[T: Type](
-      annots: List[(String, Option[Expr[cue]])]
+      annots: List[(String, Option[Expr[cue]])],
   )(using Quotes): List[Expr[PromptStep[Tuple, Any]]] =
     Type.of[T] match
       case ('[elem *: elems]) =>
@@ -102,7 +102,7 @@ private[cue4s] object PromptChainMacros:
 
         constructCue[elem](nm, hints) ::
           fieldSteps[elems](
-            annots.tail
+            annots.tail,
           )
 
       case other =>
@@ -110,7 +110,7 @@ private[cue4s] object PromptChainMacros:
 
   def constructCue[E: Type](
       name: String,
-      hints: CueHintProvider
+      hints: CueHintProvider,
   )(using Quotes): Expr[PromptStep[Tuple, Any]] =
     import quotes.reflect.*
 
@@ -125,12 +125,12 @@ private[cue4s] object PromptChainMacros:
             ${ hints.options }
               .map(_.map(_ -> false))
               .orElse(${ hints.multi })
-              .getOrElse(Nil)
+              .getOrElse(Nil),
           )
 
         PromptStep[Tuple, List[String]](
           prompt,
-          (state, t) => state :* transform(t)
+          (state, t) => state :* transform(t),
         ).toAny
       }
 
@@ -150,7 +150,7 @@ private[cue4s] object PromptChainMacros:
             PromptStep[Tuple, String](
               prompt,
               (state, t) =>
-                state :* (if t.trim().isEmpty() then None else Some(t.trim()))
+                state :* (if t.trim().isEmpty() then None else Some(t.trim())),
             ).toAny
           }
         case '[String] =>
@@ -166,7 +166,7 @@ private[cue4s] object PromptChainMacros:
 
             PromptStep[Tuple, String](
               prompt,
-              (state, t) => state :* t
+              (state, t) => state :* t,
             ).toAny
           }
         case '[List[String]] =>
@@ -177,7 +177,7 @@ private[cue4s] object PromptChainMacros:
           multiPrompt(l => l.toVector)
         case '[e] =>
           report.errorAndAbort(
-            s"cue4s: Field `$name` has unsupported type `${TypeRepr.of[e].show(using Printer.TypeReprShortCode)}`"
+            s"cue4s: Field `$name` has unsupported type `${TypeRepr.of[e].show(using Printer.TypeReprShortCode)}`",
           )
       end match
     end result

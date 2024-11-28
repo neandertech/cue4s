@@ -37,7 +37,7 @@ class TracingTerminal(out: Output) extends Terminal:
 
   def log(msg: String): Unit =
     out.logLn(
-      s"[LINE=$currentLine, COL=$currentColumn, H=$currentHeight, W=$currentWidth] $msg"
+      s"[LINE=$currentLine, COL=$currentColumn, H=$currentHeight, W=$currentWidth] $msg",
     )
 
   def updateBounds() =
@@ -159,7 +159,7 @@ class TracingTerminal(out: Output) extends Terminal:
     val multilineWriter: String => Unit = l =>
       val lines = l.split("\n", -1).zipWithIndex.toList
       log(
-        s"Writing multiple lines: ${lines.map(_._1).mkString("`", "`, `", "`")}"
+        s"Writing multiple lines: ${lines.map(_._1).mkString("`", "`, `", "`")}",
       )
       lines.foreach: (line, idx) =>
         simpleWriter(line)
@@ -196,7 +196,7 @@ class TracingTerminal(out: Output) extends Terminal:
         cur.append(pre)
         if currentColumn < currentWidth && !cursorHidden then
           cur.append(
-            "▒"
+            "▒",
           )
           cur.append(after.drop(1))
         else cur.append(after)
