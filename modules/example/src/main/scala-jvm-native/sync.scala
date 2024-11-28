@@ -29,44 +29,49 @@ import cue4s.*
 
   val prompts = Prompts()
 
-  val day = prompts
-    .sync(
-      Prompt.SingleChoice(
-        "How was your day?",
-        List(
-          "amazing",
-          "productive",
-          "relaxing",
-          "stressful",
-          "exhausting",
-          "challenging",
-          "wonderful",
-          "uneventful",
-          "interesting",
-          "exciting",
-          "boring",
-          "demanding",
-          "satisfying",
-          "frustrating",
-          "peaceful",
-          "overwhelming",
-          "busy",
-          "calm",
-          "enjoyable",
-          "memorable",
-          "ordinary",
-          "fantastic",
-          "rewarding",
-          "chaotic"
-        ),
-        windowSize = 7
-      )
-    )
-    .toOption
-  info = info.copy(day = day)
+  // val day = prompts
+  //   .sync(
+  //     Prompt.SingleChoice(
+  //       "How was your day?",
+  //       List(
+  //         "amazing",
+  //         "productive",
+  //         "relaxing",
+  //         "stressful",
+  //         "exhausting",
+  //         "challenging",
+  //         "wonderful",
+  //         "uneventful",
+  //         "interesting",
+  //         "exciting",
+  //         "boring",
+  //         "demanding",
+  //         "satisfying",
+  //         "frustrating",
+  //         "peaceful",
+  //         "overwhelming",
+  //         "busy",
+  //         "calm",
+  //         "enjoyable",
+  //         "memorable",
+  //         "ordinary",
+  //         "fantastic",
+  //         "rewarding",
+  //         "chaotic"
+  //       ),
+  //       windowSize = 7
+  //     )
+  //   )
+  //   .toOption
+  // info = info.copy(day = day)
 
-  val work = prompts.sync(Prompt.Input("Where do you work?")).toOption
-  info = info.copy(work = work)
+  val newValue = Prompt
+    .Input("Where do you work?")
+    .mapValidated: s =>
+      Either.cond(s == "blue", true, PromptError("yooooo?!"))
+
+  val work = prompts.sync(newValue).toOption
+  // info = info.copy(work = work)
 
   val letters = prompts
     .sync(

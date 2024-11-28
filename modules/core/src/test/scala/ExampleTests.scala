@@ -94,23 +94,25 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   )
 
   terminalTest("alternatives.cancel.input")(
-    Prompt.Input(
-      "how do you do fellow kids?",
-      value =>
+    Prompt
+      .Input(
+        "how do you do fellow kids?"
+      )
+      .validate(value =>
         if value.length < 4 then Some(PromptError("too short!"))
         else None
-    ),
+      ),
     list(Event.Init, Event.Interrupt),
     Next.Stop
   )
 
   terminalTestComplete("input")(
-    Prompt.Input(
-      "how do you do fellow kids?",
-      value =>
+    Prompt
+      .Input("how do you do fellow kids?")
+      .validate(value =>
         if value.length < 4 then Some(PromptError("too short!"))
         else None
-    ),
+      ),
     list(
       Event.Init,
       chars("go"),
@@ -119,6 +121,50 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER
     ),
     "good"
+  )
+
+  terminalTestComplete("derived.validated.input")(
+    Prompt
+      .Input("What color is the sky?")
+      .mapValidated:
+        case "blue" => Right(true)
+        case other  => Left(PromptError(s"look up, it's not $other"))
+    ,
+    list(
+      Event.Init,
+      chars("go"),
+      ENTER, // prevents submission
+      chars("od"),
+      ENTER,
+      delete("good"),
+      chars("blue"),
+      ENTER
+    ),
+    true
+  )
+
+  terminalTestComplete("number.input")(
+    Prompt.NumberInput
+      .float("think of a number")
+      .min(5.0)
+      .max(30.0),
+    list(
+      Event.Init,
+      chars("3.0"),
+      ENTER,
+      delete("3.0"),
+      ENTER,
+      chars("h"),
+      ENTER,
+      delete("h"),
+      ENTER,
+      chars("31.0"),
+      ENTER,
+      delete("31.0"),
+      chars("25.0"),
+      ENTER
+    ),
+    25.0f
   )
 
   terminalTestComplete("alternatives.typing")(

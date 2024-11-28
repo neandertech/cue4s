@@ -17,74 +17,60 @@
 package cue4s
 
 private[cue4s] class InteractiveTextInput(
-    prompt: Prompt.Input,
+    prompt: String,
     terminal: Terminal,
     out: Output,
-    colors: Boolean
-) extends PromptFramework(terminal, out):
+    colors: Boolean,
+    validate: String => Option[PromptError],
+) extends PromptFramework[String](terminal, out):
 
   import InteractiveTextInput.*
 
   override type PromptState = State
-  override type Result      = String
 
-  override def initialState: State = State("", prompt.validate, Status.Running)
+  override def initialState: State              = State("", Status.Running)
   override def isRunning(state: State): Boolean = state.status == Status.Running
 
-  override def handleEvent(event: Event): Next[Result] =
+  override def result(state: State) =
+    validate(state.text).toLeft(state.text)
+
+  override def handleEvent(event: Event) =
     event match
-      case Event.Init =>
-        printPrompt()
-        Next.Continue
+      case Event.Init => PromptAction.Start
 
-      case Event.Key(KeyEvent.ENTER) => // enter
-        stateTransition(_.finish)
-        currentState().status match
-          case Status.Running => Next.Continue
-          case Status.Finished(result) =>
-            printPrompt()
-            terminal.cursorShow()
-            Next.Done(result)
-          case Status.Canceled =>
-            Next.Stop
+      case Event.Key(KeyEvent.ENTER) =>
+        PromptAction.Submit(result => state => state.finish(result))
 
-      case Event.Key(KeyEvent.DELETE) => // enter
-        stateTransition(_.trimText)
-        printPrompt()
-        Next.Continue
+      case Event.Key(KeyEvent.DELETE) =>
+        PromptAction.Update(_.trimText)
 
-      case Event.Char(which) =>
-        stateTransition(_.addText(which.toChar))
-        printPrompt()
-        Next.Continue
+      case Event.Char(which) => PromptAction.Update(_.addText(which.toChar))
 
-      case Event.Interrupt =>
-        stateTransition(_.cancel)
-        printPrompt()
-        terminal.cursorShow()
-        Next.Stop
+      case Event.Interrupt => PromptAction.UpdateAndStop(_.cancel)
 
-      case _ =>
-        Next.Continue
+      case _ => PromptAction.Continue
     end match
   end handleEvent
 
   private lazy val formatting = TextFormatting(colors)
   import formatting.*
 
-  override def renderState(st: State): List[String] =
+  override def renderState(
+      st: State,
+      error: Option[PromptError],
+  ): List[String] =
     val lines = List.newBuilder[String]
 
     st.status match
       case Status.Running =>
-        lines += prompt.lab.cyan + " > " + st.text.bold
-        st.error.foreach: err =>
+        lines += prompt.cyan + " > " + st.text.bold
+        error.foreach: err =>
           lines += err.red
-      case Status.Finished(result) =>
-        lines += "✔ ".green + prompt.lab.cyan + " " + st.text.bold
+      case Status.Finished(res) =>
+        lines += "✔ ".green + prompt.cyan + " " + st.text.bold
         lines += ""
       case Status.Canceled =>
-        lines += "× ".red + prompt.lab.cyan
+        lines += "× ".red + prompt.cyan
         lines += ""
     end match
 
@@ -96,24 +82,17 @@ end InteractiveTextInput
 private[cue4s] object InteractiveTextInput:
   enum Status:
     case Running
-    case Finished(result: String)
+    case Finished(res: String)
     case Canceled
 
   case class State(
       text: String,
-      validate: String => Option[PromptError],
-      status: Status
+      status: Status,
   ):
-    lazy val error = validate(text)
+    def cancel                 = copy(status = Status.Canceled)
+    def finish(result: String) = copy(status = Status.Finished(result))
+    def addText(t: Char)       = copy(text = text + t)
 
-    def cancel = copy(status = Status.Canceled)
-
-    def finish =
-      error match
-        case None        => copy(status = Status.Finished(text))
-        case Some(value) => this
-
-    def addText(t: Char) = copy(text = text + t)
-    def trimText         = copy(text = text.dropRight(1))
+    def trimText = copy(text = text.dropRight(1))
   end State
 end InteractiveTextInput

@@ -11,22 +11,22 @@ inThisBuild(
     sonatypeCredentialHost := "s01.oss.sonatype.org",
     resolvers ++= Resolver.sonatypeOssRepos("releases"),
     homepage := Some(
-      url("https://github.com/neandertech/cue4s")
+      url("https://github.com/neandertech/cue4s"),
     ),
     startYear := Some(2023),
     licenses := List(
-      "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")
+      "Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0"),
     ),
     developers := List(
       Developer(
         "keynmol",
         "Anton Sviridov",
         "velbm@pm.me",
-        url("https://blog.indoorvivants.com")
-      )
+        url("https://blog.indoorvivants.com"),
+      ),
     ),
-    version := (if (!sys.env.contains("CI")) "dev" else version.value)
-  )
+    version := (if (!sys.env.contains("CI")) "dev" else version.value),
+  ),
 )
 
 val Versions = new {
@@ -41,7 +41,7 @@ val Versions = new {
 lazy val munitSettings = Seq(
   libraryDependencies += {
     "org.scalameta" %%% "munit" % Versions.munit % Test
-  }
+  },
 )
 
 lazy val root = project
@@ -55,7 +55,7 @@ lazy val core = projectMatrix
   .in(file("modules/core"))
   .defaultAxes(defaults*)
   .settings(
-    name := "cue4s"
+    name := "cue4s",
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
@@ -70,7 +70,7 @@ lazy val core = projectMatrix
     libraryDependencies += "com.lihaoyi" %%% "fansi" % Versions.fansi,
     libraryDependencies +=
       "net.java.dev.jna" % "jna" % Versions.jna,
-    nativeConfig ~= (_.withIncrementalCompilation(true))
+    nativeConfig ~= (_.withIncrementalCompilation(true)),
   )
   .enablePlugins(SnapshotsPlugin)
   .settings(superMatrix)
@@ -79,7 +79,7 @@ lazy val catsEffect = projectMatrix
   .in(file("modules/cats-effect"))
   .defaultAxes(defaults*)
   .settings(
-    name := "cue4s-cats-effect"
+    name := "cue4s-cats-effect",
   )
   .dependsOn(core)
   .settings(munitSettings)
@@ -92,7 +92,7 @@ lazy val catsEffect = projectMatrix
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     libraryDependencies += "org.typelevel" %%% "cats-effect" % Versions.catsEffect,
-    nativeConfig ~= (_.withIncrementalCompilation(true))
+    nativeConfig ~= (_.withIncrementalCompilation(true)),
   )
   .enablePlugins(SnapshotsPlugin)
 
@@ -103,7 +103,7 @@ lazy val example = projectMatrix
   .enablePlugins(JavaAppPackaging)
   .settings(
     name := "example",
-    noPublish
+    noPublish,
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
@@ -115,7 +115,7 @@ lazy val example = projectMatrix
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true)
       .withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
-    Compile / mainClass := Some("cue4s_example.sync")
+    Compile / mainClass := Some("cue4s_example.sync"),
   )
   .settings(superMatrix)
 
@@ -142,7 +142,7 @@ lazy val exampleCatsEffect = projectMatrix
   .enablePlugins(JavaAppPackaging)
   .settings(
     name := "example",
-    noPublish
+    noPublish,
   )
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
@@ -152,7 +152,7 @@ lazy val exampleCatsEffect = projectMatrix
     scalaJSUseMainModuleInitializer := true,
     Compile / mainClass             := Some("example.catseffect.ioExample"),
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
-    nativeConfig ~= (_.withIncrementalCompilation(true))
+    nativeConfig ~= (_.withIncrementalCompilation(true)),
   )
 
 lazy val docs =
@@ -164,7 +164,7 @@ lazy val docs =
 
 val noPublish = Seq(
   publish / skip      := true,
-  publishLocal / skip := true
+  publishLocal / skip := true,
 )
 
 val defaults =
@@ -174,7 +174,7 @@ val scalafixRules = Seq(
   "OrganizeImports",
   "DisableSyntax",
   "LeakingImplicitClassVal",
-  "NoValInForComprehension"
+  "NoValInForComprehension",
 ).mkString(" ")
 
 val CICommands = Seq(
@@ -186,14 +186,14 @@ val CICommands = Seq(
   "scalafmtCheckAll",
   "scalafmtSbtCheck",
   s"scalafix --check $scalafixRules",
-  "headerCheck"
+  "headerCheck",
 ).mkString(";")
 
 val PrepareCICommands = Seq(
   s"scalafix --rules $scalafixRules",
   "scalafmtAll",
   "scalafmtSbt",
-  "headerCreate"
+  "headerCreate",
 ).mkString(";")
 
 addCommandAlias("ci", CICommands)
@@ -202,7 +202,7 @@ addCommandAlias("preCI", PrepareCICommands)
 
 addCommandAlias(
   "testSnapshots",
-  """set Test/envVars += ("SNAPSHOTS_INTERACTIVE" -> "true"); test"""
+  """set Test/envVars += ("SNAPSHOTS_INTERACTIVE" -> "true"); test""",
 )
 
 addCommandAlias("checkDocs", "docs/mdoc --in README.md")

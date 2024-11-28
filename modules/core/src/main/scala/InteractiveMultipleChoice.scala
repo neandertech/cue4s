@@ -21,12 +21,11 @@ private[cue4s] class InteractiveMultipleChoice(
     terminal: Terminal,
     out: Output,
     colors: Boolean,
-    windowSize: Int
-) extends PromptFramework(terminal, out):
+    windowSize: Int,
+) extends PromptFramework[List[String]](terminal, out):
   import InteractiveMultipleChoice.*
 
   override type PromptState = State
-  override type Result      = List[String]
 
   private lazy val preSelected =
     prompt.alts.zipWithIndex.filter(_._1._2).map(_._2)
@@ -42,8 +41,8 @@ private[cue4s] class InteractiveMultipleChoice(
     display = InfiniscrollableState(
       showing = Some(altsWithIndex.map(_._2) -> 0),
       windowStart = 0,
-      windowSize = windowSize
-    )
+      windowSize = windowSize,
+    ),
   )
 
   private lazy val altMapping = altsWithIndex.map(_.swap).toMap
@@ -51,7 +50,10 @@ private[cue4s] class InteractiveMultipleChoice(
   private lazy val formatting = TextFormatting(colors)
   import formatting.*
 
-  override def renderState(st: State): List[String] =
+  override def renderState(
+      st: State,
+      error: Option[PromptError],
+  ): List[String] =
     val lines = List.newBuilder[String]
 
     st.status match
@@ -80,7 +82,7 @@ private[cue4s] class InteractiveMultipleChoice(
                       else if filtered.size > st.display.windowSize && idx == st.display.windowSize - 1 &&
                         filtered.indexOf(id) != filtered.size - 1
                       then s" ↓ $alt".bold
-                      else s"   $alt"
+                      else s"   $alt",
                     )
                   end if
         end match
@@ -90,8 +92,7 @@ private[cue4s] class InteractiveMultipleChoice(
 
         if ids.isEmpty then lines += "nothing selected".underline
         else
-          ids.toList.sorted
-            .map(altMapping)
+          ids
             .foreach: value =>
               lines += s" ‣ " + value.bold
 
@@ -104,57 +105,36 @@ private[cue4s] class InteractiveMultipleChoice(
     lines.result()
   end renderState
 
-  override def handleEvent(event: Event): Next[List[String]] =
+  override def result(state: State): Either[PromptError, List[String]] =
+    Right(state.selected.toList.sorted.map(altMapping).toList)
+
+  override def handleEvent(event: Event) =
     event match
-      case Event.Init =>
-        terminal.cursorHide()
-        printPrompt()
-        Next.Continue
+      case Event.Init => PromptAction.Start
 
       case Event.Key(KeyEvent.UP) =>
-        stateTransition(_.updateDisplay(_.up))
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.updateDisplay(_.up))
 
       case Event.Key(KeyEvent.DOWN) =>
-        stateTransition(_.updateDisplay(_.down))
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.updateDisplay(_.down))
 
       case Event.Key(KeyEvent.ENTER) =>
-        stateTransition(_.finish)
-        currentState().status match
-          case Status.Canceled => Next.Stop
-          case Status.Running  => Next.Continue
-          case Status.Finished(ids) =>
-            val stringValues = ids.toList.sorted.map(altMapping.apply)
-            printPrompt()
-            terminal.cursorShow()
-            Next.Done(stringValues)
+        PromptAction.Submit(result => state => state.finish(result))
 
       case Event.Key(KeyEvent.TAB) =>
-        stateTransition(_.toggle)
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.toggle)
 
       case Event.Key(KeyEvent.DELETE) =>
-        stateTransition(_.trimText)
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.trimText)
 
       case Event.Char(which) =>
-        stateTransition(_.addText(which.toChar))
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.addText(which.toChar))
 
       case Event.Interrupt =>
-        stateTransition(_.cancel)
-        printPrompt()
-        terminal.cursorShow()
-        Next.Stop
+        PromptAction.UpdateAndStop(_.cancel)
 
       case _ =>
-        Next.Continue
+        PromptAction.Continue
     end match
   end handleEvent
 
@@ -163,7 +143,7 @@ end InteractiveMultipleChoice
 private[cue4s] object InteractiveMultipleChoice:
   enum Status:
     case Running
-    case Finished(ids: Set[Int])
+    case Finished(ids: List[String])
     case Canceled
 
   case class State(
@@ -171,13 +151,13 @@ private[cue4s] object InteractiveMultipleChoice:
       selected: Set[Int],
       all: List[(String, Int)],
       status: Status,
-      display: InfiniscrollableState
+      display: InfiniscrollableState,
   ):
 
     def updateDisplay(f: InfiniscrollableState => InfiniscrollableState) =
       copy(display = f(display))
 
-    def finish = copy(status = Status.Finished(selected))
+    def finish(result: List[String]) = copy(status = Status.Finished(result))
 
     def cancel = copy(status = Status.Canceled)
 
@@ -198,7 +178,7 @@ private[cue4s] object InteractiveMultipleChoice:
       val newFiltered = all.filter((alt, _) =>
         newText.trim.isEmpty || alt
           .toLowerCase()
-          .contains(newText.toLowerCase().trim())
+          .contains(newText.toLowerCase().trim()),
       )
       if newFiltered.nonEmpty then
         display.showing match
