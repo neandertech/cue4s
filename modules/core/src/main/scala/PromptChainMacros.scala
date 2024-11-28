@@ -145,7 +145,7 @@ private[cue4s] object PromptChainMacros:
                   s => if s.trim.isEmpty then None else value(s)
 
             val label  = ${ hints.name }.getOrElse($nm)
-            val prompt = Prompt.Input(label, validate)
+            val prompt = Prompt.Input(label).validate(validate)
 
             PromptStep[Tuple, String](
               prompt,
@@ -160,7 +160,8 @@ private[cue4s] object PromptChainMacros:
 
             val label = ${ hints.name }.getOrElse($nm)
             val prompt =
-              if ${ hints.options }.isEmpty then Prompt.Input(label, validate)
+              if ${ hints.options }.isEmpty then
+                Prompt.Input(label).validate(validate)
               else Prompt.SingleChoice(label, ${ hints.options }.getOrElse(Nil))
 
             PromptStep[Tuple, String](

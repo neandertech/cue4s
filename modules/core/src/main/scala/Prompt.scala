@@ -17,39 +17,114 @@
 package cue4s
 
 trait Prompt[Result]:
-  private[cue4s] def handler(
+  self =>
+  private[cue4s] def framework(
       terminal: Terminal,
       output: Output,
       colors: Boolean
-  ): Handler[Result]
+  ): PromptFramework[Result]
+
+  def map[Derived](f: Result => Derived): Prompt[Derived] =
+    mapValidated(r => Right(f(r)))
+
+  def mapValidated[Derived](
+      f: Result => Either[PromptError, Derived]
+  ): Prompt[Derived] =
+    new Prompt[Derived]:
+      override def framework(
+          terminal: Terminal,
+          output: Output,
+          colors: Boolean
+      ): PromptFramework[Derived] =
+        self.framework(terminal, output, colors).mapValidated(f)
+end Prompt
 
 object Prompt:
-  case class Input(
+  case class Input private (
       lab: String,
       validate: String => Option[PromptError] = _ => None
   ) extends Prompt[String]:
-    override def handler(
+
+    def this(lab: String) = this(lab, _ => None)
+
+    def validate(f: String => Option[PromptError]): Input =
+      copy(validate = (n: String) => validate(n).orElse(f(n)))
+
+    override def framework(
         terminal: Terminal,
         output: Output,
         colors: Boolean
-    ): Handler[String] =
-      InteractiveTextInput(this, terminal, output, colors).handler
+    ) = InteractiveTextInput(lab, terminal, output, colors, validate)
   end Input
 
-  case class SingleChoice(lab: String, alts: List[String], windowSize: Int = 10)
-      extends Prompt[String]:
-    override def handler(
+  object Input:
+    def apply(lab: String): Input = new Input(lab)
+
+  case class NumberInput[N: Numeric] private (
+      lab: String,
+      validateNumber: N => Option[PromptError] = (_: N) => None
+  ) extends Prompt[N]:
+    private val num = Numeric[N]
+
+    def this(lab: String) = this(lab, _ => None)
+
+    def validate(f: N => Option[PromptError]): NumberInput[N] =
+      copy(validateNumber = (n: N) => validateNumber(n).orElse(f(n)))
+
+    def positive = validate(n =>
+      Option.when(num.lteq(n, num.zero))(PromptError("must be positive"))
+    )
+
+    def negative = validate(n =>
+      Option.when(num.lteq(n, num.zero))(PromptError("must be negative"))
+    )
+
+    def min(value: N): NumberInput[N] = validate(n =>
+      Option.when(num.lt(n, value))(PromptError(s"must be no less than $value"))
+    )
+
+    def max(value: N): NumberInput[N] = validate(n =>
+      Option.when(num.gt(n, value))(PromptError(s"must be no more than $value"))
+    )
+
+    override def framework(
         terminal: Terminal,
         output: Output,
         colors: Boolean
-    ): Handler[String] =
+    ) =
+      val lifted = (n: N) => validateNumber(n).toLeft(n)
+
+      val transform = (s: String) =>
+        Numeric[N]
+          .parseString(s)
+          .toRight(PromptError("not a valid number"))
+          .flatMap(lifted)
+
+      val stringValidate = transform(_: String).left.toOption
+
+      InteractiveTextInput(lab, terminal, output, colors, stringValidate)
+        .mapValidated(transform)
+    end framework
+  end NumberInput
+
+  object NumberInput:
+    val int    = NumberInput[Int].apply(_, _ => None)
+    val float  = NumberInput[Float].apply(_, _ => None)
+    val double = NumberInput[Float].apply(_, _ => None)
+  case class SingleChoice(lab: String, alts: List[String], windowSize: Int = 10)
+      extends Prompt[String]:
+    override def framework(
+        terminal: Terminal,
+        output: Output,
+        colors: Boolean
+    ) =
       InteractiveSingleChoice(
         this,
         terminal,
         output,
         colors,
         windowSize
-      ).handler
+      )
   end SingleChoice
 
   case class MultipleChoice private (
@@ -57,18 +132,18 @@ object Prompt:
       alts: List[(String, Boolean)],
       windowSize: Int
   ) extends Prompt[List[String]]:
-    override def handler(
+    override def framework(
         terminal: Terminal,
         output: Output,
         colors: Boolean
-    ): Handler[List[String]] =
+    ) =
       InteractiveMultipleChoice(
         this,
         terminal,
         output,
         colors,
         windowSize
-      ).handler
+      )
   end MultipleChoice
 
   object MultipleChoice:

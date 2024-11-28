@@ -25,8 +25,8 @@ private trait PromptsPlatform:
   def future[R](
       prompt: Prompt[R]
   )(using ExecutionContext): Future[Completion[R]] =
-    val handler = prompt.handler(terminal, out, colors)
+    val framework = prompt.framework(terminal, out, colors)
 
-    inputProvider.evaluateFuture(handler)
+    inputProvider.evaluateFuture(framework.handler)
   end future
 end PromptsPlatform

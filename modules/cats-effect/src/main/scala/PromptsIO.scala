@@ -30,12 +30,14 @@ class PromptsIO private (
       prompt: Prompt[A]
   ): IO[Completion[A]] =
     val inputProvider = InputProvider(out)
-    val handler       = prompt.handler(terminal, out, colors)
+    val framework     = prompt.framework(terminal, out, colors)
 
     // TODO: provide native CE interface here
     IO.executionContext
       .flatMap: ec =>
-        IO.fromFuture(IO(inputProvider.evaluateFuture(handler)(using ec)))
+        IO.fromFuture(
+          IO(inputProvider.evaluateFuture(framework.handler)(using ec))
+        )
       .guarantee(IO(terminal.cursorShow()))
       .guarantee(IO(inputProvider.close()))
 

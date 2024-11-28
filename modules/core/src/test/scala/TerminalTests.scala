@@ -9,6 +9,9 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   case object LogTag extends munit.Tag("logtest")
 
+  def delete(str: String): List[Event] =
+    List.fill(str.length())(Event.Key(KeyEvent.DELETE))
+
   def chars(str: String): List[Event] =
     str.map(Event.Char(_)).toList
 
@@ -92,10 +95,10 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     val logger: String => Unit =
       if log then s => sb.append(s + "\n") else _ => ()
     val term      = TracingTerminal(Output.Delegate(_ => (), logger))
-    val capturing = Output.Delegate(term.writer, s => sb.append(s + "\n"))
+    val capturing = Output.Delegate(term.writer, term.log(_))
 
     val handler =
-      prompt.handler(term, capturing, colors = false)
+      prompt.framework(term, capturing, colors = false).handler
 
     var result          = Option.empty[Next[T]]
     val eventsProcessed = List.newBuilder[Event]

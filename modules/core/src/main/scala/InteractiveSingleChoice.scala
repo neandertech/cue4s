@@ -21,17 +21,22 @@ private[cue4s] class InteractiveSingleChoice(
     terminal: Terminal,
     out: Output,
     colors: Boolean,
-    windowSize: Int
-) extends PromptFramework(terminal, out):
+    windowSize: Int,
+) extends PromptFramework[String](terminal, out):
   import InteractiveSingleChoice.*
 
   override type PromptState = State
-  override type Result      = String
 
   override def isRunning(state: State): Boolean = state.status == Status.Running
 
   private lazy val altsWithIndex = prompt.alts.zipWithIndex
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
+
+  override def result(state: State): Either[PromptError, String] =
+    state.display.showing
+      .map(_._2)
+      .map(altMapping)
+      .toRight(PromptError("nothing selected"))
 
   override def initialState = State(
     text = "",
@@ -40,59 +45,44 @@ private[cue4s] class InteractiveSingleChoice(
     display = InfiniscrollableState(
       showing = Some(altsWithIndex.map(_._2) -> 0),
       windowStart = 0,
-      windowSize = windowSize
-    )
+      windowSize = windowSize,
+    ),
   )
 
-  override def handleEvent(event: Event): Next[String] =
+  override def handleEvent(event: Event) =
     event match
-      case Event.Init =>
-        printPrompt()
-        Next.Continue
+      case Event.Init => PromptAction.Start
+
       case Event.Key(KeyEvent.UP) =>
-        stateTransition(_.updateDisplay(_.up))
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.updateDisplay(_.up))
+
       case Event.Key(KeyEvent.DOWN) =>
-        stateTransition(_.updateDisplay(_.down))
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.updateDisplay(_.down))
 
       case Event.Key(KeyEvent.ENTER) => // enter
-        stateTransition(_.finish)
-        currentState().status match
-          case Status.Running => Next.Continue
-          case Status.Finished(idx) =>
-            val stringValue = altMapping(idx)
-            printPrompt()
-            Next.Done(stringValue)
-          case Status.Canceled => Next.Stop
+        PromptAction.Submit(result => state => state.finish(result))
 
       case Event.Key(KeyEvent.DELETE) => // enter
-        stateTransition(_.trimText)
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.trimText)
 
       case Event.Char(which) =>
-        stateTransition(_.addText(which.toChar))
-        printPrompt()
-        Next.Continue
+        PromptAction.Update(_.addText(which.toChar))
 
       case Event.Interrupt =>
-        stateTransition(_.cancel)
-        printPrompt()
-        terminal.cursorShow()
-        Next.Stop
+        PromptAction.UpdateAndStop(_.cancel)
 
       case _ =>
-        Next.Continue
+        PromptAction.Continue
     end match
   end handleEvent
 
   private lazy val formatting = TextFormatting(colors)
   import formatting.*
 
-  override def renderState(st: State): List[String] =
+  override def renderState(
+      st: State,
+      error: Option[PromptError],
+  ): List[String] =
     val lines = List.newBuilder[String]
 
     st.status match
@@ -119,11 +109,10 @@ private[cue4s] class InteractiveSingleChoice(
                       idx == st.display.windowSize - 1 &&
                       filtered.indexOf(id) != filtered.size - 1
                     then s"  ↓ $alt".bold
-                    else s"    $alt".bold
+                    else s"    $alt".bold,
                   )
         end match
-      case Status.Finished(idx) =>
-        val value = altMapping(idx)
+      case Status.Finished(value) =>
         lines += "✔ ".green +
           (prompt.lab + " ").cyan +
           value.bold
@@ -141,23 +130,20 @@ end InteractiveSingleChoice
 private[cue4s] object InteractiveSingleChoice:
   enum Status:
     case Running
-    case Finished(idx: Int)
+    case Finished(selected: String)
     case Canceled
 
   case class State(
       text: String,
       all: List[(String, Int)],
       status: Status,
-      display: InfiniscrollableState
+      display: InfiniscrollableState,
   ):
     def updateDisplay(f: InfiniscrollableState => InfiniscrollableState) =
       copy(display = f(display))
 
-    def finish =
-      display.showing match
-        case None => this
-        case Some((_, selected)) =>
-          copy(status = Status.Finished(selected))
+    def finish(result: String) =
+      copy(status = Status.Finished(result))
 
     def cancel = copy(status = Status.Canceled)
 
@@ -172,7 +158,7 @@ private[cue4s] object InteractiveSingleChoice:
       val newFiltered = all.filter((alt, _) =>
         newText.trim.isEmpty || alt
           .toLowerCase()
-          .contains(newText.toLowerCase().trim())
+          .contains(newText.toLowerCase().trim()),
       )
       if newFiltered.nonEmpty then
         display.showing match
