@@ -6,12 +6,9 @@ Global / excludeLintKeys += scalaJSLinkerConfig
 
 inThisBuild(
   List(
-    semanticdbEnabled          := true,
-    semanticdbVersion          := scalafixSemanticdb.revision,
-    scalafixScalaBinaryVersion := scalaBinaryVersion.value,
-    organization               := "tech.neander",
-    organizationName           := "Neandertech",
-    sonatypeCredentialHost     := "s01.oss.sonatype.org",
+    organization           := "tech.neander",
+    organizationName       := "Neandertech",
+    sonatypeCredentialHost := "s01.oss.sonatype.org",
     resolvers ++= Resolver.sonatypeOssRepos("releases"),
     homepage := Some(
       url("https://github.com/neandertech/cue4s")
@@ -33,12 +30,12 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3        = "3.3.3"
-  val munit         = "1.0.0"
+  val Scala3        = "3.3.4"
+  val munit         = "1.0.2"
   val scalaVersions = Seq(Scala3)
   val fansi         = "0.5.0"
   val jna           = "5.14.0"
-  val catsEffect    = "3.5.3"
+  val catsEffect    = "3.5.7"
 }
 
 lazy val munitSettings = Seq(
@@ -182,6 +179,7 @@ val scalafixRules = Seq(
 
 val CICommands = Seq(
   "clean",
+  "scalafixEnable",
   "compile",
   "test",
   "checkDocs",
