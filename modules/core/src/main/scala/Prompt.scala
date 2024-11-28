@@ -80,11 +80,15 @@ object Prompt:
     )
 
     def min(value: N): NumberInput[N] = validate(n =>
-      Option.when(num.lt(n, value))(PromptError(s"must be no less than $value")),
+      Option.when(num.lt(n, value))(
+        PromptError(s"must be no less than $value"),
+      ),
     )
 
     def max(value: N): NumberInput[N] = validate(n =>
-      Option.when(num.gt(n, value))(PromptError(s"must be no more than $value")),
+      Option.when(num.gt(n, value))(
+        PromptError(s"must be no more than $value"),
+      ),
     )
 
     override def framework(
