@@ -116,11 +116,9 @@ private[cue4s] class InteractiveSingleChoice(
         lines += "✔ ".green +
           (prompt.lab + " ").cyan +
           value.bold
-        lines += ""
       case Status.Canceled =>
         lines += "× ".red +
           (prompt.lab + " ").cyan
-        lines += ""
     end match
 
     lines.result()
