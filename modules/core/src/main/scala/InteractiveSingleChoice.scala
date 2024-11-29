@@ -107,8 +107,8 @@ private[cue4s] class InteractiveSingleChoice(
                     else if filtered.size > st.display.windowSize &&
                       idx == st.display.windowSize - 1 &&
                       filtered.indexOf(id) != filtered.size - 1
-                    then s"  ↓ $alt".bold
-                    else s"    $alt".bold,
+                    then s"  ↓ $alt".option
+                    else s"    $alt".option,
                   )
         end match
       case Status.Finished(value) =>

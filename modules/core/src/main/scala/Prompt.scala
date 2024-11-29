@@ -140,14 +140,14 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
-    ): Handler[List[String]] =
+    ): PromptFramework[List[String]] =
       InteractiveMultipleChoice(
         this,
         terminal,
         output,
         theme,
         windowSize,
-      ).handler
+      )
   end MultipleChoice
 
   object MultipleChoice:
