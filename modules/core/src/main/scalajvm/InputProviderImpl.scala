@@ -22,6 +22,8 @@ import scala.util.boundary
 
 import boundary.break
 import CharCollector.*
+import scala.concurrent.Promise
+import scala.util.Success
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
@@ -32,9 +34,13 @@ private class InputProviderImpl(o: Output)
   override def evaluateFuture[Result](handler: Handler[Result])(using
       ExecutionContext,
   ) =
+
+    val cancellation = Promise[Completion[Result]]()
+
     val hook = () =>
       handler(Event.Interrupt)
-      close()
+      cancellation.complete(Success(Completion.interrupted))
+      ()
 
     InputProviderImpl.addShutdownHook(hook)
     this.synchronized:
@@ -46,22 +52,19 @@ private class InputProviderImpl(o: Output)
       this.synchronized:
         asyncHookSet = false
 
-    fut
+    Future.firstCompletedOf(Seq(cancellation.future, fut))
   end evaluateFuture
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     cue4s.ChangeMode.changemode(1)
-    val hook = () =>
-      handler(Event.Interrupt)
-      close()
-
-    if !asyncHookSet then InputProviderImpl.addShutdownHook(hook)
 
     var lastRead = 0
 
     inline def read() =
       lastRead = cue4s.ChangeMode.CLibrary.INSTANCE.getchar()
       lastRead
+
+    var hook = Option.empty[() => Unit]
 
     try
       boundary[Completion[Result]]:
@@ -72,6 +75,11 @@ private class InputProviderImpl(o: Output)
             case Next.Done(value) => break(Completion.Finished(value))
             case Next.Stop        => break(Completion.interrupted)
             case Next.Error(msg)  => break(Completion.error(msg))
+
+        hook = Some: () =>
+          whatNext(handler(Event.Interrupt))
+
+        if !asyncHookSet then hook.foreach(InputProviderImpl.addShutdownHook)
 
         def send(ev: Event) =
           whatNext(handler(ev))
@@ -85,8 +93,7 @@ private class InputProviderImpl(o: Output)
 
           result match
             case n: DecodeResult => whatNext(n.toNext)
-            case e: Event =>
-              send(e)
+            case e: Event        => send(e)
 
           state = newState
 
@@ -94,12 +101,13 @@ private class InputProviderImpl(o: Output)
 
         Completion.interrupted
     finally
-      if !asyncHookSet then InputProviderImpl.removeShutdownHook(hook)
+      if !asyncHookSet then hook.foreach(InputProviderImpl.removeShutdownHook)
     end try
 
   end evaluate
 
-  override def close() = cue4s.ChangeMode.changemode(0)
+  override def close() =
+    cue4s.ChangeMode.changemode(0)
 
 end InputProviderImpl
 
