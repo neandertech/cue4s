@@ -19,47 +19,49 @@ package example.catseffect
 import cats.effect.*
 import cue4s.*
 
+import cats.syntax.all.*
+
 import catseffect.*
 
 case class Info(
-    day: Option[String] = None,
-    work: Option[String] = None,
-    letters: Set[String] = Set.empty
+    day: String,
+    work: String,
+    letters: List[String],
 )
 
 object ioExample extends IOApp.Simple:
   def run: IO[Unit] =
     PromptsIO().use: prompts =>
       for
-        ref <- IO.ref(Info())
+        _ <- IO.println("let's go")
 
-        day <- prompts
+        day = prompts
           .io(
-            Prompt.SingleChoice("How was your day?", List("great", "okay"))
+            Prompt.SingleChoice("How was your day?", List("great", "okay")),
           )
-          .map(_.toOption)
-          .flatTap(day => ref.update(_.copy(day = day)))
+          .map(_.toEither)
+          .flatMap(IO.fromEither)
 
-        work <- prompts
+        work = prompts
           .io(
-            Prompt.Input("Where do you work?")
+            Prompt.Input("Where do you work?"),
           )
-          .map(_.toOption)
-          .flatTap(work => ref.update(_.copy(work = work)))
+          .map(_.toEither)
+          .flatMap(IO.fromEither)
 
-        letter <- prompts
+        letter = prompts
           .io(
             Prompt.MultipleChoice(
               "What are your favourite letters?",
-              ('A' to 'F').map(_.toString).toList
-            )
+              ('A' to 'F').map(_.toString).toList,
+            ),
           )
-          .map(_.toOption)
-          .flatTap(letter =>
-            ref.update(_.copy(letters = letter.fold(Set.empty)(_.toSet)))
-          )
+          .map(_.toEither)
+          .flatMap(IO.fromEither)
 
-        _ <- ref.get.flatMap(IO.println)
+        info <- (day, work, letter).mapN(Info.apply)
+
+        _ <- IO.println(info)
       yield ()
 
 end ioExample
