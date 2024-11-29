@@ -136,14 +136,6 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
               previousRendering,
             )
 
-        out.logLn(
-          current
-            .zip(previous)
-            .toString(),
-        )
-
-        out.logLn(paddingLength.toString)
-
         def render =
           current
             .zip(previous)
@@ -158,7 +150,6 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
           moveUp(current.length).moveHorizontalTo(0)
         else // we are finished
           render
-          // out.logLn(paddingLength)
           // do not leave empty lines behind - move cursor up
           moveUp(paddingLength).moveHorizontalTo(0)
 
