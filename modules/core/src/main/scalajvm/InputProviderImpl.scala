@@ -18,12 +18,12 @@ package cue4s
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scala.concurrent.Promise
+import scala.util.Success
 import scala.util.boundary
 
 import boundary.break
 import CharCollector.*
-import scala.concurrent.Promise
-import scala.util.Success
 
 private class InputProviderImpl(o: Output)
     extends InputProvider(o),
