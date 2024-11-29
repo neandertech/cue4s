@@ -75,9 +75,7 @@ private class InputProviderImpl(o: Output)
       def handle(key: Key) =
         if key.name == "c" && key.ctrl then
           handler(Event.Interrupt)
-          stdin.setRawMode(false)
-          rl.close()
-          stdin.removeListener("keypress", keypress)
+          close(Completion.Fail(CompletionError.Interrupted))
         else
           key.sequence
             .getBytes()
