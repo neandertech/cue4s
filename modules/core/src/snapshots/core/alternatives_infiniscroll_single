@@ -1,6 +1,6 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How was your day? > ┃
+┃? How was your day? > ┃
 ┃  ‣ amazing           ┃
 ┃    productive        ┃
 ┃  ↓ relaxing          ┃
@@ -8,7 +8,7 @@ Event.Init
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How was your day? > ┃
+┃? How was your day? > ┃
 ┃    amazing           ┃
 ┃  ‣ productive        ┃
 ┃  ↓ relaxing          ┃
@@ -16,7 +16,7 @@ Event.Key(DOWN)
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How was your day? > ┃
+┃? How was your day? > ┃
 ┃  ↑ productive        ┃
 ┃  ‣ relaxing          ┃
 ┃  ↓ stressful         ┃
@@ -24,7 +24,7 @@ Event.Key(DOWN)
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How was your day? > ┃
+┃? How was your day? > ┃
 ┃  ↑ relaxing          ┃
 ┃  ‣ stressful         ┃
 ┃    exhausting        ┃
@@ -32,7 +32,7 @@ Event.Key(DOWN)
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How was your day? > ┃
+┃? How was your day? > ┃
 ┃  ↑ relaxing          ┃
 ┃    stressful         ┃
 ┃  ‣ exhausting        ┃
@@ -40,17 +40,17 @@ Event.Key(DOWN)
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(UP)
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How was your day? > ┃
+┃? How was your day? > ┃
 ┃  ↑ relaxing          ┃
 ┃  ‣ stressful         ┃
 ┃    exhausting        ┃
 ┃                      ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃✔ How was your day? stressful┃
-┃                             ┃
-┃                             ┃
-┃                             ┃
-┃                             ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃✔ How was your day?  … stressful┃
+┃                                ┃
+┃                                ┃
+┃                                ┃
+┃                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛

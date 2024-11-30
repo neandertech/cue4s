@@ -1,6 +1,6 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How do you do fellow kids? > ┃
+┃? How do you do fellow kids? > ┃
 ┃  ‣ killa                      ┃
 ┃    rizza                      ┃
 ┃    flizza                     ┃
@@ -8,7 +8,7 @@ Event.Init
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('z')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How do you do fellow kids? > z┃
+┃? How do you do fellow kids? > z┃
 ┃  ‣ rizza                       ┃
 ┃    flizza                      ┃
 ┃                                ┃
@@ -16,7 +16,7 @@ Event.Char('z')
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How do you do fellow kids? >  ┃
+┃? How do you do fellow kids? >  ┃
 ┃    killa                       ┃
 ┃  ‣ rizza                       ┃
 ┃    flizza                      ┃
@@ -24,7 +24,7 @@ Event.Key(DELETE)
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('l')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How do you do fellow kids? > l┃
+┃? How do you do fellow kids? > l┃
 ┃  ‣ killa                       ┃
 ┃    flizza                      ┃
 ┃                                ┃
@@ -32,17 +32,17 @@ Event.Char('l')
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('i')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃· How do you do fellow kids? > li┃
+┃? How do you do fellow kids? > li┃
 ┃  ‣ flizza                       ┃
 ┃                                 ┃
 ┃                                 ┃
 ┃                                 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃✔ How do you do fellow kids? flizza┃
-┃                                   ┃
-┃                                   ┃
-┃                                   ┃
-┃                                   ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃✔ How do you do fellow kids?  … flizza┃
+┃                                      ┃
+┃                                      ┃
+┃                                      ┃
+┃                                      ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
