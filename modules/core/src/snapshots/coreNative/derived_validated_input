@@ -1,7 +1,6 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃What color is the sky? > ┃
-┃look up, it's not        ┃
 ┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('g')

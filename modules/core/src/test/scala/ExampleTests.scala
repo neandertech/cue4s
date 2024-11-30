@@ -177,6 +177,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
     ),
     true,
+    log = false,
   )
 
   terminalTestComplete("number.input")(

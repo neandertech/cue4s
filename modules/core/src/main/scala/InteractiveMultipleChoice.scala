@@ -31,13 +31,10 @@ private[cue4s] class InteractiveMultipleChoice(
     prompt.alts.zipWithIndex.filter(_._1._2).map(_._2)
   private lazy val altsWithIndex = prompt.alts.map(_._1).zipWithIndex
 
-  override def isRunning(state: State): Boolean = state.status == Status.Running
-
   override def initialState = State(
     text = "",
     selected = preSelected.toSet,
     all = altsWithIndex,
-    status = Status.Running,
     display = InfiniscrollableState(
       showing = Some(altsWithIndex.map(_._2) -> 0),
       windowStart = 0,
@@ -51,12 +48,12 @@ private[cue4s] class InteractiveMultipleChoice(
 
   override def renderState(
       st: State,
-      error: Option[PromptError],
+      status: Status,
   ): List[String] =
     val lines = List.newBuilder[String]
 
-    st.status match
-      case Status.Running =>
+    status match
+      case Status.Running(_) | Status.Init =>
         lines += prompt.lab.prompt + " > ".prompt + st.text.input
         lines += "Tab".emphasis + " to toggle, " + "Enter".emphasis + " to submit."
 
@@ -104,33 +101,32 @@ private[cue4s] class InteractiveMultipleChoice(
     lines.result()
   end renderState
 
-  override def result(state: State): Either[PromptError, List[String]] =
-    Right(state.selected.toList.sorted.map(altMapping).toList)
-
   override def handleEvent(event: Event) =
     event match
-      case Event.Init => PromptAction.Start
-
       case Event.Key(KeyEvent.UP) =>
-        PromptAction.Update(_.updateDisplay(_.up))
+        PromptAction.updateState(_.updateDisplay(_.up))
 
       case Event.Key(KeyEvent.DOWN) =>
-        PromptAction.Update(_.updateDisplay(_.down))
+        PromptAction.updateState(_.updateDisplay(_.down))
 
       case Event.Key(KeyEvent.ENTER) =>
-        PromptAction.Submit(result => state => state.finish(result))
+        PromptAction.updateStatus(_ =>
+          Status.Finished(
+            currentState().selected.toList.sorted.map(altMapping).toList,
+          ),
+        )
 
       case Event.Key(KeyEvent.TAB) =>
-        PromptAction.Update(_.toggle)
+        PromptAction.updateState(_.toggle)
 
       case Event.Key(KeyEvent.DELETE) =>
-        PromptAction.Update(_.trimText)
+        PromptAction.updateState(_.trimText)
 
       case Event.Char(which) =>
-        PromptAction.Update(_.addText(which.toChar))
+        PromptAction.updateState(_.addText(which.toChar))
 
       case Event.Interrupt =>
-        PromptAction.UpdateAndStop(_.cancel)
+        PromptAction.updateStatus(_ => Status.Canceled)
 
       case _ =>
         PromptAction.Continue
@@ -140,25 +136,15 @@ private[cue4s] class InteractiveMultipleChoice(
 end InteractiveMultipleChoice
 
 private[cue4s] object InteractiveMultipleChoice:
-  enum Status:
-    case Running
-    case Finished(ids: List[String])
-    case Canceled
-
   case class State(
       text: String,
       selected: Set[Int],
       all: List[(String, Int)],
-      status: Status,
       display: InfiniscrollableState,
   ):
 
     def updateDisplay(f: InfiniscrollableState => InfiniscrollableState) =
       copy(display = f(display))
-
-    def finish(result: List[String]) = copy(status = Status.Finished(result))
-
-    def cancel = copy(status = Status.Canceled)
 
     def addText(t: Char) =
       changeText(text + t).updateDisplay(_.resetWindow())
