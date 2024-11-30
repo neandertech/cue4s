@@ -25,7 +25,9 @@ class Prompts private (
 
   protected lazy val inputProvider = InputProvider(out)
 
-  override def close(): Unit = inputProvider.close()
+  override def close(): Unit =
+    terminal.cursorShow()
+    inputProvider.close()
 end Prompts
 
 object Prompts:

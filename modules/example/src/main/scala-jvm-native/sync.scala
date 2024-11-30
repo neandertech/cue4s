@@ -19,75 +19,74 @@ package cue4s_example
 import cue4s.*
 
 @main def sync =
-  val prompts = Prompts()
+  Prompts.use(): prompts =>
+    val likeCats = prompts
+      .sync(
+        Prompt.Confirmation("Do you like cats?"),
+      )
+      .toOption
 
-  val likeCats = prompts
-    .sync(
-      Prompt.Confirmation("Do you like cats?"),
-    )
-    .toOption
-
-  val day = prompts
-    .sync(
-      Prompt.SingleChoice(
-        "How was your day?",
-        List(
-          "amazing",
-          "productive",
-          "relaxing",
-          "stressful",
-          "exhausting",
-          "challenging",
-          "wonderful",
-          "uneventful",
-          "interesting",
-          "exciting",
-          "boring",
-          "demanding",
-          "satisfying",
-          "frustrating",
-          "peaceful",
-          "overwhelming",
-          "busy",
-          "calm",
-          "enjoyable",
-          "memorable",
-          "ordinary",
-          "fantastic",
-          "rewarding",
-          "chaotic",
+    val day = prompts
+      .sync(
+        Prompt.SingleChoice(
+          "How was your day?",
+          List(
+            "amazing",
+            "productive",
+            "relaxing",
+            "stressful",
+            "exhausting",
+            "challenging",
+            "wonderful",
+            "uneventful",
+            "interesting",
+            "exciting",
+            "boring",
+            "demanding",
+            "satisfying",
+            "frustrating",
+            "peaceful",
+            "overwhelming",
+            "busy",
+            "calm",
+            "enjoyable",
+            "memorable",
+            "ordinary",
+            "fantastic",
+            "rewarding",
+            "chaotic",
+          ),
+          windowSize = 7,
         ),
-        windowSize = 7,
-      ),
-    )
-    .toOption
+      )
+      .toOption
 
-  val skyColor: Completion[Boolean] = prompts.sync(
-    Prompt
-      .Input("What color is the sky?")
-      .mapValidated: s =>
-        Either.cond(s == "blue", true, PromptError("hint: it's blue")),
-  )
-
-  val letters: Completion[List[String]] = prompts
-    .sync(
-      Prompt.MultipleChoice.withNoneSelected(
-        "What are your favourite letters?",
-        ('A' to 'Z').map(_.toString).toList,
-        windowSize = 7,
-      ),
+    val skyColor: Completion[Boolean] = prompts.sync(
+      Prompt
+        .Input("What color is the sky?")
+        .mapValidated: s =>
+          Either.cond(s == "blue", true, PromptError("hint: it's blue")),
     )
 
-  val seasons: Completion[Int] =
-    prompts.sync(
-      Prompt.NumberInput
-        .int("How many seasons of Stargate SG-1 are there")
-        .validate:
-          case x if x < 10 => Option(PromptError("More!"))
-          case x if x > 10 => Option(PromptError("Fewer!"))
-          case _           => None,
-    )
+    val letters: Completion[List[String]] = prompts
+      .sync(
+        Prompt.MultipleChoice.withNoneSelected(
+          "What are your favourite letters?",
+          ('A' to 'Z').map(_.toString).toList,
+          windowSize = 7,
+        ),
+      )
 
-  println(s"$likeCats, $skyColor, $letters, $day, $seasons")
+    val seasons: Completion[Int] =
+      prompts.sync(
+        Prompt.NumberInput
+          .int("How many seasons of Stargate SG-1 are there")
+          .validate:
+            case x if x < 10 => Option(PromptError("More!"))
+            case x if x > 10 => Option(PromptError("Fewer!"))
+            case _           => None,
+      )
+
+    println(s"$likeCats, $skyColor, $letters, $day, $seasons")
 
 end sync
