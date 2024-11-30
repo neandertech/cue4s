@@ -54,7 +54,7 @@ private[cue4s] class InteractiveMultipleChoice(
 
     status match
       case Status.Running(_) | Status.Init =>
-        lines += prompt.lab.prompt + " > ".prompt + st.text.input
+        lines += "? ".selected + prompt.lab.prompt + " > ".prompt + st.text.input
         lines += "Tab".emphasis + " to toggle, " + "Enter".emphasis + " to submit."
 
         st.display.showing match

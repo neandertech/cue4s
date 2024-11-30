@@ -63,15 +63,14 @@ private[cue4s] class InteractiveConfirmation(
           (" › (" + (if default then "Y/n" else "y/N") + ")").hint
         error.left.toOption.foreach: err =>
           lines += err.error
-        lines += ""
       case Status.Finished(res) =>
         lines += "✔ ".selected + prompt.prompt + " … ".hint +
           (if res then "yes" else "no").emphasis
-        lines += ""
       case Status.Canceled =>
         lines += "× ".canceled + prompt.emphasis
-        lines += ""
     end match
+
+    lines += ""
 
     lines.result()
   end renderState

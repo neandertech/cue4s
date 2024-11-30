@@ -67,20 +67,20 @@ private[cue4s] class InteractiveTextInput(
 
     status match
       case Status.Init =>
-        lines += prompt.prompt + " > "
+        lines += "? ".selected + prompt.prompt + " > "
       case Status.Running(err) =>
         val txt = if hideText then "*" * st.text.length else st.text
-        lines += prompt.prompt + " > " + txt.input
+        lines += "? ".selected + prompt.prompt + " > " + txt.input
         err.left.toOption.foreach: err =>
           lines += err.error
       case Status.Finished(res) =>
         val txt = if hideText then "*" * res.length else res
-        lines += "✔ ".selected + prompt.prompt + " " + txt.emphasis
-        lines += ""
+        lines += "✔ ".selected + prompt.prompt + " … ".hint + txt.emphasis
       case Status.Canceled =>
         lines += "× ".canceled + prompt.prompt
-        lines += ""
     end match
+
+    lines += ""
 
     lines.result()
   end renderState

@@ -82,7 +82,7 @@ private[cue4s] class InteractiveSingleChoice(
     status match
       case Status.Running(_) | Status.Init =>
         // prompt question
-        lines += "· " + (prompt.lab + " > ").prompt + st.text.input
+        lines += "? ".selected + (prompt.lab + " > ").prompt + st.text.input
 
         status match
           case Status.Running(err) =>
@@ -115,6 +115,7 @@ private[cue4s] class InteractiveSingleChoice(
       case Status.Finished(value) =>
         lines += "✔ ".selected +
           (prompt.lab + " ").prompt +
+          " … ".hint +
           value.emphasis
       case Status.Canceled =>
         lines += "× ".canceled +
