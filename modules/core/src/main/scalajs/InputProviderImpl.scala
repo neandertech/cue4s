@@ -25,7 +25,7 @@ import cue4s.CharCollector.decode
 
 import scalajs.js
 
-private class InputProviderImpl(o: Output)
+private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
       InputProviderPlatform:
   override def evaluateFuture[Result](
@@ -74,6 +74,7 @@ private class InputProviderImpl(o: Output)
       def handle(key: Key) =
         if key.name == "c" && key.ctrl then
           handler(Event.Interrupt)
+          o.cursorShow()
           close(Completion.Fail(CompletionError.Interrupted))
         else
           key.sequence

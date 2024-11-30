@@ -27,6 +27,6 @@ trait InputProviderPlatform:
   )(using ExecutionContext): Future[Completion[Result]]
 
 trait InputProviderCompanionPlatform:
-  def apply(o: Output): InputProvider = InputProviderImpl(o)
+  def apply(o: Terminal): InputProvider = InputProviderImpl(o)
 
 end InputProviderCompanionPlatform

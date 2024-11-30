@@ -107,7 +107,7 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
 
   final def printPrompt() =
     import terminal.*
-    cursorHide()
+    if currentStatus() != Status.Canceled then cursorHide()
     rendering.last match
       case None =>
         // initial print
