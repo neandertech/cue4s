@@ -23,7 +23,7 @@ class Prompts private (
 ) extends AutoCloseable
     with PromptsPlatform:
 
-  protected lazy val inputProvider = InputProvider(out)
+  protected lazy val inputProvider = InputProvider(terminal)
 
   override def close(): Unit =
     terminal.cursorShow()

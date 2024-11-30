@@ -24,12 +24,12 @@ class PromptsIO private (
     protected val terminal: Terminal,
     protected val theme: Theme,
 ) extends AutoCloseable:
-  protected lazy val inputProvider = InputProvider(out)
+  protected lazy val inputProvider = InputProvider(terminal)
 
   def io[A](
       prompt: Prompt[A],
   ): IO[Completion[A]] =
-    val inputProvider = InputProvider(out)
+    val inputProvider = InputProvider(terminal)
     val framework     = prompt.framework(terminal, out, theme)
 
     // TODO: provide native CE interface here

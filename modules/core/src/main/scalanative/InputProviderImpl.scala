@@ -26,7 +26,7 @@ import scalanative.posix.termios.*
 import boundary.break
 import CharCollector.*
 
-private class InputProviderImpl(o: Output)
+private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
       InputProviderPlatform:
 
@@ -37,6 +37,7 @@ private class InputProviderImpl(o: Output)
   ) =
     val hook = () =>
       handler(Event.Interrupt)
+      o.cursorShow()
       close()
 
     InputProviderImpl.addShutdownHook(hook)
@@ -79,6 +80,7 @@ private class InputProviderImpl(o: Output)
 
     val hook = () =>
       handler(Event.Interrupt)
+      o.cursorShow()
       close()
 
     if !asyncHookSet then InputProviderImpl.addShutdownHook(hook)

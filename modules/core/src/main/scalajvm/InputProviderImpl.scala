@@ -25,7 +25,7 @@ import scala.util.boundary
 import boundary.break
 import CharCollector.*
 
-private class InputProviderImpl(o: Output)
+private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
       InputProviderPlatform:
 
@@ -39,6 +39,7 @@ private class InputProviderImpl(o: Output)
 
     val hook = () =>
       handler(Event.Interrupt)
+      o.cursorShow()
       cancellation.complete(Success(Completion.interrupted))
       ()
 
@@ -77,6 +78,7 @@ private class InputProviderImpl(o: Output)
             case Next.Error(msg)  => break(Completion.error(msg))
 
         hook = Some: () =>
+          o.cursorShow()
           whatNext(handler(Event.Interrupt))
 
         if !asyncHookSet then hook.foreach(InputProviderImpl.addShutdownHook)
