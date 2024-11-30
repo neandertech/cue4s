@@ -115,6 +115,28 @@ object Prompt:
     val int    = NumberInput[Int].apply(_, _ => None)
     val float  = NumberInput[Float].apply(_, _ => None)
     val double = NumberInput[Float].apply(_, _ => None)
+
+  case class Confirmation(lab: String, default: Boolean = true)
+      extends Prompt[Boolean]:
+    override def framework(
+        terminal: Terminal,
+        output: Output,
+        theme: Theme,
+    ) =
+      ConfirmationPrompt(
+        lab,
+        default,
+        terminal,
+        output,
+        theme,
+      )
+  end Confirmation
+
+  object Confirmation:
+    def apply(lab: String, default: Boolean = true) =
+      new Confirmation(lab, default)
+  end Confirmation
+
   case class SingleChoice(lab: String, alts: List[String], windowSize: Int = 10)
       extends Prompt[String]:
     override def framework(

@@ -21,6 +21,12 @@ import cue4s.*
 @main def sync =
   val prompts = Prompts()
 
+  val likeCats = prompts
+    .sync(
+      Prompt.Confirmation("Do you like cats?"),
+    )
+    .toOption
+
   val day = prompts
     .sync(
       Prompt.SingleChoice(
@@ -82,6 +88,6 @@ import cue4s.*
           case _           => None,
     )
 
-  println(s"$skyColor, $letters, $day, $seasons")
+  println(s"$likeCats, $skyColor, $letters, $day, $seasons")
 
 end sync
