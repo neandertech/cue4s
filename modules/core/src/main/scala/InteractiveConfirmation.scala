@@ -16,7 +16,7 @@
 
 package cue4s
 
-private[cue4s] class ConfirmationPrompt(
+private[cue4s] class InteractiveConfirmation(
     prompt: String,
     default: Boolean,
     terminal: Terminal,
@@ -32,16 +32,16 @@ private[cue4s] class ConfirmationPrompt(
     event match
       case Event.Init => PromptAction.Update()
       case Event.Key(KeyEvent.ENTER) =>
-        PromptAction.updateStatus(_ => Status.Finished(default))
+        PromptAction.setStatus(Status.Finished(default))
       case Event.Char(which) =>
         which match
           case 'y' | 'Y' =>
-            PromptAction.updateStatus(_ => Status.Finished(true))
+            PromptAction.setStatus(Status.Finished(true))
           case 'n' | 'N' =>
-            PromptAction.updateStatus(_ => Status.Finished(false))
+            PromptAction.setStatus(Status.Finished(false))
           case _ => PromptAction.Continue
       case Event.Interrupt =>
-        PromptAction.updateStatus(_ => Status.Canceled)
+        PromptAction.setStatus(Status.Canceled)
       case _ =>
         PromptAction.Continue
   end handleEvent
@@ -76,4 +76,4 @@ private[cue4s] class ConfirmationPrompt(
     lines.result()
   end renderState
 
-end ConfirmationPrompt
+end InteractiveConfirmation

@@ -173,13 +173,13 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
     renderState(currentState(), currentStatus()),
   )
 
-  enum Status:
+  protected enum Status:
     case Init
     case Running(err: Either[PromptError, Result])
     case Finished(result: Result)
     case Canceled
 
-  enum PromptAction:
+  protected enum PromptAction:
     case Update(
         status: Status => Status = identity,
         state: PromptState => PromptState = identity,
@@ -187,7 +187,9 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
     case Continue, Stop
 
   object PromptAction:
-    def updateStatus(f: Status => Status) = PromptAction.Update(f)
+    def setStatus(f: Status): PromptAction = PromptAction.Update(_ => f)
+    def setState(f: PromptState): PromptAction =
+      PromptAction.Update(state = _ => f)
     def updateState(f: PromptState => PromptState) =
       PromptAction.Update(state = f)
   end PromptAction

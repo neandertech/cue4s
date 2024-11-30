@@ -110,7 +110,7 @@ private[cue4s] class InteractiveMultipleChoice(
         PromptAction.updateState(_.updateDisplay(_.down))
 
       case Event.Key(KeyEvent.ENTER) =>
-        PromptAction.updateStatus(_ =>
+        PromptAction.setStatus(
           Status.Finished(
             currentState().selected.toList.sorted.map(altMapping).toList,
           ),
@@ -126,7 +126,7 @@ private[cue4s] class InteractiveMultipleChoice(
         PromptAction.updateState(_.addText(which.toChar))
 
       case Event.Interrupt =>
-        PromptAction.updateStatus(_ => Status.Canceled)
+        PromptAction.setStatus(Status.Canceled)
 
       case _ =>
         PromptAction.Continue
