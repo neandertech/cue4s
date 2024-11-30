@@ -159,6 +159,27 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     "good",
   )
 
+  terminalTestComplete("password.input")(
+    Prompt
+      .PasswordInput("Choose your password")
+      .validate(value =>
+        if value.raw.length < 4 then Some(PromptError("too short!"))
+        else if !value.raw.exists(_.isDigit) then
+          Some(PromptError("must contain a digit"))
+        else None,
+      ),
+    list(
+      Event.Init,
+      chars("go"),
+      ENTER, // prevents submission
+      chars("od"),
+      ENTER,
+      chars("5"),
+      ENTER,
+    ),
+    Prompt.PasswordInput.Password("good5"),
+  )
+
   terminalTestComplete("derived.validated.input")(
     Prompt
       .Input("What color is the sky?")
