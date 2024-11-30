@@ -80,7 +80,6 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
 
         case PromptAction.Update(statusF, stateF) =>
           stateTransition(stateF, statusF)
-          out.logLn(s"${currentState()} -- ${currentStatus()}")
           val next = currentStatus() match
             case Status.Finished(result) => Next.Done(result)
             case Status.Running(_)       => Next.Continue
@@ -109,7 +108,6 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
   final def printPrompt() =
     import terminal.*
     cursorHide()
-    out.logLn(s"${rendering.current} -- ${rendering.last}")
     rendering.last match
       case None =>
         // initial print

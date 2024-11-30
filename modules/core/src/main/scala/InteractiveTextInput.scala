@@ -38,8 +38,6 @@ private[cue4s] class InteractiveTextInput(
 
       PromptAction.Update(_ => newStatus, _ => newState)
 
-    out.logLn(s"handling $event")
-
     event match
       case Event.Key(KeyEvent.ENTER) =>
         currentStatus() match

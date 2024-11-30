@@ -65,8 +65,8 @@ private[cue4s] class ConfirmationPrompt(
           lines += err.error
         lines += ""
       case Status.Finished(res) =>
-        lines += "✔ ".selected + prompt.emphasis + " … ".hint +
-          (if res then "yes" else "no")
+        lines += "✔ ".selected + prompt.prompt + " … ".hint +
+          (if res then "yes" else "no").emphasis
         lines += ""
       case Status.Canceled =>
         lines += "× ".canceled + prompt.emphasis
@@ -76,12 +76,4 @@ private[cue4s] class ConfirmationPrompt(
     lines.result()
   end renderState
 
-  // override def isRunning(state: State): Boolean = state == State.Running
-
 end ConfirmationPrompt
-
-// private[cue4s] object ConfirmationPrompt:
-//   enum State:
-//     case Running
-//     case Finished(result: Boolean)
-//     case Canceled
