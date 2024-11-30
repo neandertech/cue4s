@@ -42,7 +42,7 @@ private[cue4s] class InteractiveTextInput(
       case Event.Key(KeyEvent.ENTER) =>
         currentStatus() match
           case Status.Running(Right(candidate)) =>
-            PromptAction.updateStatus(_ => Status.Finished(candidate))
+            PromptAction.setStatus(Status.Finished(candidate))
           case _ => PromptAction.Continue
 
       case Event.Key(KeyEvent.DELETE) =>
@@ -50,7 +50,7 @@ private[cue4s] class InteractiveTextInput(
 
       case Event.Char(which) => update(currentState(), _.addText(which.toChar))
 
-      case Event.Interrupt => PromptAction.updateStatus(_ => Status.Canceled)
+      case Event.Interrupt => PromptAction.setStatus(Status.Canceled)
 
       case _ => PromptAction.Continue
     end match

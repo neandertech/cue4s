@@ -51,11 +51,11 @@ private[cue4s] class InteractiveSingleChoice(
       case Event.Key(KeyEvent.ENTER) => // enter
         currentState().display.showing match
           case None =>
-            PromptAction.updateStatus(_ =>
+            PromptAction.setStatus(
               Status.Running(Left(PromptError("nothing selected"))),
             )
           case Some((_, idx)) =>
-            PromptAction.updateStatus(_ => Status.Finished(altMapping(idx)))
+            PromptAction.setStatus(Status.Finished(altMapping(idx)))
 
       case Event.Key(KeyEvent.DELETE) => // enter
         PromptAction.updateState(_.trimText)
@@ -64,7 +64,7 @@ private[cue4s] class InteractiveSingleChoice(
         PromptAction.updateState(_.addText(which.toChar))
 
       case Event.Interrupt =>
-        PromptAction.updateStatus(_ => Status.Canceled)
+        PromptAction.setStatus(Status.Canceled)
 
       case _ =>
         PromptAction.Continue

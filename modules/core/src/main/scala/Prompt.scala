@@ -123,7 +123,7 @@ object Prompt:
         output: Output,
         theme: Theme,
     ) =
-      ConfirmationPrompt(
+      InteractiveConfirmation(
         lab,
         default,
         terminal,
