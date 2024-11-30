@@ -54,11 +54,59 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
-    ) = InteractiveTextInput(lab, terminal, output, theme, validate)
+    ) = InteractiveTextInput(
+      lab,
+      terminal,
+      output,
+      theme,
+      validate,
+      hideText = false,
+    )
   end Input
 
   object Input:
     def apply(lab: String): Input = new Input(lab)
+
+  import PasswordInput.Password
+
+  case class PasswordInput private (
+      lab: String,
+      validate: Password => Option[PromptError] = _ => None,
+  ) extends Prompt[Password]:
+
+    def this(lab: String) = this(lab, _ => None)
+
+    def validate(f: Password => Option[PromptError]): PasswordInput =
+      copy(validate = (n: Password) => validate(n).orElse(f(n)))
+
+    override def framework(
+        terminal: Terminal,
+        output: Output,
+        theme: Theme,
+    ) =
+      val textBase =
+        InteractiveTextInput(
+          lab,
+          terminal,
+          output,
+          theme,
+          validate = _ => None,
+          hideText = true,
+        )
+
+      textBase.mapValidated[Password](str =>
+        val pwd = Password(str)
+        validate(pwd).toLeft(pwd),
+      )
+    end framework
+
+  end PasswordInput
+
+  object PasswordInput:
+    case class Password(raw: String):
+      override def toString(): String = "Password(***)"
+
+    def apply(lab: String): PasswordInput = new PasswordInput(lab)
 
   case class NumberInput[N: Numeric] private (
       lab: String,
@@ -106,7 +154,14 @@ object Prompt:
 
       val stringValidate = transform(_: String).left.toOption
 
-      InteractiveTextInput(lab, terminal, output, theme, stringValidate)
+      InteractiveTextInput(
+        lab,
+        terminal,
+        output,
+        theme,
+        stringValidate,
+        hideText = false,
+      )
         .mapValidated(transform)
     end framework
   end NumberInput

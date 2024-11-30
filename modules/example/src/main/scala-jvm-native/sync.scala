@@ -17,6 +17,7 @@
 package cue4s_example
 
 import cue4s.*
+import cue4s.Prompt.PasswordInput.Password
 
 @main def sync =
   Prompts.use(): prompts =>
@@ -87,6 +88,11 @@ import cue4s.*
             case _           => None,
       )
 
-    println(s"$likeCats, $skyColor, $letters, $day, $seasons")
+    val password: Completion[Password] =
+      prompts.sync(
+        Prompt.PasswordInput("Choose a new password"),
+      )
+
+    println(s"$likeCats, $skyColor, $letters, $day, $seasons, $password")
 
 end sync

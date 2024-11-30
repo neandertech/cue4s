@@ -22,6 +22,7 @@ private[cue4s] class InteractiveTextInput(
     out: Output,
     theme: Theme,
     validate: String => Option[PromptError],
+    hideText: Boolean,
 ) extends PromptFramework[String](terminal, out):
 
   import InteractiveTextInput.*
@@ -66,13 +67,15 @@ private[cue4s] class InteractiveTextInput(
 
     status match
       case Status.Init =>
-        lines += prompt.prompt + " > " + st.text.input
+        lines += prompt.prompt + " > "
       case Status.Running(err) =>
-        lines += prompt.prompt + " > " + st.text.input
+        val txt = if hideText then "*" * st.text.length else st.text
+        lines += prompt.prompt + " > " + txt.input
         err.left.toOption.foreach: err =>
           lines += err.error
       case Status.Finished(res) =>
-        lines += "✔ ".selected + prompt.prompt + " " + st.text.emphasis
+        val txt = if hideText then "*" * res.length else res
+        lines += "✔ ".selected + prompt.prompt + " " + txt.emphasis
         lines += ""
       case Status.Canceled =>
         lines += "× ".canceled + prompt.prompt
