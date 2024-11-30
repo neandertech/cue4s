@@ -21,94 +21,95 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
   type PromptState
 
   def initialState: PromptState
-  def handleEvent(event: Event): PromptAction[Result]
-  def renderState(state: PromptState, error: Option[PromptError]): List[String]
-  def isRunning(state: PromptState): Boolean
-
-  def result(state: PromptState): Either[PromptError, Result]
+  def handleEvent(event: Event): PromptAction
+  def renderState(state: PromptState, status: Status): List[String]
 
   final def mapValidated[Derived](
       f: Result => Either[PromptError, Derived],
   ): PromptFramework[Derived] =
     new PromptFramework[Derived](terminal, out):
+      override type PromptState = self.PromptState
 
       override def initialState: PromptState = self.initialState
 
       override def renderState(
           state: PromptState,
-          error: Option[PromptError],
+          status: Status,
       ): List[String] =
-        self.renderState(state, result(state).left.toOption)
-
-      override def isRunning(state: PromptState): Boolean =
-        self.isRunning(state)
-
-      override def result(state: PromptState): Either[PromptError, Derived] =
-        self.result(state).flatMap(f)
-
-      override type PromptState = self.PromptState
+        self.renderState(state, self.currentStatus())
 
       override def handleEvent(
           event: Event,
-      ): PromptAction[Derived] =
+      ): PromptAction =
         self.handleEvent(event) match
-          case self.PromptAction.Submit(submit) =>
-            self.result(currentState()) match
-              case Left(value) => PromptAction.Continue
-              case Right(value) =>
-                val finish = submit(value)
-                f(value) match
-                  case Left(value) => PromptAction.Continue
-                  case Right(value) =>
-                    PromptAction.Submit(_ => finish)
+          case self.PromptAction.Update(statusChange, stateChange) =>
+            self.stateTransition(stateChange, statusChange)
 
-          case self.PromptAction.Start    => PromptAction.Start
-          case self.PromptAction.Stop     => PromptAction.Stop
+            val refinedStatus =
+              self.currentStatus() match
+                case self.Status.Finished(result) =>
+                  f(result) match
+                    case Left(value)  => Status.Running(Left(value))
+                    case Right(value) => Status.Finished(value)
+
+                case self.Status.Canceled   => Status.Canceled
+                case self.Status.Running(r) => Status.Running(r.flatMap(f))
+                case self.Status.Init       => Status.Init
+            // propagate information backwards...
+            refinedStatus match
+              case Status.Running(Left(err)) =>
+                self.stateTransition(
+                  identity,
+                  _ => self.Status.Running(Left(err)),
+                )
+              case _ =>
+
+            PromptAction.Update(_ => refinedStatus, stateChange)
+
           case self.PromptAction.Continue => PromptAction.Continue
-          case self.PromptAction.Update(f) =>
-            PromptAction.Update(f)
-          case self.PromptAction.UpdateAndStop(f) =>
-            PromptAction.UpdateAndStop(f)
+          case self.PromptAction.Stop     => PromptAction.Stop
 
   end mapValidated
 
   final val handler = new Handler[Result]:
     override def apply(ev: Event): Next[Result] =
+      if ev == Event.Init then printPrompt()
       handleEvent(ev) match
         case PromptAction.Continue => Next.Continue
         case PromptAction.Stop     => Next.Stop
-        case PromptAction.Start =>
-          printPrompt()
-          Next.Continue
-        case PromptAction.UpdateAndStop(f) =>
-          stateTransition(f)
-          printPrompt()
-          Next.Stop
-        case PromptAction.Submit(finish) =>
-          result(currentState()) match
-            case Left(value) => Next.Continue
-            case Right(value) =>
-              stateTransition(finish(value))
-              printPrompt()
-              Next.Done(value)
 
-        case PromptAction.Update(f) =>
-          stateTransition(f)
+        case PromptAction.Update(statusF, stateF) =>
+          stateTransition(stateF, statusF)
+          out.logLn(s"${currentState()} -- ${currentStatus()}")
+          val next = currentStatus() match
+            case Status.Finished(result) => Next.Done(result)
+            case Status.Running(_)       => Next.Continue
+            case Status.Canceled         => Next.Stop
+            case Status.Init             => Next.Continue
+
           printPrompt()
-          Next.Continue
+          next
+      end match
+    end apply
 
   final def currentState(): PromptState = state.current
+  final def currentStatus(): Status     = status.current
 
-  final def stateTransition(s: PromptState => PromptState) =
-    state = state.nextFn(s)
+  final def stateTransition(
+      stateChange: PromptState => PromptState,
+      statusChange: Status => Status,
+  ) =
+    state = state.nextFn(stateChange)
+    status = status.nextFn(statusChange)
     rendering = rendering.next(
-      renderState(state.current, result(state.current).left.toOption),
+      renderState(state.current, status.current),
     )
   end stateTransition
 
   final def printPrompt() =
     import terminal.*
     cursorHide()
+    out.logLn(s"${rendering.current} -- ${rendering.last}")
     rendering.last match
       case None =>
         // initial print
@@ -145,7 +146,7 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
                 out.out(line)
               moveDown(1)
 
-        if isRunning(currentState()) then
+        if isRunning(currentStatus()) then
           render
           moveUp(current.length).moveHorizontalTo(0)
         else // we are finished
@@ -158,17 +159,38 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
 
   end printPrompt
 
+  private def isRunning(status: Status) =
+    status match
+      case Status.Finished(result) => false
+      case Status.Canceled         => false
+      case _                       => true
+
   private var state = Transition(
     initialState,
   )
-  private var rendering = Transition(
-    renderState(currentState(), result(currentState()).left.toOption),
+  private var status = Transition[Status](
+    Status.Init,
   )
-  enum PromptAction[-Result]:
-    case Submit(f: Result => PromptState => PromptState)
-    case Update(f: PromptState => PromptState)
-    case UpdateAndStop(f: PromptState => PromptState)
-    case Continue
-    case Stop
-    case Start
+  private var rendering = Transition(
+    renderState(currentState(), currentStatus()),
+  )
+
+  enum Status:
+    case Init
+    case Running(err: Either[PromptError, Result])
+    case Finished(result: Result)
+    case Canceled
+
+  enum PromptAction:
+    case Update(
+        status: Status => Status = identity,
+        state: PromptState => PromptState = identity,
+    )
+    case Continue, Stop
+
+  object PromptAction:
+    def updateStatus(f: Status => Status) = PromptAction.Update(f)
+    def updateState(f: PromptState => PromptState) =
+      PromptAction.Update(state = f)
+  end PromptAction
 end PromptFramework

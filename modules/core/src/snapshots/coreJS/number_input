@@ -1,7 +1,6 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━┓
 ┃think of a number > ┃
-┃not a valid number  ┃
 ┃                    ┃
 ┗━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('3')

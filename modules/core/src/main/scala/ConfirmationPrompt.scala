@@ -23,26 +23,25 @@ private[cue4s] class ConfirmationPrompt(
     out: Output,
     theme: Theme,
 ) extends PromptFramework[Boolean](terminal, out):
-  import ConfirmationPrompt.*
 
-  override type PromptState = State
+  override type PromptState = Unit
 
-  override def initialState: PromptState = State.Running
+  override def initialState: PromptState = ()
 
-  override def handleEvent(event: Event): PromptAction[Boolean] =
+  override def handleEvent(event: Event): PromptAction =
     event match
-      case Event.Init => PromptAction.Start
+      case Event.Init => PromptAction.Update()
       case Event.Key(KeyEvent.ENTER) =>
-        PromptAction.Submit(result => _ => State.Finished(default))
+        PromptAction.updateStatus(_ => Status.Finished(default))
       case Event.Char(which) =>
         which match
           case 'y' | 'Y' =>
-            PromptAction.Submit(result => _ => State.Finished(true))
+            PromptAction.updateStatus(_ => Status.Finished(true))
           case 'n' | 'N' =>
-            PromptAction.Submit(result => _ => State.Finished(false))
+            PromptAction.updateStatus(_ => Status.Finished(false))
           case _ => PromptAction.Continue
       case Event.Interrupt =>
-        PromptAction.UpdateAndStop(_ => State.Canceled)
+        PromptAction.updateStatus(_ => Status.Canceled)
       case _ =>
         PromptAction.Continue
   end handleEvent
@@ -50,23 +49,26 @@ private[cue4s] class ConfirmationPrompt(
   import theme.*
 
   override def renderState(
-      state: State,
-      error: Option[PromptError],
+      state: Unit,
+      status: Status,
   ): List[String] =
     val lines = List.newBuilder[String]
 
-    state match
-      case State.Running =>
+    status match
+      case Status.Init =>
         lines += "? ".selected + prompt.prompt +
           (" › (" + (if default then "Y/n" else "y/N") + ")").hint
-        error.foreach: err =>
+      case Status.Running(error) =>
+        lines += "? ".selected + prompt.prompt +
+          (" › (" + (if default then "Y/n" else "y/N") + ")").hint
+        error.left.toOption.foreach: err =>
           lines += err.error
         lines += ""
-      case State.Finished(res) =>
+      case Status.Finished(res) =>
         lines += "✔ ".selected + prompt.emphasis + " … ".hint +
           (if res then "yes" else "no")
         lines += ""
-      case State.Canceled =>
+      case Status.Canceled =>
         lines += "× ".canceled + prompt.emphasis
         lines += ""
     end match
@@ -74,17 +76,12 @@ private[cue4s] class ConfirmationPrompt(
     lines.result()
   end renderState
 
-  override def isRunning(state: State): Boolean = state == State.Running
-
-  override def result(state: State): Either[PromptError, Boolean] = state match
-    case State.Running          => Right(false)
-    case State.Finished(result) => Right(result)
-    case State.Canceled         => Left(PromptError("cancelled"))
+  // override def isRunning(state: State): Boolean = state == State.Running
 
 end ConfirmationPrompt
 
-private[cue4s] object ConfirmationPrompt:
-  enum State:
-    case Running
-    case Finished(result: Boolean)
-    case Canceled
+// private[cue4s] object ConfirmationPrompt:
+//   enum State:
+//     case Running
+//     case Finished(result: Boolean)
+//     case Canceled

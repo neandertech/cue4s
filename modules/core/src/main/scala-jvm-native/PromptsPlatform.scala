@@ -27,14 +27,10 @@ private trait PromptsPlatform:
   ): Completion[R] =
     prompt match
       case p: Prompt[?] =>
-        try
-          val framework =
-            p.asInstanceOf[Prompt[R]].framework(terminal, out, theme)
+        val framework =
+          p.asInstanceOf[Prompt[R]].framework(terminal, out, theme)
 
-          inputProvider.evaluate(framework.handler)
-        finally
-          terminal.cursorShow()
-          inputProvider.close()
+        inputProvider.evaluate(framework.handler)
 
       case c: PromptChain[?] =>
         c.asInstanceOf[PromptChain[R]].run([t] => (p: Prompt[t]) => sync(p))
@@ -47,9 +43,6 @@ private trait PromptsPlatform:
   )(using ExecutionContext): Future[Completion[R]] =
     val framework = prompt.framework(createTerminal(out), out, theme)
 
-    val f = inputProvider.evaluateFuture(framework.handler)
-    f.onComplete(_ => terminal.cursorShow())
-    f.onComplete(_ => inputProvider.close())
-    f
+    inputProvider.evaluateFuture(framework.handler)
   end future
 end PromptsPlatform

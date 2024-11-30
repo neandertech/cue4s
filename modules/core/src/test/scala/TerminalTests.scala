@@ -68,11 +68,11 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   def terminalTest[R](
       name: munit.TestOptions,
+      log: Boolean = false,
   )(
       prompt: Prompt[R],
       events: List[Event],
       expected: Next[R],
-      log: Boolean = false,
   )(implicit
       loc: munit.Location,
   ): Unit =
@@ -94,8 +94,8 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     val sb = new java.lang.StringBuilder
     val logger: String => Unit =
       if log then s => sb.append(s + "\n") else _ => ()
-    val term      = TracingTerminal(Output.Delegate(_ => (), logger))
-    val capturing = Output.Delegate(term.writer, term.log(_))
+    val term      = TracingTerminal(Output.Delegate(_ => (), _ => ()))
+    val capturing = Output.Delegate(term.writer, logger)
 
     val handler = prompt.framework(term, capturing, Theme.NoColors).handler
 

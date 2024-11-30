@@ -27,21 +27,12 @@ private[cue4s] class InteractiveSingleChoice(
 
   override type PromptState = State
 
-  override def isRunning(state: State): Boolean = state.status == Status.Running
-
   private lazy val altsWithIndex = prompt.alts.zipWithIndex
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
-
-  override def result(state: State): Either[PromptError, String] =
-    state.display.showing
-      .map(_._2)
-      .map(altMapping)
-      .toRight(PromptError("nothing selected"))
 
   override def initialState = State(
     text = "",
     all = altsWithIndex,
-    status = Status.Running,
     display = InfiniscrollableState(
       showing = Some(altsWithIndex.map(_._2) -> 0),
       windowStart = 0,
@@ -51,25 +42,29 @@ private[cue4s] class InteractiveSingleChoice(
 
   override def handleEvent(event: Event) =
     event match
-      case Event.Init => PromptAction.Start
-
       case Event.Key(KeyEvent.UP) =>
-        PromptAction.Update(_.updateDisplay(_.up))
+        PromptAction.updateState(_.updateDisplay(_.up))
 
       case Event.Key(KeyEvent.DOWN) =>
-        PromptAction.Update(_.updateDisplay(_.down))
+        PromptAction.updateState(_.updateDisplay(_.down))
 
       case Event.Key(KeyEvent.ENTER) => // enter
-        PromptAction.Submit(result => state => state.finish(result))
+        currentState().display.showing match
+          case None =>
+            PromptAction.updateStatus(_ =>
+              Status.Running(Left(PromptError("nothing selected"))),
+            )
+          case Some((_, idx)) =>
+            PromptAction.updateStatus(_ => Status.Finished(altMapping(idx)))
 
       case Event.Key(KeyEvent.DELETE) => // enter
-        PromptAction.Update(_.trimText)
+        PromptAction.updateState(_.trimText)
 
       case Event.Char(which) =>
-        PromptAction.Update(_.addText(which.toChar))
+        PromptAction.updateState(_.addText(which.toChar))
 
       case Event.Interrupt =>
-        PromptAction.UpdateAndStop(_.cancel)
+        PromptAction.updateStatus(_ => Status.Canceled)
 
       case _ =>
         PromptAction.Continue
@@ -80,14 +75,20 @@ private[cue4s] class InteractiveSingleChoice(
 
   override def renderState(
       st: State,
-      error: Option[PromptError],
+      status: Status,
   ): List[String] =
     val lines = List.newBuilder[String]
 
-    st.status match
-      case Status.Running =>
+    status match
+      case Status.Running(_) | Status.Init =>
         // prompt question
         lines += "· " + (prompt.lab + " > ").prompt + st.text.input
+
+        status match
+          case Status.Running(err) =>
+            err.foreach: err =>
+              lines += err.error
+          case _ =>
 
         st.display.showing match
           case None =>
@@ -125,24 +126,13 @@ private[cue4s] class InteractiveSingleChoice(
 end InteractiveSingleChoice
 
 private[cue4s] object InteractiveSingleChoice:
-  enum Status:
-    case Running
-    case Finished(selected: String)
-    case Canceled
-
   case class State(
       text: String,
       all: List[(String, Int)],
-      status: Status,
       display: InfiniscrollableState,
   ):
     def updateDisplay(f: InfiniscrollableState => InfiniscrollableState) =
       copy(display = f(display))
-
-    def finish(result: String) =
-      copy(status = Status.Finished(result))
-
-    def cancel = copy(status = Status.Canceled)
 
     def addText(t: Char) =
       val newText = text + t

@@ -28,25 +28,31 @@ private[cue4s] class InteractiveTextInput(
 
   override type PromptState = State
 
-  override def initialState: State              = State("", Status.Running)
-  override def isRunning(state: State): Boolean = state.status == Status.Running
-
-  override def result(state: State) =
-    validate(state.text).toLeft(state.text)
+  override def initialState: State = State("")
 
   override def handleEvent(event: Event) =
-    event match
-      case Event.Init => PromptAction.Start
+    def update(state: State, f: State => State) =
+      val newState = f(state)
+      val newStatus =
+        Status.Running(validate(newState.text).toLeft(newState.text))
 
+      PromptAction.Update(_ => newStatus, _ => newState)
+
+    out.logLn(s"handling $event")
+
+    event match
       case Event.Key(KeyEvent.ENTER) =>
-        PromptAction.Submit(result => state => state.finish(result))
+        currentStatus() match
+          case Status.Running(Right(candidate)) =>
+            PromptAction.updateStatus(_ => Status.Finished(candidate))
+          case _ => PromptAction.Continue
 
       case Event.Key(KeyEvent.DELETE) =>
-        PromptAction.Update(_.trimText)
+        update(currentState(), _.trimText)
 
-      case Event.Char(which) => PromptAction.Update(_.addText(which.toChar))
+      case Event.Char(which) => update(currentState(), _.addText(which.toChar))
 
-      case Event.Interrupt => PromptAction.UpdateAndStop(_.cancel)
+      case Event.Interrupt => PromptAction.updateStatus(_ => Status.Canceled)
 
       case _ => PromptAction.Continue
     end match
@@ -56,14 +62,16 @@ private[cue4s] class InteractiveTextInput(
 
   override def renderState(
       st: State,
-      error: Option[PromptError],
+      status: Status,
   ): List[String] =
     val lines = List.newBuilder[String]
 
-    st.status match
-      case Status.Running =>
+    status match
+      case Status.Init =>
         lines += prompt.prompt + " > " + st.text.input
-        error.foreach: err =>
+      case Status.Running(err) =>
+        lines += prompt.prompt + " > " + st.text.input
+        err.left.toOption.foreach: err =>
           lines += err.error
       case Status.Finished(res) =>
         lines += "✔ ".selected + prompt.prompt + " " + st.text.emphasis
@@ -79,18 +87,10 @@ private[cue4s] class InteractiveTextInput(
 end InteractiveTextInput
 
 private[cue4s] object InteractiveTextInput:
-  enum Status:
-    case Running
-    case Finished(res: String)
-    case Canceled
-
   case class State(
       text: String,
-      status: Status,
   ):
-    def cancel                 = copy(status = Status.Canceled)
-    def finish(result: String) = copy(status = Status.Finished(result))
-    def addText(t: Char)       = copy(text = text + t)
+    def addText(t: Char) = copy(text = text + t)
 
     def trimText = copy(text = text.dropRight(1))
   end State
