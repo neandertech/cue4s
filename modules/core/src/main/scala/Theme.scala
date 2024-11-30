@@ -30,6 +30,7 @@ trait Theme:
     def selectedManyInactive: String
     def canceled: String
     def error: String
+    def hint: String
   end extension
 end Theme
 
@@ -50,6 +51,7 @@ object Theme:
       def selectedManyInactive: String = s.underline
       def canceled: String             = s.red
       def error: String                = s.red
+      def hint: String                 = s.darkGray
     end extension
   end Default
 
@@ -67,6 +69,7 @@ object Theme:
       def selectedManyInactive: String = s
       def canceled: String             = s
       def error: String                = s
+      def hint: String                 = s
     end extension
   end NoColors
 end Theme

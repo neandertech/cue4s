@@ -93,6 +93,42 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     List("pizza", "steak", "fried chicken", "sushi"),
   )
 
+  terminalTestComplete("alternatives.confirm.default")(
+    Prompt.Confirmation("Are you sure?", default = true),
+    list(
+      Event.Init,
+      ENTER,
+    ),
+    true,
+  )
+
+  terminalTestComplete("alternatives.confirm.decline")(
+    Prompt.Confirmation("Are you sure?", default = true),
+    list(
+      Event.Init,
+      Event.Char('n'),
+    ),
+    false,
+  )
+
+  terminalTestComplete("alternatives.confirm.agree")(
+    Prompt.Confirmation("Are you sure?", default = false),
+    list(
+      Event.Init,
+      Event.Char('y'),
+    ),
+    true,
+  )
+
+  terminalTest("alternatives.confirm.cancel")(
+    Prompt.Confirmation("Are you sure?"),
+    list(
+      Event.Init,
+      Event.Interrupt,
+    ),
+    Next.Stop,
+  )
+
   terminalTest("alternatives.cancel.input")(
     Prompt
       .Input(
