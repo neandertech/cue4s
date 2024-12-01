@@ -72,6 +72,30 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     Next.Stop,
   )
 
+  terminalTestComplete("alternatives.cancel.multiple.derived")(
+    Prompt.MultipleChoice
+      .withAllSelected(
+        "What would you like for lunch",
+        List("pizza", "steak", "sweet potato", "fried chicken"),
+      )
+      .mapValidated(ls =>
+        Either.cond(
+          ls.contains("pizza"),
+          true,
+          PromptError("show pizza some love!"),
+        ),
+      ),
+    list(
+      Event.Init,
+      TAB,
+      ENTER,
+      TAB,
+      ENTER,
+    ),
+    true,
+    log = true,
+  )
+
   terminalTestComplete("alternatives.infiniscroll.multiple")(
     Prompt.MultipleChoice.withNoneSelected(
       "What would you like for lunch",

@@ -55,6 +55,7 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
                 case self.Status.Canceled   => Status.Canceled
                 case self.Status.Running(r) => Status.Running(r.flatMap(f))
                 case self.Status.Init       => Status.Init
+
             // propagate information backwards...
             refinedStatus match
               case Status.Running(Left(err)) =>

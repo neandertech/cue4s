@@ -127,7 +127,9 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
     result match
       case Next.Done(value) => Result(value, sb, processed)
-      case _ => fail(s"Prompt wasn't evaluated to completion: $result")
+      case _ =>
+        println(sb)
+        fail(s"Prompt wasn't evaluated to completion: $result")
   end runToCompletion
 
   def runChain[T](events: Seq[Event], log: Boolean = false)(
