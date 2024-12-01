@@ -111,7 +111,9 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
     rendering.last match
       case None =>
         // initial print
-        rendering.current.foreach(out.outLn)
+        rendering.current.foreach: line =>
+          out.outLn(line)
+          moveHorizontalTo(0)
         moveUp(rendering.current.length).moveHorizontalTo(0)
       case Some(previousRendering) =>
         val paddingLength =
