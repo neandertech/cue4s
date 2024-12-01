@@ -93,7 +93,6 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
     ),
     true,
-    log = true,
   )
 
   terminalTestComplete("alternatives.infiniscroll.multiple")(
