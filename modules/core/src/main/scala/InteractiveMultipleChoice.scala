@@ -57,6 +57,11 @@ private[cue4s] class InteractiveMultipleChoice(
         lines += "? ".selected + prompt.lab.prompt + " > ".prompt + st.text.input
         lines += "Tab".emphasis + " to toggle, " + "Enter".emphasis + " to submit."
 
+        status match
+          case Status.Running(Left(err)) =>
+            lines += err.error
+          case _ =>
+
         st.display.showing match
           case None =>
             lines += "no matches...".noMatches

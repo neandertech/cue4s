@@ -71,11 +71,15 @@ import cue4s.Prompt.PasswordInput.Password
 
     val letters: Completion[List[String]] = prompts
       .sync(
-        Prompt.MultipleChoice.withNoneSelected(
-          "What are your favourite letters?",
-          ('A' to 'Z').map(_.toString).toList,
-          windowSize = 7,
-        ),
+        Prompt.MultipleChoice
+          .withNoneSelected(
+            "What are your favourite letters?",
+            ('A' to 'Z').map(_.toString).toList,
+            windowSize = 7,
+          )
+          .mapValidated(ls =>
+            Either.cond(ls.contains("A"), ls, PromptError("show A some love!")),
+          ),
       )
 
     val seasons: Completion[Int] =
@@ -92,7 +96,5 @@ import cue4s.Prompt.PasswordInput.Password
       prompts.sync(
         Prompt.PasswordInput("Choose a new password"),
       )
-
-    println(s"$likeCats, $skyColor, $letters, $day, $seasons, $password")
 
 end sync
