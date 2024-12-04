@@ -135,17 +135,8 @@ private object InputProviderImpl:
     nativeInterop.changemode(0),
   ))
 
-  private enum OS:
-    case Windows, Linux, MacOS, Unknown
-
-  lazy private val os =
-    sys.props("os.name").toLowerCase.replaceAll("[^a-z0-9]+", "") match
-      case p if p.startsWith("linux")                         => OS.Linux
-      case p if p.startsWith("windows")                       => OS.Windows
-      case p if p.startsWith("osx") || p.startsWith("macosx") => OS.MacOS
-      case _                                                  => OS.Unknown
-
   lazy private val nativeInterop: ChangeMode =
+    import Platform.*
     os match
       case OS.MacOS => ChangeMode.forDarwin()
       case OS.Linux => ChangeMode.forLinux()
@@ -157,5 +148,7 @@ private object InputProviderImpl:
         sys.error(
           "Cue4s failed to detect the operating system, it is likely unsupported. Please raise an issue (or even a PR!) at https://github.com/neandertech/cue4s",
         )
+    end match
+  end nativeInterop
 
 end InputProviderImpl
