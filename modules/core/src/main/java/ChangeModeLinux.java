@@ -50,7 +50,7 @@ class ChangeModeLinux implements ChangeMode {
 
 	// Define the termios structure
 	@Structure.FieldOrder({ "c_iflag", "c_oflag", "c_cflag", "c_lflag", "c_line", "c_cc", "c_ispeed", "c_ospeed" })
-	private static class termios extends Structure {
+	public static class termios extends Structure {
 		public int c_iflag;
 		public int c_oflag;
 		public int c_cflag;
