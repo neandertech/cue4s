@@ -64,7 +64,7 @@ class ChangeModeLinux implements ChangeMode {
 	// Constants
 	private static final int STDIN_FILENO = 0;
 	private static final int TCSANOW = 0;
-	private static final int ICANON = 256;
+	private static final int ICANON = 0x0000002;
 	private static final int ECHO = 0x0008;
 
 	// Function to change mode
