@@ -22,6 +22,11 @@
   "fields":[{"name":"OPTIONS"}, {"name":"STRING_ENCODING"}, {"name":"STRUCTURE_ALIGNMENT"}, {"name":"TYPE_MAPPER"}]
 },
 {
+  "name":"cue4s.ChangeModeLinux$termios",
+  "allDeclaredFields":true,
+  "fields":[{"name":"OPTIONS"}, {"name":"STRING_ENCODING"}, {"name":"STRUCTURE_ALIGNMENT"}, {"name":"TYPE_MAPPER"}]
+},
+{
   "name":"cue4s.InputProviderImpl$",
   "fields":[{"name":"nativeInterop$lzy1"}]
 },
