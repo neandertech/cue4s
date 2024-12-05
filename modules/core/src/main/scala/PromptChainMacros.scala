@@ -134,6 +134,8 @@ private[cue4s] object PromptChainMacros:
         ).toAny
       }
 
+    val isNumeric = Expr.summon[Numeric[E]]
+
     val result =
       Type.of[E] match
         case '[Option[String]] =>
@@ -152,6 +154,19 @@ private[cue4s] object PromptChainMacros:
               (state, t) =>
                 state :* (if t.trim().isEmpty() then None else Some(t.trim())),
             ).toAny
+          }
+        case '[n] if isNumeric.isDefined =>
+          '{
+            val label        = ${ hints.name }.getOrElse($nm)
+            given Numeric[E] = ${ isNumeric.get }
+            val prompt       = Prompt.NumberInput[E](label)
+            PromptStep[Tuple, E](prompt, (state, t) => state :* t).toAny
+          }
+        case '[Boolean] =>
+          '{
+            val label  = ${ hints.name }.getOrElse($nm)
+            val prompt = Prompt.Confirmation(label).asInstanceOf[Prompt[E]]
+            PromptStep[Tuple, E](prompt, (state, t) => state :* t).toAny
           }
         case '[String] =>
           '{
