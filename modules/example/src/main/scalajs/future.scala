@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package example.future
+package cue4s_example
 
 import cue4s.*
 
@@ -27,27 +27,22 @@ case class Info(
 )
 
 @main def future =
-  val prompts = Prompts()
+  Prompts.async.use: prompts =>
+    for
+      day <- prompts
+        .singleChoice("How was your day?", List("great", "okay"))
+        .map(_.toOption)
 
-  for
-    day <- prompts
-      .future(
-        Prompt.SingleChoice("How was your day?", List("great", "okay")),
-      )
-      .map(_.toOption)
+      work <- prompts.text("Where do you work?").map(_.toOption)
 
-    work <- prompts.future(Prompt.Input("Where do you work?")).map(_.toOption)
-
-    letters <- prompts
-      .future(
-        Prompt.MultipleChoice.withNoneSelected(
+      letters <- prompts
+        .multiChoiceNoneSelected(
           "What are your favourite letters?",
           ('A' to 'F').map(_.toString).toList,
-        ),
-      )
-      .map(_.toOption)
+        )
+        .map(_.toOption)
 
-    info = Info(day, work, letters.fold(Set.empty)(_.toSet))
-  yield println(info)
-  end for
+      info = Info(day, work, letters.fold(Set.empty)(_.toSet))
+    yield println(info)
+    end for
 end future

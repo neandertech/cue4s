@@ -106,15 +106,23 @@ lazy val example = projectMatrix
     noPublish,
   )
   .settings(munitSettings)
-  .jvmPlatform(Versions.scalaVersions)
-  .jsPlatform(Versions.scalaVersions)
-  .nativePlatform(Versions.scalaVersions)
+  .jvmPlatform(
+    Versions.scalaVersions,
+    settings = Seq(Compile / mainClass := Some("cue4s_example.sync")),
+  )
+  .jsPlatform(
+    Versions.scalaVersions,
+    settings = Seq(Compile / mainClass := Some("cue4s_example.future")),
+  )
+  .nativePlatform(
+    Versions.scalaVersions,
+    settings = Seq(Compile / mainClass := Some("cue4s_example.sync")),
+  )
   .settings(
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     nativeConfig ~= (_.withIncrementalCompilation(true)
       .withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
-    Compile / mainClass := Some("cue4s_example.sync"),
   )
   .settings(superMatrix)
 
