@@ -300,6 +300,12 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       title: String,
       @cue(_.options("yes", "no").text("What's up doc?"))
       lab: String,
+      @cue(_.text("how old are you?"))
+      age: Int,
+      @cue(_.text("What is PI to first 2 digits?"))
+      pi: Float,
+      @cue(_.text("Do you want to build a snowman?"))
+      snowman: Boolean,
   ) derives PromptChain
 
   terminalTestComplete("promptchain")(
@@ -310,8 +316,16 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
       Event.Init,
       ENTER,
+      Event.Init,
+      chars("24"),
+      ENTER,
+      Event.Init,
+      chars("3.14"),
+      ENTER,
+      Event.Init,
+      chars("n"),
     ),
-    MyPrompt("hello", "yes"),
+    MyPrompt("hello", "yes", 24, 3.14f, false),
   )
 
 end ExampleTests
