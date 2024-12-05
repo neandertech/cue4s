@@ -41,10 +41,6 @@ private[cue4s] object PromptChainMacros:
       getHint:
         case CueHint.Options(value) => value
 
-    def password(using Quotes): Expr[Option[Boolean]] =
-      getHint:
-        case CueHint.Password => true
-
     def multi(using Quotes) =
       getHint:
         case CueHint.MultiSelect(value) => value

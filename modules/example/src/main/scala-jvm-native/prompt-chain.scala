@@ -43,6 +43,6 @@ object Test:
 
 @main def promptChain =
   val prompts = Prompts()
-  val result  = prompts.sync(PromptChain[Test])
+  val result  = prompts.run(PromptChain[Test])
 
   println(result)

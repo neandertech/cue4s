@@ -14,143 +14,96 @@
  * limitations under the License.
  */
 
-package cue4s.catseffect
+package cue4s
 
-import cats.effect.*
-import cue4s.*
 import cue4s.Prompt.PasswordInput.Password
 
-class PromptsIO private (
-    protected val out: Output,
-    protected val terminal: Terminal,
-    protected val theme: Theme,
-) extends AutoCloseable:
-  protected lazy val inputProvider = InputProvider(terminal)
+class SyncPromptsBuilder private (impl: SyncPromptsOptions):
+  def this() = this(SyncPromptsOptions(Output.Std, Theme.Default))
 
-  def run[A](
-      prompt: Prompt[A],
-  ): IO[Completion[A]] =
-    val inputProvider = InputProvider(terminal)
-    val framework     = prompt.framework(terminal, out, theme)
+  def noColors: SyncPromptsBuilder                = withTheme(Theme.NoColors)
+  def withOutput(out: Output): SyncPromptsBuilder = copy(_.copy(out = out))
+  def withTheme(theme: Theme): SyncPromptsBuilder = copy(_.copy(theme = theme))
 
-    // TODO: provide native CE interface here
-    IO.executionContext
-      .flatMap: ec =>
-        IO.fromFuture(
-          IO(inputProvider.evaluateFuture(framework.handler)(using ec)),
-        )
-      .guarantee(IO(terminal.cursorShow()))
-      .guarantee(IO(inputProvider.close()))
+  def use[A](f: SyncPrompts => A): A =
+    val p    = Prompts(impl.out, Terminal.ansi, impl.theme)
+    val inst = SyncPrompts(p)
+    try
+      f(inst)
+    finally p.close()
 
-  end run
+  private def copy(f: SyncPromptsOptions => SyncPromptsOptions) =
+    new SyncPromptsBuilder(f(impl))
+end SyncPromptsBuilder
 
-  @deprecated(
-    "use `.run(...)` instead, this method will be removed in 0.1.0",
-    "0.0.4",
-  )
-  def io[A](
-      prompt: Prompt[A],
-  ): IO[Completion[A]] = run(prompt)
+private case class SyncPromptsOptions(out: Output, theme: Theme)
+
+class SyncPrompts(underlying: Prompts):
+  export underlying.run
 
   def text(
       label: String,
       modify: Prompt.Input => Prompt.Input = identity,
-  ): IO[Completion[String]] =
+  ): Completion[String] =
     run(modify(Prompt.Input(label)))
 
   def password(
       label: String,
       modify: Prompt.PasswordInput => Prompt.PasswordInput = identity,
-  ): IO[Completion[Password]] =
+  ): Completion[Password] =
     run(modify(Prompt.PasswordInput(label)))
 
   def int(
       label: String,
       modify: Prompt.NumberInput[Int] => Prompt.NumberInput[Int] = identity,
-  ): IO[Completion[Int]] =
+  ): Completion[Int] =
     run(modify(Prompt.NumberInput(label)))
 
   def float(
       label: String,
       modify: Prompt.NumberInput[Float] => Prompt.NumberInput[Float] = identity,
-  ): IO[Completion[Float]] =
+  ): Completion[Float] =
     run(modify(Prompt.NumberInput(label)))
 
   def double(
       label: String,
       modify: Prompt.NumberInput[Double] => Prompt.NumberInput[Double] =
         identity,
-  ): IO[Completion[Double]] =
+  ): Completion[Double] =
     run(modify(Prompt.NumberInput(label)))
 
   def singleChoice(
       label: String,
       options: List[String],
       modify: Prompt.SingleChoice => Prompt.SingleChoice = identity,
-  ): IO[Completion[String]] =
+  ): Completion[String] =
     run(modify(Prompt.SingleChoice(label, options)))
 
   def confirm(
       label: String,
       modify: Prompt.Confirmation => Prompt.Confirmation = identity,
       default: Boolean = true,
-  ): IO[Completion[Boolean]] =
+  ): Completion[Boolean] =
     run(modify(Prompt.Confirmation(label, default)))
 
   def multiChoiceAllSelected(
       label: String,
       options: List[String],
       modify: Prompt.MultipleChoice => Prompt.MultipleChoice = identity,
-  ): IO[Completion[List[String]]] =
+  ): Completion[List[String]] =
     run(modify(Prompt.MultipleChoice.withAllSelected(label, options)))
 
   def multiChoiceNoneSelected(
       label: String,
       options: List[String],
       modify: Prompt.MultipleChoice => Prompt.MultipleChoice = identity,
-  ): IO[Completion[List[String]]] =
+  ): Completion[List[String]] =
     run(modify(Prompt.MultipleChoice.withNoneSelected(label, options)))
 
   def multiChoiceSomeSelected(
       label: String,
       options: List[(String, Boolean)],
       modify: Prompt.MultipleChoice => Prompt.MultipleChoice = identity,
-  ): IO[Completion[List[String]]] =
+  ): Completion[List[String]] =
     run(modify(Prompt.MultipleChoice.withSomeSelected(label, options)))
-
-  override def close(): Unit = inputProvider.close()
-end PromptsIO
-
-object PromptsIO:
-  @deprecated(
-    "use `PromptsIO.make` or `PromptsIO.builder.make` instead, this method will be removed in 0.1.0",
-    "0.0.4",
-  )
-  def apply(
-      out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi,
-      theme: Theme = Theme.Default,
-  ): Resource[IO, PromptsIO] = Resource.fromAutoCloseable(
-    IO(new PromptsIO(out, createTerminal(out), theme)),
-  )
-
-  def builder: PromptsIOBuilder = PromptsIOBuilder()
-
-  def make: Resource[IO, PromptsIO] = builder.make
-end PromptsIO
-
-class PromptsIOBuilder private (impl: IOPromptsOptions):
-  def this() = this(IOPromptsOptions(Output.Std, Theme.Default))
-
-  def noColors: PromptsIOBuilder                = withTheme(Theme.NoColors)
-  def withOutput(out: Output): PromptsIOBuilder = copy(_.copy(out = out))
-  def withTheme(theme: Theme): PromptsIOBuilder = copy(_.copy(theme = theme))
-
-  def make: Resource[IO, PromptsIO] =
-    PromptsIO(impl.out, Terminal.ansi, impl.theme)
-
-  private def copy(f: IOPromptsOptions => IOPromptsOptions) =
-    new PromptsIOBuilder(f(impl))
-end PromptsIOBuilder
-
-private case class IOPromptsOptions(out: Output, theme: Theme)
+end SyncPrompts

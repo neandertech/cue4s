@@ -22,7 +22,7 @@ import scala.concurrent.Future
 private trait PromptsPlatform:
   self: Prompts =>
 
-  def sync[R](
+  def run[R](
       prompt: Prompt[R] | PromptChain[R],
   ): Completion[R] =
     prompt match
@@ -34,15 +34,31 @@ private trait PromptsPlatform:
 
       case c: PromptChain[?] =>
         c.asInstanceOf[PromptChain[R]].run([t] => (p: Prompt[t]) => sync(p))
-  end sync
+  end run
 
-  def future[R](
+  def runAsync[R](
       prompt: Prompt[R],
-      out: Output = Output.Std,
-      createTerminal: Output => Terminal = Terminal.ansi(_),
   )(using ExecutionContext): Future[Completion[R]] =
-    val framework = prompt.framework(createTerminal(out), out, theme)
+    val framework = prompt.framework(terminal, out, theme)
 
     inputProvider.evaluateFuture(framework.handler)
+  end runAsync
+
+  @deprecated(
+    "Use `run(...)` instead, this method will be removed in 0.1.0",
+    "0.0.4",
+  )
+  def sync[R](
+      prompt: Prompt[R] | PromptChain[R],
+  ): Completion[R] = run(prompt)
+  end sync
+
+  @deprecated(
+    "Use `runAsync(...)` instead, this method will be removed in 0.1.0",
+    "0.0.4",
+  )
+  def future[R](
+      prompt: Prompt[R],
+  )(using ExecutionContext): Future[Completion[R]] = runAsync(prompt)
   end future
 end PromptsPlatform

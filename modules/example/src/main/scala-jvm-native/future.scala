@@ -24,34 +24,23 @@ import cue4s.*
 import concurrent.ExecutionContext.Implicits.global
 
 @main def future =
-  case class Info(
-      day: Option[String] = None,
-      work: Option[String] = None,
-      letters: Set[String] = Set.empty,
-  )
+  Prompts.async.use: prompts =>
+    val fut = for
+      day <- prompts
+        .singleChoice("How was your day?", List("great", "okay"))
+        .map(_.getOrThrow)
 
-  val prompts = Prompts()
+      work <- prompts.text("Where do you work?").map(_.getOrThrow)
 
-  val fut = for
-    day <- prompts
-      .future(
-        Prompt.SingleChoice("How was your day?", List("great", "okay")),
-      )
-      .map(_.toOption)
-
-    work <- prompts.future(Prompt.Input("Where do you work?")).map(_.toOption)
-
-    letters <- prompts
-      .future(
-        Prompt.MultipleChoice.withAllSelected(
+      letters <- prompts
+        .multiChoiceAllSelected(
           "What are your favourite letters?",
           ('A' to 'F').map(_.toString).toList,
-        ),
-      )
-      .map(_.toOption)
+        )
+        .map(_.getOrThrow)
+    yield println(
+      s"You work at $work, your day was $day, and your favourite letters are $letters",
+    )
 
-    info = Info(day, work, letters.fold(Set.empty)(_.toSet))
-  yield println(info)
-
-  Await.result(fut, Duration.Inf)
+    Await.result(fut, Duration.Inf)
 end future

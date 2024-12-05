@@ -30,13 +30,22 @@ class Prompts private (
     inputProvider.close()
 end Prompts
 
-object Prompts:
+object Prompts extends PromptsCompanionPlatform:
+
+  @deprecated(
+    "Use `Prompts.sync.use(...)` or `Prompts.async.use(...)` instead, this method will be removed in 0.1.0",
+    "0.0.4",
+  )
   def apply(
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
       theme: Theme = Theme.Default,
   ) = new Prompts(out, createTerminal(out), theme)
 
+  @deprecated(
+    "Use `Prompts.sync.use(...)` or `Prompts.async.use(...)` instead, this method will be removed in 0.1.0",
+    "0.0.4",
+  )
   def use[A](
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
@@ -46,4 +55,5 @@ object Prompts:
     try f(prompts)
     finally prompts.close()
   end use
+
 end Prompts

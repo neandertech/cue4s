@@ -16,25 +16,5 @@
 
 package cue4s
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
-
-private trait PromptsPlatform:
-  self: Prompts =>
-
-  def runAsync[R](
-      prompt: Prompt[R],
-  )(using ExecutionContext): Future[Completion[R]] =
-    val framework = prompt.framework(terminal, out, theme)
-
-    inputProvider.evaluateFuture(framework.handler)
-
-  @deprecated(
-    "Use `runAsync(...)` instead, this method will be removed in 0.1.0",
-    "0.0.4",
-  )
-  def future[R](
-      prompt: Prompt[R],
-  )(using ExecutionContext): Future[Completion[R]] = runAsync(prompt)
-  end future
-end PromptsPlatform
+private[cue4s] trait PromptsCompanionPlatform:
+  val async: AsyncPromptsBuilder = AsyncPromptsBuilder()

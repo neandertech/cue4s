@@ -31,30 +31,24 @@ case class Info(
 
 object ioExample extends IOApp.Simple:
   def run: IO[Unit] =
-    PromptsIO().use: prompts =>
+    PromptsIO.make.use: prompts =>
       for
         _ <- IO.println("let's go")
 
         day = prompts
-          .io(
-            Prompt.SingleChoice("How was your day?", List("great", "okay")),
-          )
+          .singleChoice("How was your day?", List("great", "okay"))
           .map(_.toEither)
           .flatMap(IO.fromEither)
 
         work = prompts
-          .io(
-            Prompt.Input("Where do you work?"),
-          )
+          .text("Where do you work?")
           .map(_.toEither)
           .flatMap(IO.fromEither)
 
         letter = prompts
-          .io(
-            Prompt.MultipleChoice(
-              "What are your favourite letters?",
-              ('A' to 'F').map(_.toString).toList,
-            ),
+          .multiChoiceAllSelected(
+            "What are your favourite letters?",
+            ('A' to 'F').map(_.toString).toList,
           )
           .map(_.toEither)
           .flatMap(IO.fromEither)
