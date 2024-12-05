@@ -100,7 +100,7 @@ lazy val example = projectMatrix
   .dependsOn(core)
   .in(file("modules/example"))
   .defaultAxes(defaults*)
-  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(JavaAppPackaging, NativeImagePlugin)
   .settings(
     name := "example",
     noPublish,
@@ -108,7 +108,11 @@ lazy val example = projectMatrix
   .settings(munitSettings)
   .jvmPlatform(
     Versions.scalaVersions,
-    settings = Seq(Compile / mainClass := Some("cue4s_example.sync")),
+    settings = Seq(
+      Compile / mainClass := Some("cue4s_example.sync"),
+      nativeImageJvm      := "graalvm-java23",
+      nativeImageVersion  := "23.0.0",
+    ),
   )
   .jsPlatform(
     Versions.scalaVersions,
