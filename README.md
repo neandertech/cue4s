@@ -40,39 +40,21 @@ This example is runnable on both JVM and Native (note how we're using `sync`).
 For this to work on JS, you need to use the `future`-based methods, example for that is provided in [examples folder](./modules/example/src/main/).
 
 ```scala mdoc:compile-only
+//> using dep tech.neander::cue4s::latest.release
+
 import cue4s.*
 
-case class Info(
-    day: Option[String] = None,
-    work: Option[String] = None,
-    letters: Set[String] = Set.empty
-)
+Prompts.sync.use: prompts =>
+  val day = prompts
+    .singleChoice("How was your day?", List("great", "okay"))
+    .getOrThrow
 
-var info = Info()
+  val work = prompts.text("Where do you work?").getOrThrow
 
-val prompts = Prompts()
-
-val day = prompts
-  .sync(
-    Prompt.SingleChoice("How was your day?", List("great", "okay"))
-  )
-  .toOption
-info = info.copy(day = day)
-
-val work = prompts.sync(Prompt.Input("Where do you work?")).toOption
-info = info.copy(work = work)
-
-val letters = prompts
-  .sync(
-    Prompt.MultipleChoice.withAllSelected(
+  val letters = prompts.multiChoiceAllSelected(
       "What are your favourite letters?",
       ('A' to 'F').map(_.toString).toList
-    )
-  )
-  .toOption
-info = info.copy(letters = letters.fold(Set.empty)(_.toSet))
-
-prompts.close() // important to put the terminal back into line mode
+    ).getOrThrow
 ```
 
 ### Auto-derivation for case classes
@@ -81,7 +63,11 @@ cue4s includes an experimental auto-derivation for case classes (and only them, 
 allowing you to create prompt chains:
 
 ```scala mdoc:compile-only
+
+//> using tech.neander::cue4s::latest.release
+
 import cue4s.*
+
 val validateName: String => Option[PromptError] = s =>
     Option.when(s.trim.isEmpty)(PromptError("name cannot be empty!"))
 
@@ -91,12 +77,18 @@ case class Attributes(
   @cue(_.text("Checklist").multi("Wake up" -> true, "Grub a brush" -> true, "Put a little makeup" -> false))
   doneToday: Set[String],
   @cue(_.text("What did you have for breakfast").options("eggs", "sadness"))
-  breakfast: String
+  breakfast: String,
+  @cue(_.text("Do you want to build a snowman?"))
+  snowman: Boolean,
+  @cue(_.text("How old are you?"))
+  age: Int,
+  @cue(_.text("What is the value of PI?"))
+  pi: Float
 ) derives PromptChain
 
 val attributes: Attributes = 
-    Prompts.use(): p =>
-      p.sync(PromptChain[Attributes]).getOrThrow
+  Prompts.sync.use: p =>
+    p.run(PromptChain[Attributes]).getOrThrow
 ```
 
 There is no generic mechanism to define how parameters of different types will be handled, just a set of 
@@ -124,48 +116,46 @@ The integration is available only for JVM and JS targets.
 **Usage**
 
 ```scala mdoc:compile-only
+//> using dep tech.neander::cue4s-cats-effect::latest.release
+
+import cue4s.catseffect.*
+
 import cats.effect.*
-import cue4s.*, catseffect.*
+import cats.syntax.all.*
 
 case class Info(
-    day: Option[String] = None,
-    work: Option[String] = None,
-    letters: Set[String] = Set.empty
+    day: String,
+    work: String,
+    letters: List[String],
 )
 
 object ioExample extends IOApp.Simple:
   def run: IO[Unit] =
-    PromptsIO().use: prompts =>
+    PromptsIO.make.use: prompts =>
       for
-        ref <- IO.ref(Info())
+        _ <- IO.println("let's go")
 
-        day <- prompts
-          .io(
-            Prompt.SingleChoice("How was your day?", List("great", "okay"))
-          )
-          .map(_.toOption)
-          .flatTap(day => ref.update(_.copy(day = day)))
+        day = prompts
+          .singleChoice("How was your day?", List("great", "okay"))
+          .map(_.toEither)
+          .flatMap(IO.fromEither)
 
-        work <- prompts
-          .io(
-            Prompt.Input("Where do you work?")
-          )
-          .map(_.toOption)
-          .flatTap(work => ref.update(_.copy(work = work)))
+        work = prompts
+          .text("Where do you work?")
+          .map(_.toEither)
+          .flatMap(IO.fromEither)
 
-        letter <- prompts
-          .io(
-            Prompt.MultipleChoice.withNoneSelected(
-              "What are your favourite letters?",
-              ('A' to 'F').map(_.toString).toList
-            )
+        letter = prompts
+          .multiChoiceAllSelected(
+            "What are your favourite letters?",
+            ('A' to 'F').map(_.toString).toList,
           )
-          .map(_.toOption)
-          .flatTap(letter =>
-            ref.update(_.copy(letters = letter.fold(Set.empty)(_.toSet)))
-          )
+          .map(_.toEither)
+          .flatMap(IO.fromEither)
 
-        _ <- ref.get.flatMap(IO.println)
+        info <- (day, work, letter).mapN(Info.apply)
+
+        _ <- IO.println(info)
       yield ()
 
 end ioExample
