@@ -167,9 +167,15 @@ object Prompt:
   end NumberInput
 
   object NumberInput:
-    val int    = NumberInput[Int].apply(_, _ => None)
-    val float  = NumberInput[Float].apply(_, _ => None)
-    val double = NumberInput[Float].apply(_, _ => None)
+    def apply[N: Numeric](label: String): NumberInput[N] =
+      new NumberInput[N](label)
+
+    def int(label: String): NumberInput[Int] = NumberInput[Int](label)
+
+    def float(label: String): NumberInput[Float] = NumberInput[Float](label)
+
+    def double(label: String): NumberInput[Float] = NumberInput[Float](label)
+  end NumberInput
 
   case class Confirmation(lab: String, default: Boolean = true)
       extends Prompt[Boolean]:
@@ -194,6 +200,7 @@ object Prompt:
 
   case class SingleChoice(lab: String, alts: List[String], windowSize: Int = 10)
       extends Prompt[String]:
+    def withWindowSize(i: Int) = copy(windowSize = i)
     override def framework(
         terminal: Terminal,
         output: Output,
@@ -213,6 +220,9 @@ object Prompt:
       alts: List[(String, Boolean)],
       windowSize: Int,
   ) extends Prompt[List[String]]:
+
+    def withWindowSize(i: Int) = copy(windowSize = i)
+
     override def framework(
         terminal: Terminal,
         output: Output,
