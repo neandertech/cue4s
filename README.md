@@ -1,10 +1,10 @@
 <!--toc:start-->
 - [Cue4s](#cue4s)
   - [Installation](#installation)
-  - [Platform support](#platform-support)
   - [Usage](#usage)
   - [Auto-derivation for case classes](#auto-derivation-for-case-classes)
   - [Cats Effect integration](#cats-effect-integration)
+  - [Platform support](#platform-support)
 <!--toc:end-->
 
 ## Cue4s
@@ -21,23 +21,11 @@ https://github.com/user-attachments/assets/c762e557-26a2-4d24-bee2-23dd3443a21b
 
  - Scala CLI: `//> using dep tech.neander::cue4s::<version>`
  - SBT: `libraryDependencies += "tech.neander" %%% "cue4s" % "<version>"`
-
-### Platform support
-
-On JS, we can only execute the prompts asynchronously, so the minimal 
-usable implementation of a prompt will always return `Future[Completion[Result]]`.
-
-On JVM and Native, we can execute prompts synchronously, so the simplest 
-implementation returns `Completion[Result]` - but methods wrapping the result in `Future` are provided for convenience.
-
-This is encoded in the methods (`sync` or `future`, or both) available on the `cue4s.Prompts` class, which is the main entry point for the library.
-
-This library is published for Scala.js 1.16.0+, Scala Native 0.5, and JVM.
-
+ - 
 ### Usage
 
 This example is runnable on both JVM and Native (note how we're using `sync`).
-For this to work on JS, you need to use the `future`-based methods, example for that is provided in [examples folder](./modules/example/src/main/).
+In fact, if you put into a file named `test.sc` you can run it with [Scala CLI](https://scala-cli.virtuslab.org/).
 
 ```scala mdoc:compile-only
 //> using dep tech.neander::cue4s::latest.release
@@ -56,6 +44,8 @@ Prompts.sync.use: prompts =>
       ('A' to 'F').map(_.toString).toList
     ).getOrThrow
 ```
+
+For this to work on JS, you need to use the `Future`-based methods, example for that is provided in [examples folder](./modules/example/src/main/).
 
 ### Auto-derivation for case classes
 
@@ -106,7 +96,6 @@ In the future more combinations can be added.
 A simple Cats Effect integration is provided, which wraps the future-based implementation of terminal interactions. 
 
 The integration is available only for JVM and JS targets.
-
 
 **Installation**
 
@@ -160,3 +149,15 @@ object ioExample extends IOApp.Simple:
 
 end ioExample
 ```
+
+### Platform support
+
+On JS, we can only execute the prompts asynchronously, so the minimal 
+usable implementation of a prompt will always return `Future[Completion[Result]]`.
+
+On JVM and Native, we can execute prompts synchronously, so the simplest 
+implementation returns `Completion[Result]` - but methods wrapping the result in `Future` are provided for convenience.
+
+This is encoded in the availablity of `sync` and `async` methods on the `Prompts` object (e.g. only `Prompts.async` is available on JS).
+
+This library is published for Scala.js 1.16.0+, Scala Native 0.5, and JVM.
