@@ -2,6 +2,7 @@ package cue4s
 
 import cue4s.*
 import KeyEvent.*
+import cue4s.Prompt.PasswordInput.Password
 
 class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("alternatives.navigation")(
@@ -306,6 +307,8 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       pi: Float,
       @cue(_.text("Do you want to build a snowman?"))
       snowman: Boolean,
+      @cue(_.text("Choose a password"))
+      password: Password,
   ) derives PromptChain
 
   terminalTestComplete("promptchain")(
@@ -324,8 +327,11 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
       Event.Init,
       chars("n"),
+      Event.Init,
+      chars("qwerty"),
+      ENTER,
     ),
-    MyPrompt("hello", "yes", 24, 3.14f, false),
+    MyPrompt("hello", "yes", 24, 3.14f, false, Password("qwerty")),
   )
 
 end ExampleTests
