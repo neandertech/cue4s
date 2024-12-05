@@ -17,16 +17,7 @@
   "methods":[{"name":"<init>","parameterTypes":[] }]
 },
 {
-  "name":"com.sun.jna.Native",
-  "methods":[{"name":"<init>","parameterTypes":[] }]
-},
-{
   "name":"cue4s.ChangeModeDarwin$termios",
-  "allDeclaredFields":true,
-  "fields":[{"name":"OPTIONS"}, {"name":"STRING_ENCODING"}, {"name":"STRUCTURE_ALIGNMENT"}, {"name":"TYPE_MAPPER"}]
-},
-{
-  "name":"cue4s.ChangeModeLinux$termios",
   "allDeclaredFields":true,
   "fields":[{"name":"OPTIONS"}, {"name":"STRING_ENCODING"}, {"name":"STRUCTURE_ALIGNMENT"}, {"name":"TYPE_MAPPER"}]
 },
@@ -35,8 +26,8 @@
   "fields":[{"name":"nativeInterop$lzy1"}]
 },
 {
-  "name":"cue4s.InteractiveTextInput",
-  "fields":[{"name":"PromptAction$lzy1"}, {"name":"Status$lzy1"}]
+  "name":"cue4s.InteractiveSingleChoice",
+  "fields":[{"name":"PromptAction$lzy1"}, {"name":"Status$lzy1"}, {"name":"altMapping$lzy1"}, {"name":"altsWithIndex$lzy1"}]
 },
 {
   "name":"cue4s.Platform$",

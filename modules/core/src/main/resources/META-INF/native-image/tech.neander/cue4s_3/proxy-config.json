@@ -1,5 +1,5 @@
 [
   {
-    "interfaces":["cue4s.ChangeModeDarwin$CLibrary", "cue4s.ChangeModeLinux$CLibrary"]
+    "interfaces":["cue4s.ChangeModeDarwin$CLibrary"]
   }
 ]
