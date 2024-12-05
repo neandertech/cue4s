@@ -34,7 +34,7 @@ object Prompts extends PromptsCompanionPlatform:
 
   @deprecated(
     "Use `Prompts.sync.use(...)` or `Prompts.async.use(...)` instead, this method will be removed in 0.1.0",
-    "0.0.4",
+    "0.0.5",
   )
   def apply(
       out: Output = Output.Std,
@@ -44,7 +44,7 @@ object Prompts extends PromptsCompanionPlatform:
 
   @deprecated(
     "Use `Prompts.sync.use(...)` or `Prompts.async.use(...)` instead, this method will be removed in 0.1.0",
-    "0.0.4",
+    "0.0.5",
   )
   def use[A](
       out: Output = Output.Std,

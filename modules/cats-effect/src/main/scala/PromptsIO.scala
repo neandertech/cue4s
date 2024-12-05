@@ -46,7 +46,7 @@ class PromptsIO private (
 
   @deprecated(
     "use `.run(...)` instead, this method will be removed in 0.1.0",
-    "0.0.4",
+    "0.0.5",
   )
   def io[A](
       prompt: Prompt[A],
@@ -124,7 +124,7 @@ end PromptsIO
 object PromptsIO:
   @deprecated(
     "use `PromptsIO.make` or `PromptsIO.builder.make` instead, this method will be removed in 0.1.0",
-    "0.0.4",
+    "0.0.5",
   )
   def apply(
       out: Output = Output.Std,

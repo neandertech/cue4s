@@ -46,7 +46,7 @@ private trait PromptsPlatform:
 
   @deprecated(
     "Use `run(...)` instead, this method will be removed in 0.1.0",
-    "0.0.4",
+    "0.0.5",
   )
   def sync[R](
       prompt: Prompt[R] | PromptChain[R],
@@ -55,7 +55,7 @@ private trait PromptsPlatform:
 
   @deprecated(
     "Use `runAsync(...)` instead, this method will be removed in 0.1.0",
-    "0.0.4",
+    "0.0.5",
   )
   def future[R](
       prompt: Prompt[R],
