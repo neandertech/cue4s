@@ -28,12 +28,21 @@ class AsyncPromptsBuilder private (impl: AsyncPromptsOptions):
   def withOutput(out: Output): AsyncPromptsBuilder = copy(_.copy(out = out))
   def withTheme(theme: Theme): AsyncPromptsBuilder = copy(_.copy(theme = theme))
 
-  def use[A](f: AsyncPrompts => A): A =
+  def use[A](f: AsyncPrompts => A)(using ExecutionContext): A =
     val p    = Prompts(impl.out, Terminal.ansi, impl.theme)
     val inst = AsyncPrompts(p)
     try
-      f(inst)
+      val result = f(inst)
+      result match
+        case f: Future[?] =>
+          // Only important on JS, where finalizer might not run
+          f.onComplete(_ => p.close())
+        case _ =>
+
+      result
     finally p.close()
+    end try
+  end use
 
   private def copy(f: AsyncPromptsOptions => AsyncPromptsOptions) =
     new AsyncPromptsBuilder(f(impl))
