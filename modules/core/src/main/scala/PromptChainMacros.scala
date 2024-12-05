@@ -16,6 +16,8 @@
 
 package cue4s
 
+import cue4s.Prompt.PasswordInput
+
 private[cue4s] object PromptChainMacros:
   import deriving.*, quoted.*
 
@@ -38,6 +40,10 @@ private[cue4s] object PromptChainMacros:
     def options(using Quotes) =
       getHint:
         case CueHint.Options(value) => value
+
+    def password(using Quotes): Expr[Option[Boolean]] =
+      getHint:
+        case CueHint.Password => true
 
     def multi(using Quotes) =
       getHint:
@@ -166,6 +172,12 @@ private[cue4s] object PromptChainMacros:
           '{
             val label  = ${ hints.name }.getOrElse($nm)
             val prompt = Prompt.Confirmation(label).asInstanceOf[Prompt[E]]
+            PromptStep[Tuple, E](prompt, (state, t) => state :* t).toAny
+          }
+        case '[PasswordInput.Password] =>
+          '{
+            val label  = ${ hints.name }.getOrElse($nm)
+            val prompt = Prompt.PasswordInput(label).asInstanceOf[Prompt[E]]
             PromptStep[Tuple, E](prompt, (state, t) => state :* t).toAny
           }
         case '[String] =>
