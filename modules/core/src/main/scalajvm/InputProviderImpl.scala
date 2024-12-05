@@ -57,12 +57,12 @@ private class InputProviderImpl(o: Terminal)
   end evaluateFuture
 
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
-    cue4s.ChangeMode.changemode(1)
+    InputProviderImpl.nativeInterop.changemode(1)
 
     var lastRead = 0
 
     inline def read() =
-      lastRead = cue4s.ChangeMode.CLibrary.INSTANCE.getchar()
+      lastRead = InputProviderImpl.nativeInterop.getchar()
       lastRead
 
     var hook = Option.empty[() => Unit]
@@ -109,7 +109,7 @@ private class InputProviderImpl(o: Terminal)
   end evaluate
 
   override def close() =
-    cue4s.ChangeMode.changemode(0)
+    InputProviderImpl.nativeInterop.changemode(0)
 
 end InputProviderImpl
 
@@ -132,6 +132,23 @@ private object InputProviderImpl:
       try hook()
       catch case e: Throwable => ()
 
-    cue4s.ChangeMode.changemode(0),
+    nativeInterop.changemode(0),
   ))
+
+  lazy private val nativeInterop: ChangeMode =
+    import Platform.*
+    os match
+      case OS.MacOS => ChangeMode.forDarwin()
+      case OS.Linux => ChangeMode.forLinux()
+      case OS.Windows =>
+        sys.error(
+          "Cue4s does not yet support windows: https://github.com/neandertech/cue4s/issues/7",
+        )
+      case OS.Unknown =>
+        sys.error(
+          "Cue4s failed to detect the operating system, it is likely unsupported. Please raise an issue (or even a PR!) at https://github.com/neandertech/cue4s",
+        )
+    end match
+  end nativeInterop
+
 end InputProviderImpl

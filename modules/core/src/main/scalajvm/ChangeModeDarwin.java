@@ -23,10 +23,23 @@ import com.sun.jna.Structure;
 import java.util.List;
 import java.util.Arrays;
 
-public class ChangeMode {
+class ChangeModeDarwin implements ChangeMode {
+
+	private static ChangeModeDarwin INSTANCE;
+
+	private ChangeModeDarwin() {
+	}
+
+	public static ChangeModeDarwin getInstance() {
+		if (INSTANCE == null) {
+			INSTANCE = new ChangeModeDarwin();
+		}
+
+		return INSTANCE;
+	}
 
 	// Define the libc interface
-	public static interface CLibrary extends Library {
+	static interface CLibrary extends Library {
 		CLibrary INSTANCE = Native.load("c", CLibrary.class);
 
 		int tcgetattr(int fd, termios termios);
@@ -56,9 +69,15 @@ public class ChangeMode {
 	public static final int ECHO = 0x0008;
 
 	// Function to change mode
-	public static termios oldt = new termios(); // store original termios
+	private termios oldt = new termios(); // store original termios
 
-	public static void changemode(int dir) {
+	@Override
+	public int getchar() {
+		return CLibrary.INSTANCE.getchar();
+	}
+
+	@Override
+	public void changemode(int dir) {
 		termios newt = new termios();
 
 		if (dir == 1) {

@@ -56,27 +56,8 @@ private class InputProviderImpl(o: Terminal)
 
   private var flags = Option.empty[CLong]
 
-  private def changemode(rawMode: Boolean) =
-    val state        = stackalloc[termios]()
-    val STDIN_FILENO = 0
-    if rawMode then
-      tcgetattr(STDIN_FILENO, state)
-      this.synchronized:
-        flags = Some((!state)._4)
-      (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-      assert(tcsetattr(STDIN_FILENO, TCSANOW, state) == 0)
-    else
-      flags.foreach: oldflags =>
-        tcgetattr(STDIN_FILENO, state)
-        (!state)._4 = oldflags
-        this.synchronized:
-          flags = None
-        assert(tcsetattr(STDIN_FILENO, TCSANOW, state) == 0)
-    end if
-  end changemode
-
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
-    changemode(rawMode = true)
+    Changemode.changeMode(rawMode = true)
 
     val hook = () =>
       handler(Event.Interrupt)
@@ -126,7 +107,7 @@ private class InputProviderImpl(o: Terminal)
 
   end evaluate
 
-  override def close() = changemode(rawMode = false)
+  override def close() = Changemode.changeMode(rawMode = false)
 end InputProviderImpl
 
 private object InputProviderImpl:
