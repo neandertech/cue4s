@@ -1,0 +1,9 @@
+{
+  "resources":{
+  "includes":[{
+    "pattern":"\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+  }, {
+    "pattern":"\\Qcom/sun/jna/(.*?)/libjnidispatch.jnilib\\E"
+  }]},
+  "bundles":[]
+}
