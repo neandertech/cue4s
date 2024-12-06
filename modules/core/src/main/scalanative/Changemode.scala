@@ -85,26 +85,35 @@ object Changemode:
       speed_t,  /* c_ospeed - output speed  */
     ]
 
-    var flags = Option.empty[Int]
+    var flags        = Option.empty[Int]
+    val STDIN_FILENO = 0
 
     def changeMode(rawMode: Boolean): Boolean =
-      val state = stackalloc[termios]()
+      Zone:
+        val state = alloc[termios]()
 
-      val STDIN_FILENO = 0
-      if rawMode then
-        tcgetattr(STDIN_FILENO, state.asInstanceOf)
-        this.synchronized:
-          flags = Some((!state)._4)
-        (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
-      else
-        flags.foreach: oldflags =>
-          tcgetattr(STDIN_FILENO, state.asInstanceOf)
-          (!state)._4 = oldflags
-          this.synchronized:
-            flags = None
-        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
-      end if
+        import util.boundary
+
+        boundary:
+          inline def assert0(value: Int) =
+            if value != 0 then boundary.break(false)
+            else true
+
+          if rawMode then
+            assert0(tcgetattr(STDIN_FILENO, state.asInstanceOf))
+            this.synchronized:
+              flags = Some((!state)._4)
+            (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
+            assert0(tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf))
+          else
+            flags.foreach: oldflags =>
+              assert0(tcgetattr(STDIN_FILENO, state.asInstanceOf))
+              (!state)._4 = oldflags
+              this.synchronized:
+                flags = None
+              assert0(tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf))
+            true
+          end if
     end changeMode
   end Linux
 
