@@ -248,7 +248,7 @@ val CICommands = Seq(
   "scalafixEnable",
   "compile",
   "test",
-  "e2e/test"
+  "e2e/test",
   "checkDocs",
   "scalafmtCheckAll",
   "scalafmtSbtCheck",
