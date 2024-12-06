@@ -1,0 +1,19 @@
+{
+  "resources": {
+    "includes": [
+      {
+        "pattern": "\\QMETA-INF/services/java.lang.System$LoggerFinder\\E"
+      },
+      {
+        "pattern": "\\Qcom/sun/jna/darwin-aarch64/libjnidispatch.jnilib\\E"
+      },
+      {
+        "pattern": "\\Qcom/sun/jna/linux-x86-64/libjnidispatch.so\\E"
+      },
+      {
+        "pattern": "\\Qcom/sun/jna/linux-aarch64/libjnidispatch.so\\E"
+      }
+    ]
+  },
+  "bundles": []
+}

@@ -28,7 +28,7 @@ def tcgetattr(fd: Int, state: Ptr[Byte]): Int = extern
 def tcsetattr(fd: Int, action: Int, state: Ptr[Byte]): Int = extern
 
 object Changemode:
-  def changeMode(rawMode: Boolean) =
+  def changeMode(rawMode: Boolean): Boolean =
     Platform.os match
       case OS.Linux => Linux.changeMode(rawMode)
       case OS.MacOS => MacOS.changeMode(rawMode)
@@ -46,7 +46,7 @@ object Changemode:
 
     var flags = Option.empty[CLong]
 
-    def changeMode(rawMode: Boolean) =
+    def changeMode(rawMode: Boolean): Boolean =
       val state = stackalloc[termios]()
 
       val STDIN_FILENO = 0
@@ -55,14 +55,14 @@ object Changemode:
         this.synchronized:
           flags = Some((!state)._4)
         (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-        assert(tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0)
+        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
       else
         flags.foreach: oldflags =>
           tcgetattr(STDIN_FILENO, state.asInstanceOf)
           (!state)._4 = oldflags
           this.synchronized:
             flags = None
-          assert(tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0)
+        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
       end if
     end changeMode
   end MacOS
@@ -87,7 +87,7 @@ object Changemode:
 
     var flags = Option.empty[Int]
 
-    def changeMode(rawMode: Boolean) =
+    def changeMode(rawMode: Boolean): Boolean =
       val state = stackalloc[termios]()
 
       val STDIN_FILENO = 0
@@ -96,14 +96,14 @@ object Changemode:
         this.synchronized:
           flags = Some((!state)._4)
         (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-        assert(tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0)
+        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
       else
         flags.foreach: oldflags =>
           tcgetattr(STDIN_FILENO, state.asInstanceOf)
           (!state)._4 = oldflags
           this.synchronized:
             flags = None
-          assert(tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0)
+        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
       end if
     end changeMode
   end Linux

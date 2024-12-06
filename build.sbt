@@ -36,6 +36,7 @@ val Versions = new {
   val fansi         = "0.5.0"
   val jna           = "5.14.0"
   val catsEffect    = "3.5.7"
+  val osLib         = "0.11.3"
 }
 
 lazy val munitSettings = Seq(
@@ -100,7 +101,7 @@ lazy val example = projectMatrix
   .dependsOn(core)
   .in(file("modules/example"))
   .defaultAxes(defaults*)
-  .enablePlugins(JavaAppPackaging)
+  .enablePlugins(JavaAppPackaging, NativeImagePlugin)
   .settings(
     name := "example",
     noPublish,
@@ -108,7 +109,11 @@ lazy val example = projectMatrix
   .settings(munitSettings)
   .jvmPlatform(
     Versions.scalaVersions,
-    settings = Seq(Compile / mainClass := Some("cue4s_example.sync")),
+    settings = Seq(
+      Compile / mainClass := Some("cue4s_example.sync"),
+      nativeImageJvm      := "graalvm-java23",
+      nativeImageVersion  := "23.0.0",
+    ),
   )
   .jsPlatform(
     Versions.scalaVersions,
@@ -162,6 +167,60 @@ lazy val exampleCatsEffect = projectMatrix
     nativeConfig ~= (_.withIncrementalCompilation(true)),
   )
 
+lazy val e2e_fixture = projectMatrix
+  .dependsOn(core)
+  .in(file("modules/e2e-fixture"))
+  .defaultAxes(defaults*)
+  .enablePlugins(JavaAppPackaging, NativeImagePlugin)
+  .settings(
+    noPublish,
+  )
+  .settings(munitSettings)
+  .jvmPlatform(
+    Versions.scalaVersions,
+    settings = Seq(
+      nativeImageJvm     := "graalvm-java23",
+      nativeImageVersion := "23.0.0",
+      nativeImageOptions += "--install-exit-handlers",
+    ),
+  )
+  .jsPlatform(
+    Versions.scalaVersions,
+  )
+  .nativePlatform(
+    Versions.scalaVersions,
+  )
+  .settings(
+    scalaJSUseMainModuleInitializer := true,
+    scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
+    nativeConfig ~= (_.withIncrementalCompilation(true)
+      .withSourceLevelDebuggingConfig(SourceLevelDebuggingConfig.enabled)),
+  )
+  .settings(superMatrix)
+
+lazy val e2e = project
+  .in(file("modules/e2e-tests"))
+  .settings(
+    Test / envVars := Map(
+      "CUE4S_EXAMPLE_NATIVE" -> (e2e_fixture.native(
+        true,
+      ) / Compile / nativeLink).value.toString,
+      "CUE4S_EXAMPLE_NATIVE_IMAGE" -> (e2e_fixture.jvm(
+        true,
+      ) / Compile / nativeImage).value.toString,
+      "CUE4S_EXAMPLE_JVM" -> (e2e_fixture.jvm(
+        true,
+      ) / Compile / assembly).value.toString,
+      "CUE4S_EXAMPLE_JS" -> (e2e_fixture.js(
+        true,
+      ) / Compile / fastOptJS).value.data.toString,
+    ),
+    munitSettings,
+    scalaVersion                          := Versions.Scala3,
+    Test / fork                           := true,
+    libraryDependencies += "com.lihaoyi" %%% "os-lib" % Versions.osLib,
+  )
+
 lazy val docs =
   project
     .in(file("target/.docs-target"))
@@ -189,6 +248,7 @@ val CICommands = Seq(
   "scalafixEnable",
   "compile",
   "test",
+  "e2e/test",
   "checkDocs",
   "scalafmtCheckAll",
   "scalafmtSbtCheck",
