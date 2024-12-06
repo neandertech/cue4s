@@ -24,3 +24,5 @@ addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
 addSbtPlugin("com.indoorvivants.snapshots" % "sbt-snapshots" % "0.0.8")
 
 addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.4")
+
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.0")
