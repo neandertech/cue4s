@@ -55,14 +55,14 @@ object Changemode:
         this.synchronized:
           flags = Some((!state)._4)
         (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf)
+        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
       else
         flags.foreach: oldflags =>
           tcgetattr(STDIN_FILENO, state.asInstanceOf)
           (!state)._4 = oldflags
           this.synchronized:
             flags = None
-        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf)
+        tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
       end if
     end changeMode
   end MacOS
