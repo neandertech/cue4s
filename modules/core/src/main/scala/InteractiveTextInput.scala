@@ -23,13 +23,14 @@ private[cue4s] class InteractiveTextInput(
     theme: Theme,
     validate: String => Option[PromptError],
     hideText: Boolean,
+    default: Option[String],
 ) extends PromptFramework[String](terminal, out):
 
   import InteractiveTextInput.*
 
   override type PromptState = State
 
-  override def initialState: State = State("")
+  override def initialState: State = State(default.getOrElse(""))
 
   override def handleEvent(event: Event) =
     def update(state: State, f: State => State) =
@@ -65,11 +66,12 @@ private[cue4s] class InteractiveTextInput(
   ): List[String] =
     val lines = List.newBuilder[String]
 
+    val txt = if hideText then "*" * st.text.length else st.text
+
     status match
       case Status.Init =>
-        lines += "? ".selected + prompt.prompt + " > "
+        lines += "? ".selected + prompt.prompt + " > " + txt.input
       case Status.Running(err) =>
-        val txt = if hideText then "*" * st.text.length else st.text
         lines += "? ".selected + prompt.prompt + " > " + txt.input
         err.left.toOption.foreach: err =>
           lines += err.error

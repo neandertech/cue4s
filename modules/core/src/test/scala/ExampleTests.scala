@@ -183,6 +183,17 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     "good",
   )
 
+  terminalTestComplete("default")(
+    Prompt
+      .Input("What color is the sky?")
+      .default("blue"),
+    list(
+      Event.Init,
+      ENTER,
+    ),
+    "blue",
+  )
+
   terminalTestComplete("password.input")(
     Prompt
       .PasswordInput("Choose your password")

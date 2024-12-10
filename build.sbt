@@ -113,6 +113,7 @@ lazy val example = projectMatrix
       Compile / mainClass := Some("cue4s_example.sync"),
       nativeImageJvm      := "graalvm-java23",
       nativeImageVersion  := "23.0.0",
+      nativeImageOptions ++= Seq("--install-exit-handlers", "--no-fallback"),
     ),
   )
   .jsPlatform(
@@ -181,7 +182,7 @@ lazy val e2e_fixture = projectMatrix
     settings = Seq(
       nativeImageJvm     := "graalvm-java23",
       nativeImageVersion := "23.0.0",
-      nativeImageOptions += "--install-exit-handlers",
+      nativeImageOptions ++= Seq("--install-exit-handlers", "--no-fallback"),
     ),
   )
   .jsPlatform(
