@@ -45,12 +45,16 @@ object Prompt:
   case class Input private (
       lab: String,
       validate: String => Option[PromptError] = _ => None,
+      default: Option[String] = None,
   ) extends Prompt[String]:
 
     def this(lab: String) = this(lab, _ => None)
 
     def validate(f: String => Option[PromptError]): Input =
       copy(validate = (n: String) => validate(n).orElse(f(n)))
+
+    def default(value: String): Input =
+      copy(default = Some(value))
 
     override def framework(
         terminal: Terminal,
@@ -65,6 +69,7 @@ object Prompt:
       validate = validate,
       hideText = false,
       symbols = symbols,
+      default = default,
     )
   end Input
 
@@ -74,11 +79,15 @@ object Prompt:
   import PasswordInput.Password
 
   case class PasswordInput private (
-      lab: String,
-      validate: Password => Option[PromptError] = _ => None,
+      private val lab: String,
+      private val validate: Password => Option[PromptError] = _ => None,
+      private val default: Option[Password] = None,
   ) extends Prompt[Password]:
 
     def this(lab: String) = this(lab, _ => None)
+
+    def default(value: Password): PasswordInput =
+      copy(default = Some(value))
 
     def validate(f: Password => Option[PromptError]): PasswordInput =
       copy(validate = (n: Password) => validate(n).orElse(f(n)))
@@ -98,6 +107,7 @@ object Prompt:
           validate = _ => None,
           hideText = true,
           symbols = symbols,
+          default = default.map(_.raw),
         )
 
       textBase.mapValidated[Password](str =>
@@ -115,8 +125,9 @@ object Prompt:
     def apply(lab: String): PasswordInput = new PasswordInput(lab)
 
   case class NumberInput[N: Numeric] private (
-      lab: String,
-      validateNumber: N => Option[PromptError] = (_: N) => None,
+      private val lab: String,
+      private val validateNumber: N => Option[PromptError] = (_: N) => None,
+      private val default: Option[N] = None,
   ) extends Prompt[N]:
     private val num = Numeric[N]
 
@@ -169,6 +180,7 @@ object Prompt:
         validate = stringValidate,
         hideText = false,
         symbols = symbols,
+        default = default.map(_.toString()),
       )
         .mapValidated(transform)
     end framework
@@ -187,6 +199,9 @@ object Prompt:
 
   case class Confirmation(lab: String, default: Boolean = true)
       extends Prompt[Boolean]:
+
+    def default(value: Boolean) = copy(default = value)
+
     override def framework(
         terminal: Terminal,
         output: Output,
