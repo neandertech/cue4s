@@ -18,7 +18,7 @@ package cue4s
 
 private object CharCollector:
   enum State:
-    case Init, ESC_Started, CSI_Started
+    case Init, ESC_Started, CSI_Started, ScanCode_Started
     case CSI_Collecting(bytes: List[Byte])
 
   enum DecodeResult:
@@ -51,14 +51,19 @@ private object CharCollector:
     curState match
       case State.Init =>
         char match
+          case 3|4 => // Ctrl+C or Ctrl+D
+            System.exit(1)
+            throw Exception("Got SIGINT or SIGTERM") // should be unreachalbe, but System.exit returns Unit
           case AnsiTerminal.ESC =>
             (State.ESC_Started, DecodeResult.Continue)
           case 10 | 13 =>
             emit(Event.Key(KeyEvent.ENTER))
           case 9 =>
             emit(Event.Key(KeyEvent.TAB))
-          case 127 =>
+          case 8|127 =>
             emit(Event.Key(KeyEvent.DELETE))
+          case 224 => // 0xE0
+            (State.ScanCode_Started, DecodeResult.Continue)
           case -1 =>
             error("Invalid character -1")
           case _ =>
@@ -90,6 +95,17 @@ private object CharCollector:
             toInit(Event.CSICode(bytes))
           case _ =>
             error(s"Unexpected byte ${char}, expected CSI final byte")
+
+      // https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-6.0/aa299374(v=vs.60)
+      case State.ScanCode_Started =>
+        char match
+          case 72 => toInit(Event.Key(KeyEvent.UP))
+          case 80 => toInit(Event.Key(KeyEvent.DOWN))
+          case 77 => toInit(Event.Key(KeyEvent.RIGHT))
+          case 75 => toInit(Event.Key(KeyEvent.LEFT))
+          case 28 => toInit(Event.Key(KeyEvent.ENTER))
+          case 83 => toInit(Event.Key(KeyEvent.DELETE))
+          case _ => (State.Init, DecodeResult.Continue)
 
     end match
   end decode

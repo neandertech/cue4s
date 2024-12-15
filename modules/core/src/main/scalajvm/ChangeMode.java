@@ -27,4 +27,8 @@ interface ChangeMode {
   static ChangeMode forLinux() {
     return ChangeModeLinux.getInstance();
   }
+
+  static ChangeMode forWindows() {
+    return ChangeModeWindows.getInstance();
+  }
 } 
