@@ -21,8 +21,6 @@ import scala.concurrent.Future
 import scala.util.boundary
 
 import scalanative.libc.stdio.getchar
-import scalanative.unsafe.*
-import scalanative.posix.termios.*
 import boundary.break
 import CharCollector.*
 
@@ -32,7 +30,7 @@ private class InputProviderImpl(o: Terminal)
 
   @volatile private var asyncHookSet = false
 
-  override def evaluateFuture[Result](handler: Handler[Result])(using
+  override def evaluateFuture[Result](handler: EventHandler[Result])(using
       ExecutionContext,
   ) =
     val hook = () =>
@@ -54,9 +52,9 @@ private class InputProviderImpl(o: Terminal)
     fut
   end evaluateFuture
 
-  private var flags = Option.empty[CLong]
-
-  override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
+  override def evaluate[Result](
+      handler: EventHandler[Result],
+  ): Completion[Result] =
     Changemode.changeMode(rawMode = true)
 
     val hook = () =>

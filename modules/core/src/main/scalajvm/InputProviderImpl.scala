@@ -31,7 +31,7 @@ private class InputProviderImpl(o: Terminal)
 
   @volatile private var asyncHookSet = false
 
-  override def evaluateFuture[Result](handler: Handler[Result])(using
+  override def evaluateFuture[Result](handler: EventHandler[Result])(using
       ExecutionContext,
   ) =
 
@@ -56,7 +56,7 @@ private class InputProviderImpl(o: Terminal)
     Future.firstCompletedOf(Seq(cancellation.future, fut))
   end evaluateFuture
 
-  override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
+  override def evaluate[Result](handler: EventHandler[Result]): Completion[Result] =
     InputProviderImpl.nativeInterop.changemode(1)
 
     var lastRead = 0
