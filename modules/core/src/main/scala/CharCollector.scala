@@ -16,7 +16,11 @@
 
 package cue4s
 
+import scala.util.control.*
+
 private object CharCollector:
+  object ExitThrowable extends ControlThrowable("Received termination signal") with NoStackTrace
+
   enum State:
     case Init, ESC_Started, CSI_Started, ScanCode_Started
     case CSI_Collecting(bytes: List[Byte])
@@ -51,9 +55,6 @@ private object CharCollector:
     curState match
       case State.Init =>
         char match
-          case 3|4 => // Ctrl+C or Ctrl+D
-            System.exit(1)
-            throw Exception("Got SIGINT or SIGTERM") // should be unreachalbe, but System.exit returns Unit
           case AnsiTerminal.ESC =>
             (State.ESC_Started, DecodeResult.Continue)
           case 10 | 13 =>
@@ -64,6 +65,8 @@ private object CharCollector:
             emit(Event.Key(KeyEvent.DELETE))
           case 224 => // 0xE0
             (State.ScanCode_Started, DecodeResult.Continue)
+          case 3|4 if Platform.os == Platform.OS.Windows => // Ctrl+C or Ctrl+D
+            throw ExitThrowable
           case -1 =>
             error("Invalid character -1")
           case _ =>
