@@ -63,7 +63,7 @@ private object CharCollector:
             emit(Event.Key(KeyEvent.TAB))
           case 8|127 =>
             emit(Event.Key(KeyEvent.DELETE))
-          case 224 => // 0xE0
+          case 224 if Platform.os == Platform.OS.Windows => // 0xE0
             (State.ScanCode_Started, DecodeResult.Continue)
           case 3|4 if Platform.os == Platform.OS.Windows => // Ctrl+C or Ctrl+D
             throw ExitThrowable
