@@ -22,12 +22,7 @@ import scala.concurrent.Future
 private trait InputProviderPlatform:
   self: InputProvider =>
 
-  def evaluate[Result](f: Handler[Result]): Completion[Result]
-  def evaluateFuture[Result](f: Handler[Result])(using
+  def evaluate[Result](f: EventHandler[Result]): Completion[Result]
+  def evaluateFuture[Result](f: EventHandler[Result])(using
       ExecutionContext,
   ): Future[Completion[Result]]
-
-private trait InputProviderCompanionPlatform:
-  def apply(o: Terminal): InputProvider = InputProviderImpl(o)
-
-end InputProviderCompanionPlatform

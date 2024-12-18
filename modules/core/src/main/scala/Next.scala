@@ -16,7 +16,7 @@
 
 package cue4s
 
-private[cue4s] enum Next[+Result]:
+enum Next[+Result]:
   case Stop, Continue
   case Done(value: Result)
   case Error(msg: String)

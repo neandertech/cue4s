@@ -72,7 +72,7 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
 
   end mapValidated
 
-  final val handler = new Handler[Result]:
+  final val handler = new EventHandler[Result]:
     override def apply(ev: Event): Next[Result] =
       if ev == Event.Init then printPrompt()
       handleEvent(ev) match
