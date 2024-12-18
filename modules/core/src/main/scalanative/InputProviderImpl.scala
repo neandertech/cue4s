@@ -20,17 +20,16 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.util.boundary
 
-import scalanative.libc.stdio.getchar
-import scalanative.unsafe.*
-import scalanative.posix.termios.*
-import boundary.break
 import CharCollector.*
+import boundary.break
 
 private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
       InputProviderPlatform:
 
   @volatile private var asyncHookSet = false
+
+  val changeMode = ChangeModeNative.instance
 
   override def evaluateFuture[Result](handler: Handler[Result])(using
       ExecutionContext,
@@ -54,10 +53,8 @@ private class InputProviderImpl(o: Terminal)
     fut
   end evaluateFuture
 
-  private var flags = Option.empty[CLong]
-
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
-    Changemode.changeMode(rawMode = true)
+    changeMode.changeMode(rawMode = true)
 
     val hook = () =>
       handler(Event.Interrupt)
@@ -69,7 +66,7 @@ private class InputProviderImpl(o: Terminal)
     var lastRead = 0
 
     inline def read() =
-      lastRead = getchar()
+      lastRead = changeMode.getchar()
       lastRead
 
     try
@@ -107,7 +104,7 @@ private class InputProviderImpl(o: Terminal)
 
   end evaluate
 
-  override def close() = Changemode.changeMode(rawMode = false)
+  override def close() = changeMode.changeMode(rawMode = false)
 end InputProviderImpl
 
 private object InputProviderImpl:
