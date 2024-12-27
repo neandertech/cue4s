@@ -22,6 +22,7 @@ trait Prompt[Result]:
       terminal: Terminal,
       output: Output,
       theme: Theme,
+      symbols: Symbols,
   ): PromptFramework[Result]
 
   def map[Derived](f: Result => Derived): Prompt[Derived] =
@@ -35,8 +36,9 @@ trait Prompt[Result]:
           terminal: Terminal,
           output: Output,
           theme: Theme,
+          symbols: Symbols,
       ): PromptFramework[Derived] =
-        self.framework(terminal, output, theme).mapValidated(f)
+        self.framework(terminal, output, theme, symbols).mapValidated(f)
 end Prompt
 
 object Prompt:
@@ -54,6 +56,7 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
+        symbols: Symbols,
     ) = InteractiveTextInput(
       prompt = lab,
       terminal = terminal,
@@ -61,7 +64,7 @@ object Prompt:
       theme = theme,
       validate = validate,
       hideText = false,
-      Symbols.default,
+      symbols = symbols,
     )
   end Input
 
@@ -84,16 +87,17 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
+        symbols: Symbols,
     ) =
       val textBase =
         InteractiveTextInput(
-          lab,
-          terminal,
-          output,
-          theme,
+          prompt = lab,
+          terminal = terminal,
+          out = output,
+          theme = theme,
           validate = _ => None,
           hideText = true,
-          Symbols.default,
+          symbols = symbols,
         )
 
       textBase.mapValidated[Password](str =>
@@ -145,6 +149,7 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
+        symbols: Symbols,
     ) =
       val lifted = (n: N) => validateNumber(n).toLeft(n)
 
@@ -163,7 +168,7 @@ object Prompt:
         theme = theme,
         validate = stringValidate,
         hideText = false,
-        symbols = Symbols.default,
+        symbols = symbols,
       )
         .mapValidated(transform)
     end framework
@@ -186,6 +191,7 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
+        symbols: Symbols,
     ) =
       InteractiveConfirmation(
         prompt = lab,
@@ -193,7 +199,7 @@ object Prompt:
         terminal = terminal,
         out = output,
         theme = theme,
-        symbols = Symbols.default,
+        symbols = symbols,
       )
   end Confirmation
 
@@ -209,14 +215,15 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
+        symbols: Symbols,
     ) =
       InteractiveSingleChoice(
-        this,
-        terminal,
-        output,
-        theme,
-        windowSize,
-        Symbols.default,
+        prompt = this,
+        terminal = terminal,
+        out = output,
+        theme = theme,
+        windowSize = windowSize,
+        symbols = symbols,
       )
   end SingleChoice
 
@@ -232,14 +239,15 @@ object Prompt:
         terminal: Terminal,
         output: Output,
         theme: Theme,
+        symbols: Symbols,
     ): PromptFramework[List[String]] =
       InteractiveMultipleChoice(
-        this,
-        terminal,
-        output,
-        theme,
-        windowSize,
-        Symbols.default,
+        prompt = this,
+        terminal = terminal,
+        out = output,
+        theme = theme,
+        windowSize = windowSize,
+        symbols = symbols,
       )
   end MultipleChoice
 

@@ -47,12 +47,18 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   def terminalTestComplete[R](
       name: munit.TestOptions,
-  )(prompt: Prompt[R], events: List[Event], expected: R, log: Boolean = false)(
-      implicit loc: munit.Location,
+  )(
+      prompt: Prompt[R],
+      events: List[Event],
+      expected: R,
+      symbols: Symbols = Symbols.UnicodeSymbols,
+      log: Boolean = false,
+  )(implicit
+      loc: munit.Location,
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
-        runToCompletion(events, log)(
+        runToCompletion(events, symbols, log)(
           prompt,
         )
 
@@ -68,6 +74,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   def terminalTest[R](
       name: munit.TestOptions,
+      symbols: Symbols = Symbols.UnicodeSymbols,
       log: Boolean = false,
   )(
       prompt: Prompt[R],
@@ -78,7 +85,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
-        run(events, log)(
+        run(events, symbols, log)(
           prompt,
         )
 
@@ -88,7 +95,11 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   case class Result[T](value: T, snapshot: String, eventsProcessed: List[Event])
 
-  def run[T](events: Seq[Event], log: Boolean = false)(
+  def run[T](
+      events: Seq[Event],
+      symbols: Symbols = Symbols.UnicodeSymbols,
+      log: Boolean = false,
+  )(
       prompt: Prompt[T],
   ): Result[Next[T]] =
     val sb = new java.lang.StringBuilder
@@ -97,7 +108,8 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     val term      = TracingTerminal(Output.Delegate(_ => (), _ => ()))
     val capturing = Output.Delegate(term.writer, logger)
 
-    val handler = prompt.framework(term, capturing, Theme.NoColors).handler
+    val handler =
+      prompt.framework(term, capturing, Theme.NoColors, symbols).handler
 
     var result          = Option.empty[Next[T]]
     val eventsProcessed = List.newBuilder[Event]
@@ -120,10 +132,14 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     )
   end run
 
-  def runToCompletion[T](events: Seq[Event], log: Boolean = false)(
+  def runToCompletion[T](
+      events: Seq[Event],
+      symbols: Symbols = Symbols.UnicodeSymbols,
+      log: Boolean = false,
+  )(
       prompt: Prompt[T],
   ): Result[T] =
-    val Result(result, sb, processed) = run(events, log)(prompt)
+    val Result(result, sb, processed) = run(events, symbols, log)(prompt)
 
     result match
       case Next.Done(value) => Result(value, sb, processed)
@@ -132,7 +148,11 @@ trait TerminalTests extends MunitSnapshotsIntegration:
         fail(s"Prompt wasn't evaluated to completion: $result")
   end runToCompletion
 
-  def runChain[T](events: Seq[Event], log: Boolean = false)(
+  def runChain[T](
+      events: Seq[Event],
+      symbols: Symbols = Symbols.UnicodeSymbols,
+      log: Boolean = false,
+  )(
       prompt: PromptChain[T],
   ): Result[T] =
     val totalLog     = new java.lang.StringBuilder
@@ -140,7 +160,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     val evaluator: [t] => (p: Prompt[t]) => Completion[t] = [t] =>
       (p: Prompt[t]) =>
         val Result(res, sb, processed) =
-          runToCompletion(events.drop(eventsOffset), log)(p)
+          runToCompletion(events.drop(eventsOffset), symbols, log)(p)
         eventsOffset += processed.length
         totalLog.append(sb + "\n")
         Completion.Finished[t](res)

@@ -16,7 +16,7 @@
 
 package cue4s
 
-private[cue4s] trait Symbols:
+trait Symbols:
   def promptCancelled: String
   def promptDone: String
   def promptCue: String
@@ -28,48 +28,49 @@ private[cue4s] trait Symbols:
   def altNotSelected: String
 end Symbols
 
-private object UnicodeSymbols extends Symbols:
-
-  override val promptCancelled: String = "×"
-
-  override val promptDone: String = "✔"
-
-  override val promptCue: String = "›"
-
-  override val ellipsis: String = "…"
-
-  override val pageUpArrow: String = "↑"
-
-  override val pageDownArrow: String = "↓"
-
-  override val altCursor: String = "‣"
-
-  override val altSelected: String = "◉"
-
-  override val altNotSelected: String = "◯"
-end UnicodeSymbols
-
-private object ASCIISymbols extends Symbols:
-
-  override val promptCancelled: String = "X"
-
-  override val promptDone: String = "√"
-
-  override val ellipsis: String = "..."
-
-  override val pageUpArrow: String = "^"
-
-  override val pageDownArrow: String = "v"
-
-  override val altCursor: String = ">"
-
-  override val promptCue = "»"
-
-  override val altSelected: String = "*"
-
-  override val altNotSelected: String = "_"
-end ASCIISymbols
-
-private[cue4s] object Symbols:
-  lazy val default =
+object Symbols:
+  lazy val platformDefault =
     if Platform.os == Platform.OS.Windows then ASCIISymbols else UnicodeSymbols
+
+  object UnicodeSymbols extends Symbols:
+
+    override val promptCancelled: String = "×"
+
+    override val promptDone: String = "✔"
+
+    override val promptCue: String = "›"
+
+    override val ellipsis: String = "…"
+
+    override val pageUpArrow: String = "↑"
+
+    override val pageDownArrow: String = "↓"
+
+    override val altCursor: String = "‣"
+
+    override val altSelected: String = "◉"
+
+    override val altNotSelected: String = "◯"
+  end UnicodeSymbols
+
+  object ASCIISymbols extends Symbols:
+
+    override val promptCancelled: String = "X"
+
+    override val promptDone: String = "√"
+
+    override val ellipsis: String = "..."
+
+    override val pageUpArrow: String = "^"
+
+    override val pageDownArrow: String = "v"
+
+    override val altCursor: String = ">"
+
+    override val promptCue = "»"
+
+    override val altSelected: String = "*"
+
+    override val altNotSelected: String = "_"
+  end ASCIISymbols
+end Symbols
