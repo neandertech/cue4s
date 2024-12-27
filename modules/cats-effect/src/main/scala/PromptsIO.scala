@@ -24,6 +24,7 @@ class PromptsIO private (
     protected val out: Output,
     protected val terminal: Terminal,
     protected val theme: Theme,
+    protected val symbols: Symbols,
 ) extends AutoCloseable:
   protected lazy val inputProvider = InputProvider(terminal)
 
@@ -31,7 +32,7 @@ class PromptsIO private (
       prompt: Prompt[A],
   ): IO[Completion[A]] =
     val inputProvider = InputProvider(terminal)
-    val framework     = prompt.framework(terminal, out, theme)
+    val framework     = prompt.framework(terminal, out, theme, symbols)
 
     // TODO: provide native CE interface here
     IO.executionContext
@@ -130,8 +131,9 @@ object PromptsIO:
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
       theme: Theme = Theme.Default,
+      symbols: Symbols = Symbols.platformDefault,
   ): Resource[IO, PromptsIO] = Resource.fromAutoCloseable(
-    IO(new PromptsIO(out, createTerminal(out), theme)),
+    IO(new PromptsIO(out, createTerminal(out), theme, symbols)),
   )
 
   def builder: PromptsIOBuilder = PromptsIOBuilder()

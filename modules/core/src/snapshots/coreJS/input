@@ -1,40 +1,40 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how do you do fellow kids? > ┃
+┃? how do you do fellow kids? › ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('g')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how do you do fellow kids? > g┃
+┃? how do you do fellow kids? › g┃
 ┃too short!                      ┃
 ┃                                ┃
 ┃                                ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('o')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how do you do fellow kids? > go┃
+┃? how do you do fellow kids? › go┃
 ┃too short!                       ┃
 ┃                                 ┃
 ┃                                 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how do you do fellow kids? > go┃
+┃? how do you do fellow kids? › go┃
 ┃too short!                       ┃
 ┃                                 ┃
 ┃                                 ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('o')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how do you do fellow kids? > goo┃
+┃? how do you do fellow kids? › goo┃
 ┃too short!                        ┃
 ┃                                  ┃
 ┃                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('d')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how do you do fellow kids? > good┃
+┃? how do you do fellow kids? › good┃
 ┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃

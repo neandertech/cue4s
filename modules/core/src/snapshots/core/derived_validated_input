@@ -1,103 +1,103 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > ┃
+┃? What color is the sky? › ┃
 ┃                           ┃
 ┃                           ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('g')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > g┃
+┃? What color is the sky? › g┃
 ┃look up, it's not g         ┃
 ┃                            ┃
 ┃                            ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('o')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > go┃
+┃? What color is the sky? › go┃
 ┃look up, it's not go         ┃
 ┃                             ┃
 ┃                             ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > go┃
+┃? What color is the sky? › go┃
 ┃look up, it's not go         ┃
 ┃                             ┃
 ┃                             ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('o')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > goo┃
+┃? What color is the sky? › goo┃
 ┃look up, it's not goo         ┃
 ┃                              ┃
 ┃                              ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('d')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > good┃
+┃? What color is the sky? › good┃
 ┃look up, it's not good         ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > good┃
+┃? What color is the sky? › good┃
 ┃look up, it's not good         ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > goo ┃
+┃? What color is the sky? › goo ┃
 ┃look up, it's not goo          ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > go  ┃
+┃? What color is the sky? › go  ┃
 ┃look up, it's not go           ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > g   ┃
+┃? What color is the sky? › g   ┃
 ┃look up, it's not g            ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? >     ┃
+┃? What color is the sky? ›     ┃
 ┃look up, it's not              ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('b')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > b   ┃
+┃? What color is the sky? › b   ┃
 ┃look up, it's not b            ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('l')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > bl  ┃
+┃? What color is the sky? › bl  ┃
 ┃look up, it's not bl           ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('u')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > blu ┃
+┃? What color is the sky? › blu ┃
 ┃look up, it's not blu          ┃
 ┃                               ┃
 ┃                               ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('e')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What color is the sky? > blue┃
+┃? What color is the sky? › blue┃
 ┃                               ┃
 ┃                               ┃
 ┃                               ┃

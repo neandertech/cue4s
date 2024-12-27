@@ -28,7 +28,7 @@ private trait PromptsPlatform:
     prompt match
       case p: Prompt[?] =>
         val framework =
-          p.asInstanceOf[Prompt[R]].framework(terminal, out, theme)
+          p.asInstanceOf[Prompt[R]].framework(terminal, out, theme, symbols)
 
         inputProvider.evaluate(framework.handler)
 
@@ -39,7 +39,7 @@ private trait PromptsPlatform:
   def runAsync[R](
       prompt: Prompt[R],
   )(using ExecutionContext): Future[Completion[R]] =
-    val framework = prompt.framework(terminal, out, theme)
+    val framework = prompt.framework(terminal, out, theme, symbols)
 
     inputProvider.evaluateFuture(framework.handler)
   end runAsync

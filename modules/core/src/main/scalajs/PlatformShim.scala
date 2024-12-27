@@ -16,7 +16,8 @@
 
 package cue4s
 
-private[cue4s] trait PlatformStd extends Output:
-  override def logLn[A: AsString](a: A): Unit =
-    Process.stderr.write(a.render + "\n")
-  override def out[A: AsString](a: A): Unit = Process.stdout.write(a.render)
+private[cue4s] trait PlatformShim:
+  protected val detected = Some(Process.platform).collect:
+    case "darwin" => Platform.OS.MacOS
+    case "linux"  => Platform.OS.Linux
+    case "win32"  => Platform.OS.Windows

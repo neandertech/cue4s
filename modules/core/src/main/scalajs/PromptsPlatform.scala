@@ -25,7 +25,7 @@ private trait PromptsPlatform:
   def runAsync[R](
       prompt: Prompt[R],
   )(using ExecutionContext): Future[Completion[R]] =
-    val framework = prompt.framework(terminal, out, theme)
+    val framework = prompt.framework(terminal, out, theme, symbols)
 
     inputProvider.evaluateFuture(framework.handler)
 

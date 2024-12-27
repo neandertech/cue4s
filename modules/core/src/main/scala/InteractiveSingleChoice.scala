@@ -22,6 +22,7 @@ private[cue4s] class InteractiveSingleChoice(
     out: Output,
     theme: Theme,
     windowSize: Int,
+    symbols: Symbols,
 ) extends PromptFramework[String](terminal, out):
   import InteractiveSingleChoice.*
 
@@ -79,10 +80,12 @@ private[cue4s] class InteractiveSingleChoice(
   ): List[String] =
     val lines = List.newBuilder[String]
 
+    import symbols.*
+
     status match
       case Status.Running(_) | Status.Init =>
         // prompt question
-        lines += "? ".selected + (prompt.lab + " > ").prompt + st.text.input
+        lines += "? ".focused + (prompt.lab + s" $promptCue ").prompt + st.text.input
 
         status match
           case Status.Running(err) =>
@@ -102,23 +105,23 @@ private[cue4s] class InteractiveSingleChoice(
                 case (id, idx) =>
                   val alt = altMapping(id)
                   lines.addOne(
-                    if id == selected then s"  ‣ $alt".selected
+                    if id == selected then s"  $altCursor $alt".focused
                     else if st.display.windowStart > 0 && idx == 0 then
-                      s"  ↑ $alt".option
+                      s"  $pageUpArrow $alt".option
                     else if filtered.size > st.display.windowSize &&
                       idx == st.display.windowSize - 1 &&
                       filtered.indexOf(id) != filtered.size - 1
-                    then s"  ↓ $alt".option
+                    then s"  $pageDownArrow $alt".option
                     else s"    $alt".option,
                   )
         end match
       case Status.Finished(value) =>
-        lines += "✔ ".selected +
+        lines += s"$promptDone ".focused +
           (prompt.lab + " ").prompt +
-          " … ".hint +
+          s" $ellipsis ".hint +
           value.emphasis
       case Status.Canceled =>
-        lines += "× ".canceled +
+        lines += s"$promptCancelled ".canceled +
           (prompt.lab + " ").prompt
     end match
 

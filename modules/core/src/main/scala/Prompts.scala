@@ -20,6 +20,7 @@ class Prompts private (
     protected val out: Output,
     protected val terminal: Terminal,
     protected val theme: Theme,
+    protected val symbols: Symbols,
 ) extends AutoCloseable
     with PromptsPlatform:
 
@@ -40,7 +41,8 @@ object Prompts extends PromptsCompanionPlatform:
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
       theme: Theme = Theme.Default,
-  ) = new Prompts(out, createTerminal(out), theme)
+      symbols: Symbols = Symbols.platformDefault,
+  ) = new Prompts(out, createTerminal(out), theme, symbols)
 
   @deprecated(
     "Use `Prompts.sync.use(...)` or `Prompts.async.use(...)` instead, this method will be removed in 0.1.0",
