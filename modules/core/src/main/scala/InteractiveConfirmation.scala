@@ -66,7 +66,7 @@ private[cue4s] class InteractiveConfirmation(
         error.left.toOption.foreach: err =>
           lines += err.error
       case Status.Finished(res) =>
-        lines += "$promptDone ".focused + prompt.prompt + s" $ellipsis ".hint +
+        lines += s"$promptDone ".focused + prompt.prompt + s" $ellipsis ".hint +
           (if res then "yes" else "no").emphasis
       case Status.Canceled =>
         lines += s"$promptCancelled ".canceled + prompt.emphasis

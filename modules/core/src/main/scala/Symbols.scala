@@ -61,7 +61,7 @@ private object ASCIISymbols extends Symbols:
 
   override val pageDownArrow: String = "v"
 
-  override val altCursor: String = ""
+  override val altCursor: String = ">"
 
   override val promptCue = "»"
 
