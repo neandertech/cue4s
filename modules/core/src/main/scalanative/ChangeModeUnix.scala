@@ -14,21 +14,24 @@
  * limitations under the License.
  */
 
-package cue4s;
+package cue4s
 
-interface ChangeMode {
-  abstract void changemode(int dir);
-  abstract int getchar();
+import scala.scalanative.unsafe.*
 
-  static ChangeMode forDarwin() {
-    return ChangeModeDarwin.getInstance();
-  }
+trait ChangeModeUnix extends ChangeModeNative:
+  val STDIN_FILENO = 0
 
-  static ChangeMode forLinux() {
-    return ChangeModeLinux.getInstance();
-  }
+  def getchar(): Int =
+    scalanative.libc.stdio.getchar()
 
-  static ChangeMode forWindows() {
-    return ChangeModeWindows.getInstance();
-  }
-} 
+end ChangeModeUnix
+
+object ChangeModeUnix:
+  object Termios:
+    @extern()
+    def tcgetattr(fd: Int, state: Ptr[Byte]): Int = extern
+
+    @extern()
+    def tcsetattr(fd: Int, action: Int, state: Ptr[Byte]): Int = extern
+  end Termios
+end ChangeModeUnix

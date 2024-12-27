@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package cue4s;
+package cue4s
 
-interface ChangeMode {
-  abstract void changemode(int dir);
-  abstract int getchar();
+import scala.scalanative.meta.LinktimeInfo
 
-  static ChangeMode forDarwin() {
-    return ChangeModeDarwin.getInstance();
-  }
+trait ChangeModeNative:
+  def changeMode(rawMode: Boolean): Boolean
+  def getchar(): Int
 
-  static ChangeMode forLinux() {
-    return ChangeModeLinux.getInstance();
-  }
-
-  static ChangeMode forWindows() {
-    return ChangeModeWindows.getInstance();
-  }
-} 
+object ChangeModeNative:
+  def instance: ChangeModeNative =
+    if LinktimeInfo.isMac then ChangeModeMac
+    else if LinktimeInfo.isLinux then ChangeModeLinux
+    else if LinktimeInfo.isWindows then ChangeModeWindows
+    else
+      sys.error(
+        "Cue4s failed to detect the operating system, it is likely unsupported. Please raise an issue (or even a PR!) at https://github.com/neandertech/cue4s",
+      )
+    end if
+end ChangeModeNative

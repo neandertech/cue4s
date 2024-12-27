@@ -16,9 +16,15 @@
 
 package cue4s
 
+import scala.util.control.*
+
 private object CharCollector:
+  object ExitThrowable
+      extends ControlThrowable("Received termination signal")
+      with NoStackTrace
+
   enum State:
-    case Init, ESC_Started, CSI_Started
+    case Init, ESC_Started, CSI_Started, ScanCode_Started
     case CSI_Collecting(bytes: List[Byte])
 
   enum DecodeResult:
@@ -57,8 +63,13 @@ private object CharCollector:
             emit(Event.Key(KeyEvent.ENTER))
           case 9 =>
             emit(Event.Key(KeyEvent.TAB))
-          case 127 =>
+          case 8 | 127 =>
             emit(Event.Key(KeyEvent.DELETE))
+          case 224 if Platform.os == Platform.OS.Windows => // 0xE0
+            (State.ScanCode_Started, DecodeResult.Continue)
+          case 3 | 4
+              if Platform.os == Platform.OS.Windows => // Ctrl+C or Ctrl+D
+            throw ExitThrowable
           case -1 =>
             error("Invalid character -1")
           case _ =>
@@ -90,6 +101,17 @@ private object CharCollector:
             toInit(Event.CSICode(bytes))
           case _ =>
             error(s"Unexpected byte ${char}, expected CSI final byte")
+
+      // https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-6.0/aa299374(v=vs.60)
+      case State.ScanCode_Started =>
+        char match
+          case 72 => toInit(Event.Key(KeyEvent.UP))
+          case 80 => toInit(Event.Key(KeyEvent.DOWN))
+          case 77 => toInit(Event.Key(KeyEvent.RIGHT))
+          case 75 => toInit(Event.Key(KeyEvent.LEFT))
+          case 28 => toInit(Event.Key(KeyEvent.ENTER))
+          case 83 => toInit(Event.Key(KeyEvent.DELETE))
+          case _  => (State.Init, DecodeResult.Continue)
 
     end match
   end decode

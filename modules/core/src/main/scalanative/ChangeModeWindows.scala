@@ -14,21 +14,16 @@
  * limitations under the License.
  */
 
-package cue4s;
+package cue4s
 
-interface ChangeMode {
-  abstract void changemode(int dir);
-  abstract int getchar();
+import scala.scalanative.unsafe.*
 
-  static ChangeMode forDarwin() {
-    return ChangeModeDarwin.getInstance();
-  }
+object ChangeModeWindows extends ChangeModeNative:
+  def getchar(): Int                        = Msvcrt._getch()
+  def changeMode(rawMode: Boolean): Boolean = rawMode
 
-  static ChangeMode forLinux() {
-    return ChangeModeLinux.getInstance();
-  }
-
-  static ChangeMode forWindows() {
-    return ChangeModeWindows.getInstance();
-  }
-} 
+  object Msvcrt:
+    @extern() @link("msvcrt")
+    def _getch(): Int = extern
+  end Msvcrt
+end ChangeModeWindows

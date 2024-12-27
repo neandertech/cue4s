@@ -138,12 +138,9 @@ private object InputProviderImpl:
   lazy private val nativeInterop: ChangeMode =
     import Platform.*
     os match
-      case OS.MacOS => ChangeMode.forDarwin()
-      case OS.Linux => ChangeMode.forLinux()
-      case OS.Windows =>
-        sys.error(
-          "Cue4s does not yet support windows: https://github.com/neandertech/cue4s/issues/7",
-        )
+      case OS.MacOS   => ChangeMode.forDarwin()
+      case OS.Linux   => ChangeMode.forLinux()
+      case OS.Windows => ChangeMode.forWindows()
       case OS.Unknown =>
         sys.error(
           "Cue4s failed to detect the operating system, it is likely unsupported. Please raise an issue (or even a PR!) at https://github.com/neandertech/cue4s",
