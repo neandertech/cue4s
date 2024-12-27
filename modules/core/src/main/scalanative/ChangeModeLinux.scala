@@ -16,8 +16,9 @@
 
 package cue4s
 
-import scalanative.unsafe.*
 import cue4s.ChangeModeUnix.Termios
+
+import scalanative.unsafe.*
 
 object ChangeModeLinux extends ChangeModeUnix:
 
@@ -39,7 +40,7 @@ object ChangeModeLinux extends ChangeModeUnix:
     speed_t,  /* c_ospeed - output speed  */
   ]
 
-  var flags        = Option.empty[Int]
+  var flags = Option.empty[Int]
 
   def changeMode(rawMode: Boolean): Boolean =
     Zone:
@@ -64,7 +65,9 @@ object ChangeModeLinux extends ChangeModeUnix:
             (!state)._4 = oldflags
             this.synchronized:
               flags = None
-            assert0(Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf))
+            assert0(
+              Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf),
+            )
           true
         end if
   end changeMode

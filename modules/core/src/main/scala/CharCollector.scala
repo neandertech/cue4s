@@ -19,7 +19,9 @@ package cue4s
 import scala.util.control.*
 
 private object CharCollector:
-  object ExitThrowable extends ControlThrowable("Received termination signal") with NoStackTrace
+  object ExitThrowable
+      extends ControlThrowable("Received termination signal")
+      with NoStackTrace
 
   enum State:
     case Init, ESC_Started, CSI_Started, ScanCode_Started
@@ -61,11 +63,12 @@ private object CharCollector:
             emit(Event.Key(KeyEvent.ENTER))
           case 9 =>
             emit(Event.Key(KeyEvent.TAB))
-          case 8|127 =>
+          case 8 | 127 =>
             emit(Event.Key(KeyEvent.DELETE))
           case 224 if Platform.os == Platform.OS.Windows => // 0xE0
             (State.ScanCode_Started, DecodeResult.Continue)
-          case 3|4 if Platform.os == Platform.OS.Windows => // Ctrl+C or Ctrl+D
+          case 3 | 4
+              if Platform.os == Platform.OS.Windows => // Ctrl+C or Ctrl+D
             throw ExitThrowable
           case -1 =>
             error("Invalid character -1")
@@ -108,7 +111,7 @@ private object CharCollector:
           case 75 => toInit(Event.Key(KeyEvent.LEFT))
           case 28 => toInit(Event.Key(KeyEvent.ENTER))
           case 83 => toInit(Event.Key(KeyEvent.DELETE))
-          case _ => (State.Init, DecodeResult.Continue)
+          case _  => (State.Init, DecodeResult.Continue)
 
     end match
   end decode

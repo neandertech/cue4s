@@ -16,8 +16,9 @@
 
 package cue4s
 
-import scalanative.unsafe.*
 import cue4s.ChangeModeUnix.Termios
+
+import scalanative.unsafe.*
 
 object ChangeModeMac extends ChangeModeUnix:
   import scalanative.posix.termios.{TCSANOW, ECHO, ICANON}

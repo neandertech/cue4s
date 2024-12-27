@@ -138,8 +138,8 @@ private object InputProviderImpl:
   lazy private val nativeInterop: ChangeMode =
     import Platform.*
     os match
-      case OS.MacOS => ChangeMode.forDarwin()
-      case OS.Linux => ChangeMode.forLinux()
+      case OS.MacOS   => ChangeMode.forDarwin()
+      case OS.Linux   => ChangeMode.forLinux()
       case OS.Windows => ChangeMode.forWindows()
       case OS.Unknown =>
         sys.error(

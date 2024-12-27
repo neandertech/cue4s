@@ -24,14 +24,12 @@ trait ChangeModeNative:
 
 object ChangeModeNative:
   def instance: ChangeModeNative =
-    if LinktimeInfo.isMac then
-      ChangeModeMac
-    else if LinktimeInfo.isLinux then
-      ChangeModeLinux
-    else if LinktimeInfo.isWindows then
-      ChangeModeWindows
+    if LinktimeInfo.isMac then ChangeModeMac
+    else if LinktimeInfo.isLinux then ChangeModeLinux
+    else if LinktimeInfo.isWindows then ChangeModeWindows
     else
       sys.error(
-        "Cue4s failed to detect the operating system, it is likely unsupported. Please raise an issue (or even a PR!) at https://github.com/neandertech/cue4s")
+        "Cue4s failed to detect the operating system, it is likely unsupported. Please raise an issue (or even a PR!) at https://github.com/neandertech/cue4s",
+      )
     end if
 end ChangeModeNative

@@ -16,7 +16,7 @@
 
 package cue4s
 
-import scala.scalanative.unsafe._
+import scala.scalanative.unsafe.*
 
 trait ChangeModeUnix extends ChangeModeNative:
   val STDIN_FILENO = 0

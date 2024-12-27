@@ -16,10 +16,10 @@
 
 package cue4s
 
-import scala.scalanative.unsafe._
+import scala.scalanative.unsafe.*
 
 object ChangeModeWindows extends ChangeModeNative:
-  def getchar(): Int = Msvcrt._getch()
+  def getchar(): Int                        = Msvcrt._getch()
   def changeMode(rawMode: Boolean): Boolean = rawMode
 
   object Msvcrt:
