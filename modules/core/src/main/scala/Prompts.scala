@@ -20,7 +20,7 @@ class Prompts private (
     protected val out: Output,
     protected val terminal: Terminal,
     protected val theme: Theme,
-    protected val symbols: Symbols
+    protected val symbols: Symbols,
 ) extends AutoCloseable
     with PromptsPlatform:
 
@@ -41,7 +41,7 @@ object Prompts extends PromptsCompanionPlatform:
       out: Output = Output.Std,
       createTerminal: Output => Terminal = Terminal.ansi,
       theme: Theme = Theme.Default,
-      symbols: Symbols = Symbols.platformDefault
+      symbols: Symbols = Symbols.platformDefault,
   ) = new Prompts(out, createTerminal(out), theme, symbols)
 
   @deprecated(
