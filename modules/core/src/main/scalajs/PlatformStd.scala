@@ -16,7 +16,7 @@
 
 package cue4s
 
-trait PlatformStd extends Output:
+private[cue4s] trait PlatformStd extends Output:
   override def logLn[A: AsString](a: A): Unit =
     Process.stderr.write(a.render + "\n")
   override def out[A: AsString](a: A): Unit = Process.stdout.write(a.render)

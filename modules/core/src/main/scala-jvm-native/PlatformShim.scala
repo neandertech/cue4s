@@ -15,5 +15,6 @@
  */
 
 package cue4s
-trait PlatformShim:
+
+private[cue4s] trait PlatformShim:
   protected val detected = None
