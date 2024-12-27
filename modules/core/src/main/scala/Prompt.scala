@@ -55,12 +55,13 @@ object Prompt:
         output: Output,
         theme: Theme,
     ) = InteractiveTextInput(
-      lab,
-      terminal,
-      output,
-      theme,
-      validate,
+      prompt = lab,
+      terminal = terminal,
+      out = output,
+      theme = theme,
+      validate = validate,
       hideText = false,
+      Symbols.default,
     )
   end Input
 
@@ -92,6 +93,7 @@ object Prompt:
           theme,
           validate = _ => None,
           hideText = true,
+          Symbols.default,
         )
 
       textBase.mapValidated[Password](str =>
@@ -155,12 +157,13 @@ object Prompt:
       val stringValidate = transform(_: String).left.toOption
 
       InteractiveTextInput(
-        lab,
-        terminal,
-        output,
-        theme,
-        stringValidate,
+        prompt = lab,
+        terminal = terminal,
+        out = output,
+        theme = theme,
+        validate = stringValidate,
         hideText = false,
+        symbols = Symbols.default,
       )
         .mapValidated(transform)
     end framework
@@ -185,11 +188,12 @@ object Prompt:
         theme: Theme,
     ) =
       InteractiveConfirmation(
-        lab,
-        default,
-        terminal,
-        output,
-        theme,
+        prompt = lab,
+        default = default,
+        terminal = terminal,
+        out = output,
+        theme = theme,
+        symbols = Symbols.default,
       )
   end Confirmation
 
@@ -212,6 +216,7 @@ object Prompt:
         output,
         theme,
         windowSize,
+        Symbols.default,
       )
   end SingleChoice
 
@@ -234,6 +239,7 @@ object Prompt:
         output,
         theme,
         windowSize,
+        Symbols.default,
       )
   end MultipleChoice
 

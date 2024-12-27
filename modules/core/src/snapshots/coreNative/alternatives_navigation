@@ -1,6 +1,6 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? How do you do fellow kids? > ┃
+┃? How do you do fellow kids? › ┃
 ┃  ‣ killa                      ┃
 ┃    rizza                      ┃
 ┃    flizza                     ┃
@@ -8,7 +8,7 @@ Event.Init
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? How do you do fellow kids? > ┃
+┃? How do you do fellow kids? › ┃
 ┃    killa                      ┃
 ┃  ‣ rizza                      ┃
 ┃    flizza                     ┃
@@ -16,7 +16,7 @@ Event.Key(DOWN)
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? How do you do fellow kids? > ┃
+┃? How do you do fellow kids? › ┃
 ┃    killa                      ┃
 ┃    rizza                      ┃
 ┃  ‣ flizza                     ┃

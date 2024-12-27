@@ -22,6 +22,7 @@ private[cue4s] class InteractiveMultipleChoice(
     out: Output,
     theme: Theme,
     windowSize: Int,
+    symbols: Symbols,
 ) extends PromptFramework[List[String]](terminal, out):
   import InteractiveMultipleChoice.*
 
@@ -52,9 +53,11 @@ private[cue4s] class InteractiveMultipleChoice(
   ): List[String] =
     val lines = List.newBuilder[String]
 
+    import symbols.*
+
     status match
       case Status.Running(_) | Status.Init =>
-        lines += "? ".selected + prompt.lab.prompt + " > ".prompt + st.text.input
+        lines += "? ".focused + prompt.lab.prompt + s" $promptCue ".prompt + st.text.input
         lines += "Tab".emphasis + " to toggle, " + "Enter".emphasis + " to submit."
 
         status match
@@ -73,32 +76,33 @@ private[cue4s] class InteractiveMultipleChoice(
                 case (id, idx) =>
                   val alt = altMapping(id)
                   if st.selected(id) then
-                    if id == selected then lines += s" ✔ " + alt.selectedMany
-                    else lines += s" ✔ " + alt.selectedManyInactive
+                    if id == selected then
+                      lines += s" $altSelected " + alt.selectedMany
+                    else lines += s" $altSelected " + alt.selectedManyInactive
                   else
                     lines.addOne(
-                      if id == selected then s" ‣ $alt".selected
+                      if id == selected then s" $altNotSelected $alt".focused
                       else if st.display.windowStart > 0 && idx == 0 then
-                        s" ↑ $alt".optionMany
+                        s" $pageUpArrow $alt".optionMany
                       else if filtered.size > st.display.windowSize && idx == st.display.windowSize - 1 &&
                         filtered.indexOf(id) != filtered.size - 1
-                      then s" ↓ $alt".optionMany
-                      else s"   $alt".optionMany,
+                      then s" $pageDownArrow $alt".optionMany
+                      else s" $altNotSelected $alt".optionMany,
                     )
                   end if
         end match
 
       case Status.Finished(ids) =>
-        lines += "✔ ".selected + prompt.lab.prompt
+        lines += s"$promptDone ".focused + prompt.lab.prompt
 
         if ids.isEmpty then lines += "nothing selected".nothingSelected
         else
           ids
             .foreach: value =>
-              lines += s" ‣ " + value.emphasis
+              lines += s" $altSelected " + value.emphasis
 
       case Status.Canceled =>
-        lines += "× ".canceled +
+        lines += s"$promptCancelled ".canceled +
           (prompt.lab + " ").prompt
         lines += ""
     end match

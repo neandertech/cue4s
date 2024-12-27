@@ -1,58 +1,58 @@
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch > ┃
+┃? What would you like for lunch › ┃
 ┃Tab to toggle, Enter to submit.   ┃
-┃ ‣ pizza                          ┃
-┃   steak                          ┃
-┃   sweet potato                   ┃
-┃   fried chicken                  ┃
+┃ ◯ pizza                          ┃
+┃ ◯ steak                          ┃
+┃ ◯ sweet potato                   ┃
+┃ ◯ fried chicken                  ┃
 ┃                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(TAB)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch > ┃
+┃? What would you like for lunch › ┃
 ┃Tab to toggle, Enter to submit.   ┃
-┃ ✔ pizza                          ┃
-┃   steak                          ┃
-┃   sweet potato                   ┃
-┃   fried chicken                  ┃
+┃ ◉ pizza                          ┃
+┃ ◯ steak                          ┃
+┃ ◯ sweet potato                   ┃
+┃ ◯ fried chicken                  ┃
 ┃                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch > ┃
+┃? What would you like for lunch › ┃
 ┃Tab to toggle, Enter to submit.   ┃
-┃ ✔ pizza                          ┃
-┃ ‣ steak                          ┃
-┃   sweet potato                   ┃
-┃   fried chicken                  ┃
+┃ ◉ pizza                          ┃
+┃ ◯ steak                          ┃
+┃ ◯ sweet potato                   ┃
+┃ ◯ fried chicken                  ┃
 ┃                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(TAB)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch > ┃
+┃? What would you like for lunch › ┃
 ┃Tab to toggle, Enter to submit.   ┃
-┃ ✔ pizza                          ┃
-┃ ✔ steak                          ┃
-┃   sweet potato                   ┃
-┃   fried chicken                  ┃
+┃ ◉ pizza                          ┃
+┃ ◉ steak                          ┃
+┃ ◯ sweet potato                   ┃
+┃ ◯ fried chicken                  ┃
 ┃                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch > ┃
+┃? What would you like for lunch › ┃
 ┃Tab to toggle, Enter to submit.   ┃
-┃ ✔ pizza                          ┃
-┃ ✔ steak                          ┃
-┃ ‣ sweet potato                   ┃
-┃   fried chicken                  ┃
+┃ ◉ pizza                          ┃
+┃ ◉ steak                          ┃
+┃ ◯ sweet potato                   ┃
+┃ ◯ fried chicken                  ┃
 ┃                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('h')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch > h┃
+┃? What would you like for lunch › h┃
 ┃Tab to toggle, Enter to submit.    ┃
-┃ ‣ fried chicken                   ┃
+┃ ◯ fried chicken                   ┃
 ┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃
@@ -60,9 +60,9 @@ Event.Char('h')
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(TAB)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch > h┃
+┃? What would you like for lunch › h┃
 ┃Tab to toggle, Enter to submit.    ┃
-┃ ✔ fried chicken                   ┃
+┃ ◉ fried chicken                   ┃
 ┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃
@@ -70,20 +70,20 @@ Event.Key(TAB)
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What would you like for lunch >  ┃
+┃? What would you like for lunch ›  ┃
 ┃Tab to toggle, Enter to submit.    ┃
-┃ ✔ pizza                           ┃
-┃ ✔ steak                           ┃
-┃   sweet potato                    ┃
-┃ ✔ fried chicken                   ┃
+┃ ◉ pizza                           ┃
+┃ ◉ steak                           ┃
+┃ ◯ sweet potato                    ┃
+┃ ◉ fried chicken                   ┃
 ┃                                   ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃✔ What would you like for lunch    ┃
-┃ ‣ pizza                           ┃
-┃ ‣ steak                           ┃
-┃ ‣ fried chicken                   ┃
+┃ ◉ pizza                           ┃
+┃ ◉ steak                           ┃
+┃ ◉ fried chicken                   ┃
 ┃                                   ┃
 ┃                                   ┃
 ┃                                   ┃

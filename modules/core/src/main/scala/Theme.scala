@@ -25,7 +25,7 @@ trait Theme:
     def optionMany: String
     def noMatches: String
     def nothingSelected: String
-    def selected: String
+    def focused: String
     def selectedMany: String
     def selectedManyInactive: String
     def canceled: String
@@ -46,7 +46,7 @@ object Theme:
       def optionMany: String           = s
       def noMatches: String            = s.bold
       def nothingSelected: String      = s.underline
-      def selected: String             = s.green
+      def focused: String              = s.green
       def selectedMany: String         = s.underline.green
       def selectedManyInactive: String = s.underline
       def canceled: String             = s.red
@@ -64,7 +64,7 @@ object Theme:
       def optionMany: String           = s
       def noMatches: String            = s
       def nothingSelected: String      = s
-      def selected: String             = s
+      def focused: String              = s
       def selectedMany: String         = s
       def selectedManyInactive: String = s
       def canceled: String             = s

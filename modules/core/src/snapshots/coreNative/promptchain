@@ -1,36 +1,36 @@
 Event.Init
 ┏━━━━━━━━━━━━┓
-┃? Sir...? > ┃
+┃? Sir...? › ┃
 ┃            ┃
 ┃            ┃
 ┗━━━━━━━━━━━━┛
 Event.Char('h')
 ┏━━━━━━━━━━━━━┓
-┃? Sir...? > h┃
+┃? Sir...? › h┃
 ┃             ┃
 ┃             ┃
 ┗━━━━━━━━━━━━━┛
 Event.Char('e')
 ┏━━━━━━━━━━━━━━┓
-┃? Sir...? > he┃
+┃? Sir...? › he┃
 ┃              ┃
 ┃              ┃
 ┗━━━━━━━━━━━━━━┛
 Event.Char('l')
 ┏━━━━━━━━━━━━━━━┓
-┃? Sir...? > hel┃
+┃? Sir...? › hel┃
 ┃               ┃
 ┃               ┃
 ┗━━━━━━━━━━━━━━━┛
 Event.Char('l')
 ┏━━━━━━━━━━━━━━━━┓
-┃? Sir...? > hell┃
+┃? Sir...? › hell┃
 ┃                ┃
 ┃                ┃
 ┗━━━━━━━━━━━━━━━━┛
 Event.Char('o')
 ┏━━━━━━━━━━━━━━━━━┓
-┃? Sir...? > hello┃
+┃? Sir...? › hello┃
 ┃                 ┃
 ┃                 ┃
 ┗━━━━━━━━━━━━━━━━━┛
@@ -43,7 +43,7 @@ Event.Key(ENTER)
 
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━┓
-┃? What's up doc? > ┃
+┃? What's up doc? › ┃
 ┃  ‣ yes            ┃
 ┃    no             ┃
 ┃                   ┃
@@ -58,19 +58,19 @@ Event.Key(ENTER)
 
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━┓
-┃? how old are you? > ┃
+┃? how old are you? › ┃
 ┃                     ┃
 ┃                     ┃
 ┗━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('2')
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how old are you? > 2┃
+┃? how old are you? › 2┃
 ┃                      ┃
 ┃                      ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('4')
 ┏━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? how old are you? > 24┃
+┃? how old are you? › 24┃
 ┃                       ┃
 ┃                       ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -83,31 +83,31 @@ Event.Key(ENTER)
 
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What is PI to first 2 digits? > ┃
+┃? What is PI to first 2 digits? › ┃
 ┃                                  ┃
 ┃                                  ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('3')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What is PI to first 2 digits? > 3┃
+┃? What is PI to first 2 digits? › 3┃
 ┃                                   ┃
 ┃                                   ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('.')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What is PI to first 2 digits? > 3.┃
+┃? What is PI to first 2 digits? › 3.┃
 ┃                                    ┃
 ┃                                    ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('1')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What is PI to first 2 digits? > 3.1┃
+┃? What is PI to first 2 digits? › 3.1┃
 ┃                                     ┃
 ┃                                     ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('4')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? What is PI to first 2 digits? > 3.14┃
+┃? What is PI to first 2 digits? › 3.14┃
 ┃                                      ┃
 ┃                                      ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -125,51 +125,51 @@ Event.Init
 ┃                                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('n')
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃✔ Do you want to build a snowman? … no   ┃
-┃                                         ┃
-┃                                         ┃
-┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃$promptDone Do you want to build a snowman? … no┃
+┃                                                ┃
+┃                                                ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 
 Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
-┃? Choose a password > ┃
+┃? Choose a password › ┃
 ┃                      ┃
 ┃                      ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('q')
 ┏━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? Choose a password > *┃
+┃? Choose a password › *┃
 ┃                       ┃
 ┃                       ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('w')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? Choose a password > **┃
+┃? Choose a password › **┃
 ┃                        ┃
 ┃                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('e')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? Choose a password > ***┃
+┃? Choose a password › ***┃
 ┃                         ┃
 ┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('r')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? Choose a password > ****┃
+┃? Choose a password › ****┃
 ┃                          ┃
 ┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('t')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? Choose a password > *****┃
+┃? Choose a password › *****┃
 ┃                           ┃
 ┃                           ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('y')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃? Choose a password > ******┃
+┃? Choose a password › ******┃
 ┃                            ┃
 ┃                            ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛

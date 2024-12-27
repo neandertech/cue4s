@@ -22,6 +22,7 @@ private[cue4s] class InteractiveConfirmation(
     terminal: Terminal,
     out: Output,
     theme: Theme,
+    symbols: Symbols,
 ) extends PromptFramework[Boolean](terminal, out):
 
   override type PromptState = Unit
@@ -53,21 +54,22 @@ private[cue4s] class InteractiveConfirmation(
       status: Status,
   ): List[String] =
     val lines = List.newBuilder[String]
+    import symbols.*
 
     status match
       case Status.Init =>
-        lines += "? ".selected + prompt.prompt +
-          (" › (" + (if default then "Y/n" else "y/N") + ")").hint
+        lines += "? ".focused + prompt.prompt +
+          (s" $promptCue (" + (if default then "Y/n" else "y/N") + ")").hint
       case Status.Running(error) =>
-        lines += "? ".selected + prompt.prompt +
-          (" › (" + (if default then "Y/n" else "y/N") + ")").hint
+        lines += "? ".focused + prompt.prompt +
+          (s" $promptCue (" + (if default then "Y/n" else "y/N") + ")").hint
         error.left.toOption.foreach: err =>
           lines += err.error
       case Status.Finished(res) =>
-        lines += "✔ ".selected + prompt.prompt + " … ".hint +
+        lines += "$promptDone ".focused + prompt.prompt + s" $ellipsis ".hint +
           (if res then "yes" else "no").emphasis
       case Status.Canceled =>
-        lines += "× ".canceled + prompt.emphasis
+        lines += s"$promptCancelled ".canceled + prompt.emphasis
     end match
 
     lines += ""
