@@ -65,9 +65,9 @@ private object ASCIISymbols extends Symbols:
 
   override val promptCue = "»"
 
-  override val altSelected: String = "(*)"
+  override val altSelected: String = "*"
 
-  override val altNotSelected: String = "( )"
+  override val altNotSelected: String = "_"
 end ASCIISymbols
 
 private[cue4s] object Symbols:
