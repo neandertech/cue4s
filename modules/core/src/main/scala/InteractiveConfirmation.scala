@@ -45,6 +45,7 @@ private[cue4s] class InteractiveConfirmation(
         PromptAction.setStatus(Status.Canceled)
       case _ =>
         PromptAction.Continue
+    end match
   end handleEvent
 
   import theme.*

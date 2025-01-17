@@ -183,7 +183,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     "good",
   )
 
-  terminalTestComplete("default")(
+  terminalTestComplete("input.default")(
     Prompt
       .Input("What color is the sky?")
       .default("blue"),
@@ -192,6 +192,18 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
     ),
     "blue",
+  )
+  terminalTestComplete("input.default.ignore")(
+    Prompt
+      .Input("What color is the sky?")
+      .default("blue"),
+    list(
+      Event.Init,
+      delete("blue"),
+      chars("red"),
+      ENTER,
+    ),
+    "red",
   )
 
   terminalTestComplete("password.input")(
@@ -210,6 +222,23 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       chars("od"),
       ENTER,
       chars("5"),
+      ENTER,
+    ),
+    Prompt.PasswordInput.Password("good5"),
+  )
+
+  terminalTestComplete("password.input.default")(
+    Prompt
+      .PasswordInput("Choose your password")
+      .validate(value =>
+        if value.raw.length < 4 then Some(PromptError("too short!"))
+        else if !value.raw.exists(_.isDigit) then
+          Some(PromptError("must contain a digit"))
+        else None,
+      )
+      .default(Password("good5")),
+    list(
+      Event.Init,
       ENTER,
     ),
     Prompt.PasswordInput.Password("good5"),

@@ -46,6 +46,11 @@ private[cue4s] class InteractiveTextInput(
         currentStatus() match
           case Status.Running(Right(candidate)) =>
             PromptAction.setStatus(Status.Finished(candidate))
+          case Status.Init =>
+            default match
+              case None        => PromptAction.Continue
+              case Some(value) => PromptAction.setStatus(Status.Finished(value))
+
           case _ => PromptAction.Continue
 
       case Event.Key(KeyEvent.DELETE) =>
@@ -72,9 +77,8 @@ private[cue4s] class InteractiveTextInput(
 
     status match
       case Status.Init =>
-        lines += "? ".focused + prompt.prompt + s" $promptCue "
+        lines += "? ".focused + prompt.prompt + s" $promptCue " + txt.input
       case Status.Running(err) =>
-        val txt = if hideText then "*" * st.text.length else st.text
         lines += "? ".focused + prompt.prompt + s" $promptCue " + txt.input
         err.left.toOption.foreach: err =>
           lines += err.error
