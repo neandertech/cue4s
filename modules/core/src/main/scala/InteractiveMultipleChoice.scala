@@ -17,7 +17,9 @@
 package cue4s
 
 private[cue4s] class InteractiveMultipleChoice(
-    prompt: Prompt.MultipleChoice,
+    // prompt: Prompt.MultipleChoice,
+    lab: String,
+    alts: List[(String, Boolean)],
     terminal: Terminal,
     out: Output,
     theme: Theme,
@@ -29,8 +31,8 @@ private[cue4s] class InteractiveMultipleChoice(
   override type PromptState = State
 
   private lazy val preSelected =
-    prompt.alts.zipWithIndex.filter(_._1._2).map(_._2)
-  private lazy val altsWithIndex = prompt.alts.map(_._1).zipWithIndex
+    alts.zipWithIndex.filter(_._1._2).map(_._2)
+  private lazy val altsWithIndex = alts.map(_._1).zipWithIndex
 
   override def initialState = State(
     text = "",
@@ -57,7 +59,7 @@ private[cue4s] class InteractiveMultipleChoice(
 
     status match
       case Status.Running(_) | Status.Init =>
-        lines += "? ".focused + prompt.lab.prompt + s" $promptCue ".prompt + st.text.input
+        lines += "? ".focused + lab.prompt + s" $promptCue ".prompt + st.text.input
         lines += "Tab".emphasis + " to toggle, " + "Enter".emphasis + " to submit."
 
         status match
@@ -93,7 +95,7 @@ private[cue4s] class InteractiveMultipleChoice(
         end match
 
       case Status.Finished(ids) =>
-        lines += s"$promptDone ".focused + prompt.lab.prompt
+        lines += s"$promptDone ".focused + lab.prompt
 
         if ids.isEmpty then lines += "nothing selected".nothingSelected
         else
@@ -103,7 +105,7 @@ private[cue4s] class InteractiveMultipleChoice(
 
       case Status.Canceled =>
         lines += s"$promptCancelled ".canceled +
-          (prompt.lab + " ").prompt
+          (lab + " ").prompt
         lines += ""
     end match
 

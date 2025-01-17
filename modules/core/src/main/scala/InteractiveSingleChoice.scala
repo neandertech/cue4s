@@ -17,7 +17,8 @@
 package cue4s
 
 private[cue4s] class InteractiveSingleChoice(
-    prompt: Prompt.SingleChoice,
+    lab: String,
+    alts: List[String],
     terminal: Terminal,
     out: Output,
     theme: Theme,
@@ -28,7 +29,7 @@ private[cue4s] class InteractiveSingleChoice(
 
   override type PromptState = State
 
-  private lazy val altsWithIndex = prompt.alts.zipWithIndex
+  private lazy val altsWithIndex = alts.zipWithIndex
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
 
   override def initialState = State(
@@ -85,7 +86,7 @@ private[cue4s] class InteractiveSingleChoice(
     status match
       case Status.Running(_) | Status.Init =>
         // prompt question
-        lines += "? ".focused + (prompt.lab + s" $promptCue ").prompt + st.text.input
+        lines += "? ".focused + (lab + s" $promptCue ").prompt + st.text.input
 
         status match
           case Status.Running(err) =>
@@ -117,12 +118,12 @@ private[cue4s] class InteractiveSingleChoice(
         end match
       case Status.Finished(value) =>
         lines += s"$promptDone ".focused +
-          (prompt.lab + " ").prompt +
+          (lab + " ").prompt +
           s" $ellipsis ".hint +
           value.emphasis
       case Status.Canceled =>
         lines += s"$promptCancelled ".canceled +
-          (prompt.lab + " ").prompt
+          (lab + " ").prompt
     end match
 
     lines.result()

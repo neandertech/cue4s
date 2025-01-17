@@ -43,9 +43,9 @@ end Prompt
 
 object Prompt:
   case class Input private (
-      lab: String,
-      validate: String => Option[PromptError] = _ => None,
-      default: Option[String] = None,
+      private val lab: String,
+      private val validate: String => Option[PromptError] = _ => None,
+      private val default: Option[String] = None,
   ) extends Prompt[String]:
 
     def this(lab: String) = this(lab, _ => None)
@@ -199,8 +199,10 @@ object Prompt:
     def double(label: String): NumberInput[Float] = NumberInput[Float](label)
   end NumberInput
 
-  case class Confirmation(lab: String, default: Boolean = true)
-      extends Prompt[Boolean]:
+  case class Confirmation private (
+      private val lab: String,
+      private val default: Boolean = true,
+  ) extends Prompt[Boolean]:
 
     def default(value: Boolean) = copy(default = value)
 
@@ -225,9 +227,14 @@ object Prompt:
       new Confirmation(lab, default)
   end Confirmation
 
-  case class SingleChoice(lab: String, alts: List[String], windowSize: Int = 10)
-      extends Prompt[String]:
+  case class SingleChoice private (
+      private val lab: String,
+      private val alts: List[String],
+      private val windowSize: Int = 10,
+  ) extends Prompt[String]:
+
     def withWindowSize(i: Int) = copy(windowSize = i)
+
     override def framework(
         terminal: Terminal,
         output: Output,
@@ -235,19 +242,24 @@ object Prompt:
         symbols: Symbols,
     ) =
       InteractiveSingleChoice(
-        prompt = this,
+        lab = this.lab,
+        alts = this.alts,
         terminal = terminal,
         out = output,
         theme = theme,
-        windowSize = windowSize,
+        windowSize = this.windowSize,
         symbols = symbols,
       )
   end SingleChoice
 
+  object SingleChoice:
+    def apply(label: String, alts: List[String]): SingleChoice =
+      new SingleChoice(label, alts)
+
   case class MultipleChoice private (
-      lab: String,
-      alts: List[(String, Boolean)],
-      windowSize: Int,
+      private val lab: String,
+      private val alts: List[(String, Boolean)],
+      private val windowSize: Int,
   ) extends Prompt[List[String]]:
 
     def withWindowSize(i: Int) = copy(windowSize = i)
@@ -259,7 +271,8 @@ object Prompt:
         symbols: Symbols,
     ): PromptFramework[List[String]] =
       InteractiveMultipleChoice(
-        prompt = this,
+        lab = this.lab,
+        alts = this.alts,
         terminal = terminal,
         out = output,
         theme = theme,
@@ -285,12 +298,14 @@ object Prompt:
         windowSize: Int = 10,
     ) =
       new MultipleChoice(lab, variants.map(_ -> false).toList, windowSize)
+
     def withAllSelected(
         lab: String,
         variants: Seq[String],
         windowSize: Int = 10,
     ) =
       new MultipleChoice(lab, variants.map(_ -> true).toList, windowSize)
+
     def withSomeSelected(
         lab: String,
         variants: Seq[(String, Boolean)],
