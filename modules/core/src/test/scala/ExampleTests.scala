@@ -265,6 +265,19 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     log = false,
   )
 
+  terminalTestComplete("number.default")(
+    Prompt.NumberInput
+      .float("think of a number")
+      .min(5.0)
+      .max(30.0)
+      .default(25.7),
+    list(
+      Event.Init,
+      ENTER,
+    ),
+    25.7f,
+  )
+
   terminalTestComplete("number.input")(
     Prompt.NumberInput
       .float("think of a number")

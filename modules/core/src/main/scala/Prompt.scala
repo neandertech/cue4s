@@ -133,6 +133,8 @@ object Prompt:
 
     def this(lab: String) = this(lab, _ => None)
 
+    def default(value: N): NumberInput[N] = copy(default = Some(value))
+
     def validate(f: N => Option[PromptError]): NumberInput[N] =
       copy(validateNumber = (n: N) => validateNumber(n).orElse(f(n)))
 
