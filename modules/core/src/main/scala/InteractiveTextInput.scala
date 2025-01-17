@@ -24,13 +24,14 @@ private[cue4s] class InteractiveTextInput(
     validate: String => Option[PromptError],
     hideText: Boolean,
     symbols: Symbols,
+    default: Option[String],
 ) extends PromptFramework[String](terminal, out):
 
   import InteractiveTextInput.*
 
   override type PromptState = State
 
-  override def initialState: State = State("")
+  override def initialState: State = State(default.getOrElse(""))
 
   override def handleEvent(event: Event) =
     def update(state: State, f: State => State) =
@@ -45,6 +46,11 @@ private[cue4s] class InteractiveTextInput(
         currentStatus() match
           case Status.Running(Right(candidate)) =>
             PromptAction.setStatus(Status.Finished(candidate))
+          case Status.Init =>
+            default match
+              case None        => PromptAction.Continue
+              case Some(value) => PromptAction.setStatus(Status.Finished(value))
+
           case _ => PromptAction.Continue
 
       case Event.Key(KeyEvent.DELETE) =>
@@ -67,11 +73,12 @@ private[cue4s] class InteractiveTextInput(
     val lines = List.newBuilder[String]
     import symbols.*
 
+    val txt = if hideText then "*" * st.text.length else st.text
+
     status match
       case Status.Init =>
-        lines += "? ".focused + prompt.prompt + s" $promptCue "
+        lines += "? ".focused + prompt.prompt + s" $promptCue " + txt.input
       case Status.Running(err) =>
-        val txt = if hideText then "*" * st.text.length else st.text
         lines += "? ".focused + prompt.prompt + s" $promptCue " + txt.input
         err.left.toOption.foreach: err =>
           lines += err.error

@@ -8,17 +8,18 @@ import KeyEvent.*
 class FallbackRenderingTests extends munit.FunSuite, TerminalTests:
 
   terminalTestComplete("fallback.render.alternatives")(
-    Prompt.SingleChoice(
-      "How was your day?",
-      List(
-        "amazing",
-        "productive",
-        "relaxing",
-        "stressful",
-        "exhausting",
-      ),
-      windowSize = 3,
-    ),
+    Prompt
+      .SingleChoice(
+        "How was your day?",
+        List(
+          "amazing",
+          "productive",
+          "relaxing",
+          "stressful",
+          "exhausting",
+        ),
+      )
+      .withWindowSize(3),
     list(
       Event.Init,
       DOWN,
@@ -33,11 +34,12 @@ class FallbackRenderingTests extends munit.FunSuite, TerminalTests:
   )
 
   terminalTestComplete("fallback.alternatives.multiple")(
-    Prompt.MultipleChoice.withNoneSelected(
-      "What would you like for lunch",
-      List("pizza", "steak", "sweet potato", "fried chicken", "sushi"),
-      windowSize = 3,
-    ),
+    Prompt.MultipleChoice
+      .withNoneSelected(
+        "What would you like for lunch",
+        List("pizza", "steak", "sweet potato", "fried chicken", "sushi"),
+      )
+      .withWindowSize(3),
     list(
       Event.Init,
       TAB,
