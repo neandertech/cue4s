@@ -30,12 +30,12 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3        = "3.3.4"
-  val munit         = "1.0.2"
+  val Scala3        = "3.3.5"
+  val munit         = "1.1.0"
   val scalaVersions = Seq(Scala3)
   val fansi         = "0.5.0"
   val jna           = "5.14.0"
-  val catsEffect    = "3.5.7"
+  val catsEffect    = "3.6.0"
   val osLib         = "0.11.3"
 }
 
