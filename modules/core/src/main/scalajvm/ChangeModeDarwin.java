@@ -20,81 +20,89 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Structure;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 class ChangeModeDarwin implements ChangeMode {
 
-	private static ChangeModeDarwin INSTANCE;
+    private static ChangeModeDarwin INSTANCE;
 
-	private ChangeModeDarwin() {
-	}
+    private ChangeModeDarwin() {}
 
-	public static ChangeModeDarwin getInstance() {
-		if (INSTANCE == null) {
-			INSTANCE = new ChangeModeDarwin();
-		}
+    public static ChangeModeDarwin getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new ChangeModeDarwin();
+        }
 
-		return INSTANCE;
-	}
+        return INSTANCE;
+    }
 
-	// Define the libc interface
-	static interface CLibrary extends Library {
-		CLibrary INSTANCE = Native.load("c", CLibrary.class);
+    // Define the libc interface
+    static interface CLibrary extends Library {
+        CLibrary INSTANCE = Native.load("c", CLibrary.class);
 
-		int tcgetattr(int fd, termios termios);
+        int tcgetattr(int fd, termios termios);
 
-		int tcsetattr(int fd, int optional_actions, termios termios);
+        int tcsetattr(int fd, int optional_actions, termios termios);
 
-		int getchar();
-	}
+        int getchar();
+    }
 
-	// Define the termios structure
-	@Structure.FieldOrder({ "c_iflag", "c_oflag", "c_cflag", "c_lflag", "c_line", "c_cc", "c_ispeed", "c_ospeed" })
-	public static class termios extends Structure {
-		public NativeLong c_iflag;
-		public NativeLong c_oflag;
-		public NativeLong c_cflag;
-		public NativeLong c_lflag;
-		public byte c_line;
-		public byte[] c_cc = new byte[32];
-		public NativeLong c_ispeed;
-		public NativeLong c_ospeed;
-	}
+    // Define the termios structure
+    @Structure.FieldOrder(
+        {
+            "c_iflag",
+            "c_oflag",
+            "c_cflag",
+            "c_lflag",
+            "c_line",
+            "c_cc",
+            "c_ispeed",
+            "c_ospeed",
+        }
+    )
+    public static class termios extends Structure {
 
-	// Constants
-	public static final int STDIN_FILENO = 0;
-	public static final int TCSANOW = 0;
-	public static final int ICANON = 256;
-	public static final int ECHO = 0x0008;
+        public NativeLong c_iflag;
+        public NativeLong c_oflag;
+        public NativeLong c_cflag;
+        public NativeLong c_lflag;
+        public byte c_line;
+        public byte[] c_cc = new byte[32];
+        public NativeLong c_ispeed;
+        public NativeLong c_ospeed;
+    }
 
-	// Function to change mode
-	private termios oldt = new termios(); // store original termios
+    // Constants
+    public static final int STDIN_FILENO = 0;
+    public static final int TCSANOW = 0;
+    public static final int ICANON = 256;
+    public static final int ECHO = 0x0008;
 
-	@Override
-	public int getchar() {
-		return CLibrary.INSTANCE.getchar();
-	}
+    // Function to change mode
+    private termios oldt = new termios(); // store original termios
 
-	@Override
-	public void changemode(int dir) {
-		termios newt = new termios();
+    @Override
+    public int getchar() {
+        return CLibrary.INSTANCE.getchar();
+    }
 
-		if (dir == 1) {
-			CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, oldt); // get current terminal attributes
-			newt.c_iflag = oldt.c_iflag;
-			newt.c_oflag = oldt.c_oflag;
-			newt.c_cflag = oldt.c_cflag;
-			newt.c_lflag = oldt.c_lflag;
-			newt.c_line = oldt.c_line;
-			newt.c_cc = oldt.c_cc;
-			newt.c_ispeed = oldt.c_ispeed;
-			newt.c_ospeed = oldt.c_ospeed;
+    @Override
+    public void changemode(int dir) {
+        termios termiosAttrs = new termios();
 
-			newt.c_lflag.setValue(newt.c_lflag.longValue() & ~(ICANON | ECHO)); // disable canonical mode and echo
-			CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, newt); // set new terminal attributes
-		} else {
-			CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, oldt); // restore original terminal attributes
-		}
-	}
+        if (dir == 1) {
+            CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
+            termiosAttrs.c_lflag.setValue(
+                termiosAttrs.c_lflag.longValue() & ~(ICANON | ECHO)
+            ); // disable canonical mode and echo
+            CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
+        } else {
+            CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
+            termiosAttrs.c_lflag.setValue(
+                termiosAttrs.c_lflag.longValue() & (ICANON | ECHO)
+            ); // re-enable canonical mode and echo
+            CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
+        }
+    }
 }

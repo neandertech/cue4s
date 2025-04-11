@@ -24,13 +24,13 @@ object ChangeModeLinux extends ChangeModeUnix:
 
   import scalanative.posix.termios.{TCSANOW, ECHO, ICANON}
   import scalanative.unsafe.Nat.*
-  type tcflag_t = CInt /// SIC!!!
-  type cc_t     = CChar
-  type speed_t  = CInt /// SIC!!!
-  type NCCS     = Digit2[_3, _2]
-  type c_cc     = CArray[cc_t, NCCS]
+  private type tcflag_t = CInt /// SIC!!!
+  private type cc_t     = CChar
+  private type speed_t  = CInt /// SIC!!!
+  private type NCCS     = Digit2[_3, _2]
+  private type c_cc     = CArray[cc_t, NCCS]
 
-  type termios = CStruct7[
+  private type termios = CStruct7[
     tcflag_t, /* c_iflag - input flags   */
     tcflag_t, /* c_oflag - output flags  */
     tcflag_t, /* c_cflag - control flags */
@@ -40,36 +40,35 @@ object ChangeModeLinux extends ChangeModeUnix:
     speed_t,  /* c_ospeed - output speed  */
   ]
 
-  var flags = Option.empty[Int]
-
   def changeMode(rawMode: Boolean): Boolean =
     Zone:
       val state = alloc[termios]()
 
-      import util.boundary
+      val isTTY = scalanative.posix.unistd.isatty(STDIN_FILENO) == 2
 
-      boundary:
-        inline def assert0(value: Int) =
-          if value != 0 then boundary.break(false)
-          else true
-
-        if rawMode then
-          assert0(Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf))
-          this.synchronized:
-            flags = Some((!state)._4)
-          (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-          assert0(Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf))
-        else
-          flags.foreach: oldflags =>
-            assert0(Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf))
-            (!state)._4 = oldflags
-            this.synchronized:
-              flags = None
-            assert0(
-              Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf),
-            )
-          true
-        end if
+      if rawMode then
+        assertAndReturn(
+          !isTTY || Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
+          "getting current flags failed",
+        )
+        (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
+        assertAndReturn(
+          !isTTY || Termios
+            .tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+          "changing to char input failed",
+        )
+      else
+        assertAndReturn(
+          !isTTY || Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
+          "getting current flags failed",
+        )
+        state._4 = (!state)._4 & (ICANON | ECHO)
+        assertAndReturn(
+          !isTTY || Termios
+            .tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+          "changing back from char input failed",
+        )
+      end if
   end changeMode
 
 end ChangeModeLinux

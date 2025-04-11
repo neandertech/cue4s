@@ -24,6 +24,10 @@ trait ChangeModeUnix extends ChangeModeNative:
   def getchar(): Int =
     scalanative.libc.stdio.getchar()
 
+  protected inline def assertAndReturn(b: Boolean, msg: String) =
+    assert(b, msg)
+    b
+
 end ChangeModeUnix
 
 object ChangeModeUnix:
