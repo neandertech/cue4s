@@ -28,18 +28,30 @@ object ChangeModeMac extends ChangeModeUnix:
   def changeMode(rawMode: Boolean): Boolean =
     val state = stackalloc[termios]()
 
+    val isTTY = scalanative.posix.unistd.isatty(STDIN_FILENO) == 2
+
     if rawMode then
-      assertAndReturn(Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0, "getting current flags failed") 
+      assertAndReturn(
+        !isTTY ||
+          Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
+        "getting current flags failed",
+      )
       (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
       assertAndReturn(
-        Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+        !isTTY ||
+          Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
         "changing to char input failed",
       )
     else
-      assertAndReturn(Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0, "getting current flags failed") 
+      assertAndReturn(
+        !isTTY ||
+          Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
+        "getting current flags failed",
+      )
       state._4 = (!state)._4 & (ICANON | ECHO)
       assertAndReturn(
-        Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+        !isTTY ||
+          Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
         "changing back from char input failed",
       )
     end if

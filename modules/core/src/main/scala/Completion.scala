@@ -42,5 +42,5 @@ object Completion:
     Completion.Fail(CompletionError.Error(msg))
 
 enum CompletionError(msg: String | Null) extends Throwable(msg):
-  case Interrupted extends CompletionError(null)
+  case Interrupted        extends CompletionError(null)
   case Error(msg: String) extends CompletionError(msg)
