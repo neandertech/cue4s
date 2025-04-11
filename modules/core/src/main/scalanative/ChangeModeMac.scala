@@ -28,7 +28,7 @@ object ChangeModeMac extends ChangeModeUnix:
   def changeMode(rawMode: Boolean): Boolean =
     val state = stackalloc[termios]()
 
-    val isTTY = scalanative.posix.unistd.isatty(STDIN_FILENO) == 2
+    val isTTY = scalanative.posix.unistd.isatty(STDIN_FILENO) == 1
 
     if rawMode then
       assertAndReturn(

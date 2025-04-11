@@ -44,7 +44,7 @@ object ChangeModeLinux extends ChangeModeUnix:
     Zone:
       val state = alloc[termios]()
 
-      val isTTY = scalanative.posix.unistd.isatty(STDIN_FILENO) == 2
+      val isTTY = scalanative.posix.unistd.isatty(STDIN_FILENO) == 1
 
       if rawMode then
         assertAndReturn(
