@@ -22,7 +22,16 @@ trait ChangeModeUnix extends ChangeModeNative:
   val STDIN_FILENO = 0
 
   def getchar(): Int =
-    scalanative.libc.stdio.getchar()
+    val c = scalanative.libc.stdio.getchar()
+    if c == -1 then 
+      println(scalanative.libc.errno.errno)
+    c
+
+
+  protected inline def assertAndReturn(b: Boolean, msg: String) =
+    assert(b, msg)
+    b
+
 
 end ChangeModeUnix
 

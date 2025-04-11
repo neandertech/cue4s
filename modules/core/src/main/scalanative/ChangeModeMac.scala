@@ -25,25 +25,23 @@ object ChangeModeMac extends ChangeModeUnix:
 
   type termios = scalanative.posix.termios.termios
 
-  var flags = Option.empty[CLong]
-
   def changeMode(rawMode: Boolean): Boolean =
     val state = stackalloc[termios]()
 
-    val STDIN_FILENO = 0
     if rawMode then
-      Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf)
-      this.synchronized:
-        flags = Some((!state)._4)
+      assertAndReturn(Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0, "getting current flags failed") 
       (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-      Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
+      assertAndReturn(
+        Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+        "changing to char input failed",
+      )
     else
-      flags.foreach: oldflags =>
-        Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf)
-        (!state)._4 = oldflags
-        this.synchronized:
-          flags = None
-      Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0
+      assertAndReturn(Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0, "getting current flags failed") 
+      state._4 = (!state)._4 & (ICANON | ECHO)
+      assertAndReturn(
+        Termios.tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+        "changing back from char input failed",
+      )
     end if
   end changeMode
 

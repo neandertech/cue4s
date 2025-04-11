@@ -41,6 +41,6 @@ object Completion:
   private[cue4s] def error(msg: String) =
     Completion.Fail(CompletionError.Error(msg))
 
-enum CompletionError extends Throwable:
-  case Interrupted
-  case Error(msg: String)
+enum CompletionError(msg: String | Null) extends Throwable(msg):
+  case Interrupted extends CompletionError(null)
+  case Error(msg: String) extends CompletionError(msg)
