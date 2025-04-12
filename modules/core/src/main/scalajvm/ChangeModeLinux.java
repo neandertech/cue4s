@@ -21,6 +21,7 @@ import com.sun.jna.Native;
 import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 class ChangeModeLinux implements ChangeMode {
 
@@ -83,17 +84,23 @@ class ChangeModeLinux implements ChangeMode {
         return CLibrary.INSTANCE.getchar();
     }
 
+    private Optional<Integer> flags = Optional.empty();
+
     @Override
     public void changemode(int dir) {
         termios termiosAttrs = new termios();
 
         if (dir == 1) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
+            flags = Optional.of(termiosAttrs.c_lflag);
             termiosAttrs.c_lflag = termiosAttrs.c_lflag & ~(ICANON | ECHO); // disable canonical mode and echo
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         } else {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
-            termiosAttrs.c_lflag = termiosAttrs.c_lflag & (ICANON | ECHO); // re-enable canonical mode and echo
+            flags.ifPresent(old -> {
+                termiosAttrs.c_lflag = old;
+            });
+            flags = Optional.empty();
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         }
     }

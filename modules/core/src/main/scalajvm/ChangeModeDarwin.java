@@ -22,6 +22,7 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 class ChangeModeDarwin implements ChangeMode {
 
@@ -87,21 +88,23 @@ class ChangeModeDarwin implements ChangeMode {
         return CLibrary.INSTANCE.getchar();
     }
 
+    private Optional<Long> flags = Optional.empty();
+
     @Override
     public void changemode(int dir) {
         termios termiosAttrs = new termios();
 
         if (dir == 1) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
+            flags = Optional.of(termiosAttrs.c_lflag.longValue());
             termiosAttrs.c_lflag.setValue(
                 termiosAttrs.c_lflag.longValue() & ~(ICANON | ECHO)
             ); // disable canonical mode and echo
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         } else {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
-            termiosAttrs.c_lflag.setValue(
-                termiosAttrs.c_lflag.longValue() & (ICANON | ECHO)
-            ); // re-enable canonical mode and echo
+            flags.ifPresent(old -> termiosAttrs.c_lflag.setValue(old));
+            flags = Optional.empty();
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         }
     }

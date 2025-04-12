@@ -40,34 +40,42 @@ object ChangeModeLinux extends ChangeModeUnix:
     speed_t,  /* c_ospeed - output speed  */
   ]
 
+  private var flags = Option.empty[Int]
+
   def changeMode(rawMode: Boolean): Boolean =
     Zone:
       val state = alloc[termios]()
 
       val isTTY = scalanative.posix.unistd.isatty(STDIN_FILENO) == 1
 
-      if rawMode then
-        assertAndReturn(
-          !isTTY || Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
-          "getting current flags failed",
-        )
-        (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
-        assertAndReturn(
-          !isTTY || Termios
-            .tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
-          "changing to char input failed",
-        )
-      else
-        assertAndReturn(
-          !isTTY || Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
-          "getting current flags failed",
-        )
-        state._4 = (!state)._4 & (ICANON | ECHO)
-        assertAndReturn(
-          !isTTY || Termios
-            .tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
-          "changing back from char input failed",
-        )
+      if isTTY then
+        if rawMode then
+          assertAndReturn(
+            Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
+            "getting current flags failed",
+          )
+          flags = Some((!state)._4)
+          (!state)._4 = (!state)._4 & ~(ICANON | ECHO)
+          assertAndReturn(
+            Termios
+              .tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+            "changing to char input failed",
+          )
+        else
+          assertAndReturn(
+            Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
+            "getting current flags failed",
+          )
+          flags.foreach: old =>
+            state._4 = old
+            flags = None
+          assertAndReturn(
+            Termios
+              .tcsetattr(STDIN_FILENO, TCSANOW, state.asInstanceOf) == 0,
+            "changing back from char input failed",
+          )
+        end if
+      else false
       end if
   end changeMode
 
