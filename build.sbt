@@ -59,7 +59,13 @@ lazy val core = projectMatrix
     name := "cue4s",
   )
   .settings(munitSettings)
-  .jvmPlatform(Versions.scalaVersions)
+  .jvmPlatform(
+    Versions.scalaVersions,
+    settings = Seq(
+      libraryDependencies +=
+        "net.java.dev.jna" % "jna" % Versions.jna,
+    ),
+  )
   .jsPlatform(Versions.scalaVersions)
   .nativePlatform(Versions.scalaVersions)
   .settings(
@@ -69,8 +75,6 @@ lazy val core = projectMatrix
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     libraryDependencies += "com.lihaoyi" %%% "fansi" % Versions.fansi,
-    libraryDependencies +=
-      "net.java.dev.jna" % "jna" % Versions.jna,
     nativeConfig ~= (_.withIncrementalCompilation(true)),
   )
   .enablePlugins(SnapshotsPlugin)
