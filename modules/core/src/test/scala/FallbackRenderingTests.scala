@@ -1,7 +1,6 @@
 package cue4s
 
 import cue4s.*
-import cue4s.Prompt.PasswordInput.Password
 
 import KeyEvent.*
 

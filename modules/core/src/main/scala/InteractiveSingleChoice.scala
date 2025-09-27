@@ -23,6 +23,7 @@ private[cue4s] class InteractiveSingleChoice(
     out: Output,
     theme: Theme,
     windowSize: Int,
+    width: Int,
     symbols: Symbols,
 ) extends PromptFramework[String](terminal, out):
   import InteractiveSingleChoice.*
@@ -31,6 +32,8 @@ private[cue4s] class InteractiveSingleChoice(
 
   private lazy val altsWithIndex = alts.zipWithIndex
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
+  private lazy val preSplitMapping =
+    altMapping.view.mapValues(TextSplitter.split(_, width)).toMap
 
   override def initialState = State(
     text = "",
@@ -75,6 +78,24 @@ private[cue4s] class InteractiveSingleChoice(
 
   import theme.*
 
+  def prefixed(lab: (Symbols => String) | String, text: String): String =
+    lab match
+      case f: (Symbols => String) => "  " + f(symbols) + " " + text
+      case s: String              => "  " + s + text
+
+  def prefixed(
+      lab: (Symbols => String) | String,
+      text: List[String],
+  ): List[String] =
+    var i      = 0
+    val indent = " " * prefixed(lab, "").length
+    text.map: l =>
+      i += 1
+      if i == 1 then prefixed(lab, l)
+      else indent + l
+
+  end prefixed
+
   override def renderState(
       st: State,
       status: Status,
@@ -104,16 +125,20 @@ private[cue4s] class InteractiveSingleChoice(
               .zipWithIndex
               .foreach:
                 case (id, idx) =>
-                  val alt = altMapping(id)
-                  lines.addOne(
-                    if id == selected then s"  $altCursor $alt".focused
+                  val text = preSplitMapping(id)
+                  lines.addAll(
+                    if id == selected then
+                      prefixed(
+                        _.altCursor,
+                        text,
+                      ).map(_.focused)
                     else if st.display.windowStart > 0 && idx == 0 then
-                      s"  $pageUpArrow $alt".option
+                      prefixed(_.pageUpArrow, text).map(_.option)
                     else if filtered.size > st.display.windowSize &&
                       idx == st.display.windowSize - 1 &&
                       filtered.indexOf(id) != filtered.size - 1
-                    then s"  $pageDownArrow $alt".option
-                    else s"    $alt".option,
+                    then prefixed(_.pageDownArrow, text).map(_.option)
+                    else prefixed("  ", text).map(_.option),
                   )
         end match
       case Status.Finished(value) =>
