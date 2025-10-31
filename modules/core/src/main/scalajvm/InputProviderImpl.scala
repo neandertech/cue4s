@@ -58,33 +58,6 @@ private class InputProviderImpl(o: Terminal)
     Future.firstCompletedOf(Seq(cancellation.future, fut))
   end evaluateFuture
 
-  class KeyboardReadingThread[Result](
-      whatNext: Next[Result] => Boolean,
-      send: TerminalEvent => Boolean,
-  ) extends Thread:
-    override def run(): Unit =
-      var lastRead = 0
-
-      inline def read() =
-        lastRead = InputProviderImpl.nativeInterop.getchar()
-        lastRead
-
-      var state = State.Init
-      var stop  = false
-
-      while !stop && read() != 0 do
-        val (newState, result) = decode(state, lastRead)
-
-        result match
-          case n: DecodeResult  => stop = whatNext(n.toNext)
-          case e: TerminalEvent => stop = send(e)
-
-        state = newState
-
-      end while
-    end run
-  end KeyboardReadingThread
-
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     InputProviderImpl.nativeInterop.changemode(1)
 
@@ -117,7 +90,11 @@ private class InputProviderImpl(o: Terminal)
     def send(ev: TerminalEvent): Boolean =
       whatNext(handler(ev))
 
-    val readingThread = KeyboardReadingThread(whatNext, send)
+    val readingThread = KeyboardReadingThread(
+      whatNext,
+      send,
+      () => InputProviderImpl.nativeInterop.getchar(),
+    )
 
     readingThread.start()
 
@@ -133,37 +110,7 @@ private class InputProviderImpl(o: Terminal)
 
     readingThread.join()
 
-
     completed
-
-    // try
-    //   boundary[Completion[Result]]:
-
-    //     hook = Some: () =>
-    //       o.cursorShow()
-    //       whatNext(handler(TerminalEvent.Interrupt))
-
-    //     if !asyncHookSet then hook.foreach(InputProviderImpl.addShutdownHook)
-
-    //     var state = State.Init
-
-    //     whatNext(handler(TerminalEvent.Init))
-
-    //     while read() != 0 do
-    //       val (newState, result) = decode(state, lastRead)
-
-    //       result match
-    //         case n: DecodeResult  => whatNext(n.toNext)
-    //         case e: TerminalEvent => send(e)
-
-    //       state = newState
-
-    //     end while
-
-    //     Completion.interrupted
-    // finally
-    //   if !asyncHookSet then hook.foreach(InputProviderImpl.removeShutdownHook)
-    // end try
 
   end evaluate
 

@@ -18,7 +18,7 @@ package cue4s
 
 import scala.util.control.*
 
-private object CharCollector:
+private[cue4s] object CharCollector:
   object ExitThrowable
       extends ControlThrowable("Received termination signal")
       with NoStackTrace

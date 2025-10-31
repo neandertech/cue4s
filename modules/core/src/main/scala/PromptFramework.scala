@@ -73,25 +73,6 @@ trait PromptFramework[Result](terminal: Terminal, out: Output):
 
   end mapValidated
 
-  // final def send(ev: Event): PromptAction =
-  //   if ev == TerminalEvent.Init then printPrompt()
-  //   handleEvent(ev) match
-  //     case PromptAction.Continue => Next.Continue
-  //     case PromptAction.Stop     => Next.Stop
-
-  //     case PromptAction.Update(statusF, stateF) =>
-  //       stateTransition(stateF, statusF)
-  //       val next = currentStatus() match
-  //         case Status.Finished(result) => Next.Done(result)
-  //         case Status.Running(_)       => Next.Continue
-  //         case Status.Canceled         => Next.Stop
-  //         case Status.Init             => Next.Continue
-
-  //       printPrompt()
-  //       next
-  //   end match
-  // end send
-
   private var backchannel: Option[Next[Result] => Unit] = None
 
   final def send(ev: Event) =

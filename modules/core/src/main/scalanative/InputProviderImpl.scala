@@ -22,6 +22,10 @@ import scala.util.boundary
 
 import CharCollector.*
 import boundary.break
+import scala.util.Success
+import scala.concurrent.Promise
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
 private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
@@ -63,44 +67,48 @@ private class InputProviderImpl(o: Terminal)
 
     if !asyncHookSet then InputProviderImpl.addShutdownHook(hook)
 
-    var lastRead = 0
+    val result = Promise[Completion[Result]]()
+    def whatNext(n: Next[Result]): Boolean =
+      if !result.isCompleted then
+        n match
+          case Next.Continue => false
+          case Next.Done(value) =>
+            result.complete(Success(Completion.Finished(value)))
+            true
+          case Next.Stop =>
+            result.complete(Success(Completion.interrupted))
+            true
+          case Next.Error(msg) =>
+            result.complete(Success(Completion.error(msg)))
+            true
+      else true
 
-    inline def read() =
-      lastRead = changeMode.getchar()
-      lastRead
+    handler.setupBackchannel(whatNext(_))
 
-    try
-      boundary[Completion[Result]]:
+    def send(ev: TerminalEvent): Boolean =
+      whatNext(handler(ev))
 
-        def whatNext(n: Next[Result]) =
-          n match
-            case Next.Continue    =>
-            case Next.Done(value) => break(Completion.Finished(value))
-            case Next.Stop        => break(Completion.interrupted)
-            case Next.Error(msg)  => break(Completion.error(msg))
+    val readingThread = KeyboardReadingThread(
+      whatNext,
+      send,
+      () => changeMode.getchar(),
+    )
 
-        def send(ev: TerminalEvent) =
-          whatNext(handler(ev))
+    readingThread.start()
 
-        var state = State.Init
+    whatNext(handler(TerminalEvent.Init))
 
-        whatNext(handler(TerminalEvent.Init))
+    result.future.onComplete: _ =>
+      readingThread.interrupt()
 
-        while read() != 0 do
-          val (newState, result) = decode(state, lastRead)
+    given ExecutionContext = ExecutionContext.global
 
-          result match
-            case n: DecodeResult => whatNext(n.toNext)
-            case e: TerminalEvent =>
-              send(e)
+    val completed = Await.result(result.future, Duration.Inf)
+    if !asyncHookSet then InputProviderImpl.removeShutdownHook(hook)
 
-          state = newState
+    readingThread.join()
 
-        end while
-
-        Completion.interrupted
-    finally if !asyncHookSet then InputProviderImpl.removeShutdownHook(hook)
-    end try
+    completed
 
   end evaluate
 
