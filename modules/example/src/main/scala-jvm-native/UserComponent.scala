@@ -2,15 +2,35 @@ package cue4s_test
 
 import cue4s.*
 import cue4s.KeyEvent
+import java.util.concurrent.atomic.AtomicBoolean
+import java.time.LocalDate
+import java.time.LocalTime
 
-@main def tictac = 
+@main def tictac =
   val terminal = Terminal.ansi(Output.Std)
-  val input = InputProvider(terminal)
-  val tic = TicTacToe(terminal, Output.Std)
+  val input    = InputProvider(terminal)
+  val tic      = TicTacToe(terminal, Output.Std)
 
+  val finish = AtomicBoolean()
+
+  val t = new Thread:
+    override def run(): Unit =
+      var flip = false
+      while !finish.get() do
+        if flip then tic.send(TimerEvent.ShowTime)
+        else tic.send(TimerEvent.ShowDate)
+
+        flip = !flip
+
+        Thread.sleep(2000)
+
+  t.start()
   val result = input.evaluate(tic.handler)
+  finish.set(true)
+  t.join()
 
   println(result)
+end tictac
 
 class TicTacToe(terminal: Terminal, out: Output)
     extends PromptFramework[Outcome](terminal, out):
@@ -24,7 +44,16 @@ class TicTacToe(terminal: Terminal, out: Output)
       case t: TimerEvent    => handleTimerEvent(t)
       case t: TerminalEvent => handleTerminalEvent(t)
 
-  private def handleTimerEvent(t: TimerEvent): PromptAction = ???
+  private def handleTimerEvent(t: TimerEvent): PromptAction =
+    t match
+      case TimerEvent.ShowDate =>
+        PromptAction.updateState(
+          _.copy(flash = Some("Current date is " + LocalDate.now())),
+        )
+      case TimerEvent.ShowTime =>
+        PromptAction.updateState(
+          _.copy(flash = Some("Current time is " + LocalTime.now())),
+        )
 
   private def handleTerminalEvent(t: TerminalEvent): PromptAction =
     t match
@@ -79,7 +108,9 @@ class TicTacToe(terminal: Terminal, out: Output)
           )
     end match
 
-    if debug then builder += this.toString()
+    state.flash.foreach(builder += _)
+
+    if debug then builder += state.toString()
 
     builder += "-" * (3 * 3 + 1 * 4)
 
@@ -98,7 +129,7 @@ class TicTacToe(terminal: Terminal, out: Output)
 end TicTacToe
 
 enum TimerEvent:
-  case HurryUp, HideHurryUp
+  case ShowDate, ShowTime
 
 enum Outcome:
   case Winner(turn: Turn)
@@ -122,6 +153,7 @@ case class State(
     board: Vector[Vector[Option[Turn]]],
     turn: Turn,
     selected: (Int, Int),
+    flash: Option[String],
     debug: Boolean = false,
 ):
   def cursorRow    = selected._1
@@ -170,4 +202,4 @@ end State
 
 object State:
   def init =
-    new State(Vector.fill(3)(Vector.fill(3)(None)), Noughts, (0, 0))
+    new State(Vector.fill(3)(Vector.fill(3)(None)), Noughts, (0, 0), None)

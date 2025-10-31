@@ -29,7 +29,7 @@ trait PromptFramework[Result](terminal: Terminal, out: Output):
   ): PromptFramework[Derived] =
     new PromptFramework[Derived](terminal, out):
       override type PromptState = self.PromptState
-      override type Event = self.Event
+      override type Event       = self.Event
 
       override def initialState: PromptState = self.initialState
 
@@ -73,24 +73,51 @@ trait PromptFramework[Result](terminal: Terminal, out: Output):
 
   end mapValidated
 
+  // final def send(ev: Event): PromptAction =
+  //   if ev == TerminalEvent.Init then printPrompt()
+  //   handleEvent(ev) match
+  //     case PromptAction.Continue => Next.Continue
+  //     case PromptAction.Stop     => Next.Stop
+
+  //     case PromptAction.Update(statusF, stateF) =>
+  //       stateTransition(stateF, statusF)
+  //       val next = currentStatus() match
+  //         case Status.Finished(result) => Next.Done(result)
+  //         case Status.Running(_)       => Next.Continue
+  //         case Status.Canceled         => Next.Stop
+  //         case Status.Init             => Next.Continue
+
+  //       printPrompt()
+  //       next
+  //   end match
+  // end send
+
+  private var backchannel: Option[Next[Result] => Unit] = None
+
+  final def send(ev: Event) =
+    backchannel.foreach(b => b(manage(handleEvent(ev))))
+
+  private def manage(a: PromptAction) = a match
+    case PromptAction.Continue => Next.Continue
+    case PromptAction.Stop     => Next.Stop
+
+    case PromptAction.Update(statusF, stateF) =>
+      stateTransition(stateF, statusF)
+      val next = currentStatus() match
+        case Status.Finished(result) => Next.Done(result)
+        case Status.Running(_)       => Next.Continue
+        case Status.Canceled         => Next.Stop
+        case Status.Init             => Next.Continue
+
+      printPrompt()
+      next
+
   final val handler = new Handler[Result]:
+    override def setupBackchannel(notif: Next[Result] => Unit): Unit = 
+      backchannel = Some(notif)
     override def apply(ev: TerminalEvent): Next[Result] =
       if ev == TerminalEvent.Init then printPrompt()
-      handleEvent(ev) match
-        case PromptAction.Continue => Next.Continue
-        case PromptAction.Stop     => Next.Stop
-
-        case PromptAction.Update(statusF, stateF) =>
-          stateTransition(stateF, statusF)
-          val next = currentStatus() match
-            case Status.Finished(result) => Next.Done(result)
-            case Status.Running(_)       => Next.Continue
-            case Status.Canceled         => Next.Stop
-            case Status.Init             => Next.Continue
-
-          printPrompt()
-          next
-      end match
+      manage(handleEvent(ev))
     end apply
 
   final def currentState(): PromptState = state.current
@@ -100,64 +127,66 @@ trait PromptFramework[Result](terminal: Terminal, out: Output):
       stateChange: PromptState => PromptState,
       statusChange: Status => Status,
   ) =
-    state = state.nextFn(stateChange)
-    status = status.nextFn(statusChange)
-    rendering = rendering.next(
-      renderState(state.current, status.current),
-    )
+    this.synchronized:
+      state = state.nextFn(stateChange)
+      status = status.nextFn(statusChange)
+      rendering = rendering.next(
+        renderState(state.current, status.current),
+      )
   end stateTransition
 
   final def printPrompt() =
     import terminal.*
-    if currentStatus() != Status.Canceled then cursorHide()
-    rendering.last match
-      case None =>
-        // initial print
-        rendering.current.foreach: line =>
-          out.outLn(line)
-          moveHorizontalTo(0)
-        moveUp(rendering.current.length).moveHorizontalTo(0)
-      case Some(previousRendering) =>
-        val paddingLength =
-          (previousRendering.length - rendering.current.length).max(0)
+    this.synchronized:
+      if currentStatus() != Status.Canceled then cursorHide()
+      rendering.last match
+        case None =>
+          // initial print
+          rendering.current.foreach: line =>
+            out.outLn(line)
+            moveHorizontalTo(0)
+          moveUp(rendering.current.length).moveHorizontalTo(0)
+        case Some(previousRendering) =>
+          val paddingLength =
+            (previousRendering.length - rendering.current.length).max(0)
 
-        inline def pad(n: Int) = List.fill(n)("")
+          inline def pad(n: Int) = List.fill(n)("")
 
-        val (current, previous) =
-          if rendering.current.length > previousRendering.length then
-            (
-              rendering.current,
-              previousRendering ++ pad(
-                rendering.current.length - previousRendering.length,
-              ),
-            )
-          else
-            (
-              rendering.current ++ pad(
-                previousRendering.length - rendering.current.length,
-              ),
-              previousRendering,
-            )
+          val (current, previous) =
+            if rendering.current.length > previousRendering.length then
+              (
+                rendering.current,
+                previousRendering ++ pad(
+                  rendering.current.length - previousRendering.length,
+                ),
+              )
+            else
+              (
+                rendering.current ++ pad(
+                  previousRendering.length - rendering.current.length,
+                ),
+                previousRendering,
+              )
 
-        def render =
-          current
-            .zip(previous)
-            .foreach: (line, oldLine) =>
-              if line != oldLine then
-                moveHorizontalTo(0).eraseEntireLine()
-                out.out(line)
-              moveDown(1)
+          def render =
+            current
+              .zip(previous)
+              .foreach: (line, oldLine) =>
+                if line != oldLine then
+                  moveHorizontalTo(0).eraseEntireLine()
+                  out.out(line)
+                moveDown(1)
 
-        if isRunning(currentStatus()) then
-          render
-          moveUp(current.length).moveHorizontalTo(0)
-        else // we are finished
-          render
-          // do not leave empty lines behind - move cursor up
-          moveUp(paddingLength).moveHorizontalTo(0)
+          if isRunning(currentStatus()) then
+            render
+            moveUp(current.length).moveHorizontalTo(0)
+          else // we are finished
+            render
+            // do not leave empty lines behind - move cursor up
+            moveUp(paddingLength).moveHorizontalTo(0)
 
-        end if
-    end match
+          end if
+      end match
 
   end printPrompt
 

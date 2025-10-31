@@ -17,6 +17,7 @@
 package cue4s
 
 abstract class Handler[Result]:
+  def setupBackchannel(notif: Next[Result] => Unit): Unit = ()
   def apply(ev: TerminalEvent): Next[Result]
 
 abstract class InputProvider(protected val terminal: Terminal)
