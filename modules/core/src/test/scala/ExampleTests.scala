@@ -11,7 +11,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       List("killa", "rizza", "flizza"),
     ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       DOWN,
       DOWN,
       ENTER,
@@ -25,10 +25,10 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       List("killa", "rizza", "flizza"),
     ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       DOWN,
       DOWN,
-      Event.Interrupt,
+      TerminalEvent.Interrupt,
     ),
     Next.Stop,
   )
@@ -47,7 +47,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       )
       .withWindowSize(3),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       DOWN,
       DOWN,
       DOWN,
@@ -64,12 +64,12 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       List("pizza", "steak", "sweet potato", "fried chicken"),
     ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       TAB,
       DOWN,
       TAB,
       DOWN,
-      Event.Interrupt,
+      TerminalEvent.Interrupt,
     ),
     Next.Stop,
   )
@@ -88,7 +88,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
         ),
       ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       TAB,
       ENTER,
       TAB,
@@ -105,7 +105,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       )
       .withWindowSize(3),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       TAB,
       DOWN,
       TAB,
@@ -122,7 +122,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("alternatives.confirm.default")(
     Prompt.Confirmation("Are you sure?", default = true),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       ENTER,
     ),
     true,
@@ -131,8 +131,8 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("alternatives.confirm.decline")(
     Prompt.Confirmation("Are you sure?", default = true),
     list(
-      Event.Init,
-      Event.Char('n'),
+      TerminalEvent.Init,
+      TerminalEvent.Char('n'),
     ),
     false,
   )
@@ -140,8 +140,8 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("alternatives.confirm.agree")(
     Prompt.Confirmation("Are you sure?", default = false),
     list(
-      Event.Init,
-      Event.Char('y'),
+      TerminalEvent.Init,
+      TerminalEvent.Char('y'),
     ),
     true,
   )
@@ -149,8 +149,8 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTest("alternatives.confirm.cancel")(
     Prompt.Confirmation("Are you sure?"),
     list(
-      Event.Init,
-      Event.Interrupt,
+      TerminalEvent.Init,
+      TerminalEvent.Interrupt,
     ),
     Next.Stop,
   )
@@ -164,7 +164,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
         if value.length < 4 then Some(PromptError("too short!"))
         else None,
       ),
-    list(Event.Init, Event.Interrupt),
+    list(TerminalEvent.Init, TerminalEvent.Interrupt),
     Next.Stop,
   )
 
@@ -176,7 +176,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
         else None,
       ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       chars("go"),
       ENTER, // prevents submission
       chars("od"),
@@ -190,7 +190,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       .Input("What color is the sky?")
       .default("blue"),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       ENTER,
     ),
     "blue",
@@ -200,7 +200,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       .Input("What color is the sky?")
       .default("blue"),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       delete("blue"),
       chars("red"),
       ENTER,
@@ -218,7 +218,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
         else None,
       ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       chars("go"),
       ENTER, // prevents submission
       chars("od"),
@@ -240,7 +240,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       )
       .default(Password("good5")),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       ENTER,
     ),
     Prompt.PasswordInput.Password("good5"),
@@ -254,7 +254,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
         case other  => Left(PromptError(s"look up, it's not $other"))
     ,
     list(
-      Event.Init,
+      TerminalEvent.Init,
       chars("go"),
       ENTER, // prevents submission
       chars("od"),
@@ -274,7 +274,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       .max(30.0)
       .default(25.7),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       ENTER,
     ),
     25.7f,
@@ -286,7 +286,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       .min(5.0)
       .max(30.0),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       chars("3.0"),
       ENTER,
       delete("3.0"),
@@ -310,7 +310,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       List("killa", "rizza", "flizza"),
     ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       chars("z"),
       DELETE,
       chars("li"),
@@ -325,7 +325,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       List("pizza", "steak", "sweet potato", "fried chicken"),
     ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       TAB,
       DOWN,
       TAB,
@@ -344,7 +344,7 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       List("pizza", "steak", "sweet potato", "fried chicken"),
     ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       TAB, // unselect pizza
       ENTER,
     ),
@@ -369,20 +369,20 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("promptchain")(
     PromptChain[MyPrompt],
     list(
-      Event.Init,
+      TerminalEvent.Init,
       chars("hello"),
       ENTER,
-      Event.Init,
+      TerminalEvent.Init,
       ENTER,
-      Event.Init,
+      TerminalEvent.Init,
       chars("24"),
       ENTER,
-      Event.Init,
+      TerminalEvent.Init,
       chars("3.14"),
       ENTER,
-      Event.Init,
+      TerminalEvent.Init,
       chars("n"),
-      Event.Init,
+      TerminalEvent.Init,
       chars("qwerty"),
       ENTER,
     ),

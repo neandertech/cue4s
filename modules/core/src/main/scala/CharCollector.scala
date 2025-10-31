@@ -35,7 +35,7 @@ private object CharCollector:
       case Continue   => Next.Continue
       case Error(msg) => Next.Error(msg)
 
-  def decode(curState: State, char: Int): (State, DecodeResult | Event) =
+  def decode(curState: State, char: Int): (State, DecodeResult | TerminalEvent) =
     def isCSIParameterByte(b: Int) =
       (b >= 0x30 && b <= 0x3f)
 
@@ -48,10 +48,10 @@ private object CharCollector:
     def error(msg: String) =
       (curState, DecodeResult.Error(msg))
 
-    def emit(event: Event) =
+    def emit(event: TerminalEvent) =
       (curState, event)
 
-    def toInit(result: DecodeResult | Event) =
+    def toInit(result: DecodeResult | TerminalEvent) =
       (State.Init, result)
 
     curState match
@@ -60,11 +60,11 @@ private object CharCollector:
           case AnsiTerminal.ESC =>
             (State.ESC_Started, DecodeResult.Continue)
           case 10 | 13 =>
-            emit(Event.Key(KeyEvent.ENTER))
+            emit(TerminalEvent.Key(KeyEvent.ENTER))
           case 9 =>
-            emit(Event.Key(KeyEvent.TAB))
+            emit(TerminalEvent.Key(KeyEvent.TAB))
           case 8 | 127 =>
-            emit(Event.Key(KeyEvent.DELETE))
+            emit(TerminalEvent.Key(KeyEvent.DELETE))
           case 224 if Platform.os == Platform.OS.Windows => // 0xE0
             (State.ScanCode_Started, DecodeResult.Continue)
           case 3 | 4
@@ -73,7 +73,7 @@ private object CharCollector:
           case -1 =>
             error("Invalid character -1")
           case _ =>
-            emit(Event.Char(char))
+            emit(TerminalEvent.Char(char))
 
       case State.ESC_Started =>
         char match
@@ -84,10 +84,10 @@ private object CharCollector:
 
       case State.CSI_Started =>
         char match
-          case 'A' => toInit(Event.Key(KeyEvent.UP))
-          case 'B' => toInit(Event.Key(KeyEvent.DOWN))
-          case 'C' => toInit(Event.Key(KeyEvent.RIGHT))
-          case 'D' => toInit(Event.Key(KeyEvent.LEFT))
+          case 'A' => toInit(TerminalEvent.Key(KeyEvent.UP))
+          case 'B' => toInit(TerminalEvent.Key(KeyEvent.DOWN))
+          case 'C' => toInit(TerminalEvent.Key(KeyEvent.RIGHT))
+          case 'D' => toInit(TerminalEvent.Key(KeyEvent.LEFT))
 
           case b
               if isCSIParameterByte(b) || isCSIIntermediateByte(
@@ -98,19 +98,19 @@ private object CharCollector:
       case State.CSI_Collecting(bytes) =>
         char match
           case b if isCSIFinalByte(b) =>
-            toInit(Event.CSICode(bytes))
+            toInit(TerminalEvent.CSICode(bytes))
           case _ =>
             error(s"Unexpected byte ${char}, expected CSI final byte")
 
       // https://learn.microsoft.com/en-us/previous-versions/visualstudio/visual-studio-6.0/aa299374(v=vs.60)
       case State.ScanCode_Started =>
         char match
-          case 72 => toInit(Event.Key(KeyEvent.UP))
-          case 80 => toInit(Event.Key(KeyEvent.DOWN))
-          case 77 => toInit(Event.Key(KeyEvent.RIGHT))
-          case 75 => toInit(Event.Key(KeyEvent.LEFT))
-          case 28 => toInit(Event.Key(KeyEvent.ENTER))
-          case 83 => toInit(Event.Key(KeyEvent.DELETE))
+          case 72 => toInit(TerminalEvent.Key(KeyEvent.UP))
+          case 80 => toInit(TerminalEvent.Key(KeyEvent.DOWN))
+          case 77 => toInit(TerminalEvent.Key(KeyEvent.RIGHT))
+          case 75 => toInit(TerminalEvent.Key(KeyEvent.LEFT))
+          case 28 => toInit(TerminalEvent.Key(KeyEvent.ENTER))
+          case 83 => toInit(TerminalEvent.Key(KeyEvent.DELETE))
           case _  => (State.Init, DecodeResult.Continue)
 
     end match

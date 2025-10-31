@@ -38,7 +38,7 @@ private class InputProviderImpl(o: Terminal)
     val cancellation = Promise[Completion[Result]]()
 
     val hook = () =>
-      handler(Event.Interrupt)
+      handler(TerminalEvent.Interrupt)
       o.cursorShow()
       cancellation.complete(Success(Completion.interrupted))
       ()
@@ -79,23 +79,23 @@ private class InputProviderImpl(o: Terminal)
 
         hook = Some: () =>
           o.cursorShow()
-          whatNext(handler(Event.Interrupt))
+          whatNext(handler(TerminalEvent.Interrupt))
 
         if !asyncHookSet then hook.foreach(InputProviderImpl.addShutdownHook)
 
-        def send(ev: Event) =
+        def send(ev: TerminalEvent) =
           whatNext(handler(ev))
 
         var state = State.Init
 
-        whatNext(handler(Event.Init))
+        whatNext(handler(TerminalEvent.Init))
 
         while read() != 0 do
           val (newState, result) = decode(state, lastRead)
 
           result match
             case n: DecodeResult => whatNext(n.toNext)
-            case e: Event        => send(e)
+            case e: TerminalEvent        => send(e)
 
           state = newState
 

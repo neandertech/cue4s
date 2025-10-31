@@ -35,7 +35,7 @@ private class InputProviderImpl(o: Terminal)
       ExecutionContext,
   ) =
     val hook = () =>
-      handler(Event.Interrupt)
+      handler(TerminalEvent.Interrupt)
       o.cursorShow()
       close()
 
@@ -57,7 +57,7 @@ private class InputProviderImpl(o: Terminal)
     changeMode.changeMode(rawMode = true)
 
     val hook = () =>
-      handler(Event.Interrupt)
+      handler(TerminalEvent.Interrupt)
       o.cursorShow()
       close()
 
@@ -79,19 +79,19 @@ private class InputProviderImpl(o: Terminal)
             case Next.Stop        => break(Completion.interrupted)
             case Next.Error(msg)  => break(Completion.error(msg))
 
-        def send(ev: Event) =
+        def send(ev: TerminalEvent) =
           whatNext(handler(ev))
 
         var state = State.Init
 
-        whatNext(handler(Event.Init))
+        whatNext(handler(TerminalEvent.Init))
 
         while read() != 0 do
           val (newState, result) = decode(state, lastRead)
 
           result match
             case n: DecodeResult => whatNext(n.toNext)
-            case e: Event =>
+            case e: TerminalEvent =>
               send(e)
 
           state = newState

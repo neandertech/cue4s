@@ -16,11 +16,11 @@
 
 package cue4s
 
-private[cue4s] abstract class Handler[Result]:
-  def apply(ev: Event): Next[Result]
+abstract class Handler[Result]:
+  def apply(ev: TerminalEvent): Next[Result]
 
-private[cue4s] abstract class InputProvider(protected val terminal: Terminal)
+abstract class InputProvider(protected val terminal: Terminal)
     extends AutoCloseable,
       InputProviderPlatform
 
-private[cue4s] object InputProvider extends InputProviderCompanionPlatform
+object InputProvider extends InputProviderCompanionPlatform

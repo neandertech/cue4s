@@ -9,18 +9,18 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   case object LogTag extends munit.Tag("logtest")
 
-  def delete(str: String): List[Event] =
-    List.fill(str.length())(Event.Key(KeyEvent.DELETE))
+  def delete(str: String): List[TerminalEvent] =
+    List.fill(str.length())(TerminalEvent.Key(KeyEvent.DELETE))
 
-  def chars(str: String): List[Event] =
-    str.map(Event.Char(_)).toList
+  def chars(str: String): List[TerminalEvent] =
+    str.map(TerminalEvent.Char(_)).toList
 
-  def list(args: (KeyEvent | Event | List[Event])*) =
+  def list(args: (KeyEvent | TerminalEvent | List[TerminalEvent])*) =
     flatten(args.toList)
 
   def terminalTestComplete[R](
       name: munit.TestOptions,
-  )(prompt: PromptChain[R], events: List[Event | List[Event]], expected: R)(
+  )(prompt: PromptChain[R], events: List[TerminalEvent | List[TerminalEvent]], expected: R)(
       implicit loc: munit.Location,
   ): Unit =
     test(name) {
@@ -39,17 +39,17 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       assertEquals(result, expected)
     }
 
-  def flatten(evs: List[KeyEvent | Event | List[Event]]): List[Event] =
+  def flatten(evs: List[KeyEvent | TerminalEvent | List[TerminalEvent]]): List[TerminalEvent] =
     evs.flatMap:
-      case ev: Event    => List(ev)
-      case ev: KeyEvent => List(Event.Key(ev))
+      case ev: TerminalEvent    => List(ev)
+      case ev: KeyEvent => List(TerminalEvent.Key(ev))
       case ev: List[?]  => ev
 
   def terminalTestComplete[R](
       name: munit.TestOptions,
   )(
       prompt: Prompt[R],
-      events: List[Event],
+      events: List[TerminalEvent],
       expected: R,
       symbols: Symbols = Symbols.UnicodeSymbols,
       log: Boolean = false,
@@ -78,7 +78,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       log: Boolean = false,
   )(
       prompt: Prompt[R],
-      events: List[Event],
+      events: List[TerminalEvent],
       expected: Next[R],
   )(implicit
       loc: munit.Location,
@@ -93,10 +93,10 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       assertEquals(result, expected)
     }
 
-  case class Result[T](value: T, snapshot: String, eventsProcessed: List[Event])
+  case class Result[T](value: T, snapshot: String, eventsProcessed: List[TerminalEvent])
 
   def run[T](
-      events: Seq[Event],
+      events: Seq[TerminalEvent],
       symbols: Symbols = Symbols.UnicodeSymbols,
       log: Boolean = false,
   )(
@@ -112,7 +112,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       prompt.framework(term, capturing, Theme.NoColors, symbols).handler
 
     var result          = Option.empty[Next[T]]
-    val eventsProcessed = List.newBuilder[Event]
+    val eventsProcessed = List.newBuilder[TerminalEvent]
     boundary:
       events.foreach: event =>
         sb.append(event.toString() + "\n")
@@ -133,7 +133,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
   end run
 
   def runToCompletion[T](
-      events: Seq[Event],
+      events: Seq[TerminalEvent],
       symbols: Symbols = Symbols.UnicodeSymbols,
       log: Boolean = false,
   )(
@@ -149,7 +149,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
   end runToCompletion
 
   def runChain[T](
-      events: Seq[Event],
+      events: Seq[TerminalEvent],
       symbols: Symbols = Symbols.UnicodeSymbols,
       log: Boolean = false,
   )(

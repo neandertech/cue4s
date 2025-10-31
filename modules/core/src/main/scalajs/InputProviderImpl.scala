@@ -68,12 +68,12 @@ private class InputProviderImpl(o: Terminal)
           case Next.Stop        => close(Completion.interrupted)
           case Next.Error(msg)  => close(Completion.error(msg))
 
-      def send(ev: Event) =
+      def send(ev: TerminalEvent) =
         whatNext(handler(ev))
 
       def handle(key: Key) =
         if key.name == "c" && key.ctrl then
-          handler(Event.Interrupt)
+          handler(TerminalEvent.Interrupt)
           o.cursorShow()
           close(Completion.Fail(CompletionError.Interrupted))
         else
@@ -91,9 +91,9 @@ private class InputProviderImpl(o: Terminal)
                     case Continue   => whatNext(Next.Continue)
                     case Error(msg) => whatNext(Next.Error(msg))
 
-                case e: Event => send(e)
+                case e: TerminalEvent => send(e)
 
-      handler(Event.Init)
+      handler(TerminalEvent.Init)
       stdin.on("keypress", keypress)
 
       fut

@@ -30,10 +30,11 @@ private[cue4s] class InteractiveTextInput(
   import InteractiveTextInput.*
 
   override type PromptState = State
+  override type Event = TerminalEvent
 
   override def initialState: State = State(default.getOrElse(""))
 
-  override def handleEvent(event: Event) =
+  override def handleEvent(event: TerminalEvent) =
     def update(state: State, f: State => State) =
       val newState = f(state)
       val newStatus =
@@ -42,7 +43,7 @@ private[cue4s] class InteractiveTextInput(
       PromptAction.Update(_ => newStatus, _ => newState)
 
     event match
-      case Event.Key(KeyEvent.ENTER) =>
+      case TerminalEvent.Key(KeyEvent.ENTER) =>
         currentStatus() match
           case Status.Running(Right(candidate)) =>
             PromptAction.setStatus(Status.Finished(candidate))
@@ -53,12 +54,12 @@ private[cue4s] class InteractiveTextInput(
 
           case _ => PromptAction.Continue
 
-      case Event.Key(KeyEvent.DELETE) =>
+      case TerminalEvent.Key(KeyEvent.DELETE) =>
         update(currentState(), _.trimText)
 
-      case Event.Char(which) => update(currentState(), _.addText(which.toChar))
+      case TerminalEvent.Char(which) => update(currentState(), _.addText(which.toChar))
 
-      case Event.Interrupt => PromptAction.setStatus(Status.Canceled)
+      case TerminalEvent.Interrupt => PromptAction.setStatus(Status.Canceled)
 
       case _ => PromptAction.Continue
     end match

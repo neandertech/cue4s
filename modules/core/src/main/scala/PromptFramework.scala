@@ -16,10 +16,10 @@
 
 package cue4s
 
-private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
+trait PromptFramework[Result](terminal: Terminal, out: Output):
   self =>
   type PromptState
-
+  type Event >: TerminalEvent
   def initialState: PromptState
   def handleEvent(event: Event): PromptAction
   def renderState(state: PromptState, status: Status): List[String]
@@ -29,6 +29,7 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
   ): PromptFramework[Derived] =
     new PromptFramework[Derived](terminal, out):
       override type PromptState = self.PromptState
+      override type Event = self.Event
 
       override def initialState: PromptState = self.initialState
 
@@ -73,8 +74,8 @@ private[cue4s] trait PromptFramework[Result](terminal: Terminal, out: Output):
   end mapValidated
 
   final val handler = new Handler[Result]:
-    override def apply(ev: Event): Next[Result] =
-      if ev == Event.Init then printPrompt()
+    override def apply(ev: TerminalEvent): Next[Result] =
+      if ev == TerminalEvent.Init then printPrompt()
       handleEvent(ev) match
         case PromptAction.Continue => Next.Continue
         case PromptAction.Stop     => Next.Stop

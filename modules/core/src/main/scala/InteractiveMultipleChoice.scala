@@ -29,6 +29,7 @@ private[cue4s] class InteractiveMultipleChoice(
   import InteractiveMultipleChoice.*
 
   override type PromptState = State
+  override type Event = TerminalEvent
 
   private lazy val preSelected =
     alts.zipWithIndex.filter(_._1._2).map(_._2)
@@ -112,31 +113,31 @@ private[cue4s] class InteractiveMultipleChoice(
     lines.result()
   end renderState
 
-  override def handleEvent(event: Event) =
+  override def handleEvent(event: TerminalEvent) =
     event match
-      case Event.Key(KeyEvent.UP) =>
+      case TerminalEvent.Key(KeyEvent.UP) =>
         PromptAction.updateState(_.updateDisplay(_.up))
 
-      case Event.Key(KeyEvent.DOWN) =>
+      case TerminalEvent.Key(KeyEvent.DOWN) =>
         PromptAction.updateState(_.updateDisplay(_.down))
 
-      case Event.Key(KeyEvent.ENTER) =>
+      case TerminalEvent.Key(KeyEvent.ENTER) =>
         PromptAction.setStatus(
           Status.Finished(
             currentState().selected.toList.sorted.map(altMapping).toList,
           ),
         )
 
-      case Event.Key(KeyEvent.TAB) =>
+      case TerminalEvent.Key(KeyEvent.TAB) =>
         PromptAction.updateState(_.toggle)
 
-      case Event.Key(KeyEvent.DELETE) =>
+      case TerminalEvent.Key(KeyEvent.DELETE) =>
         PromptAction.updateState(_.trimText)
 
-      case Event.Char(which) =>
+      case TerminalEvent.Char(which) =>
         PromptAction.updateState(_.addText(which.toChar))
 
-      case Event.Interrupt =>
+      case TerminalEvent.Interrupt =>
         PromptAction.setStatus(Status.Canceled)
 
       case _ =>

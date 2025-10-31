@@ -16,7 +16,7 @@
 
 package cue4s
 
-private[cue4s] enum Event:
+enum TerminalEvent:
   case Init
   case Key(which: KeyEvent)
   case Char(which: Int)
@@ -30,11 +30,11 @@ private[cue4s] enum Event:
       case Char(which)    => s"Event.Char('${which.toChar}')"
       case CSICode(bytes) => s"Event.CSICode(${bytes.mkString("[", ", ", "]")})"
       case Interrupt      => "Event.Interrupt"
-end Event
+end TerminalEvent
 
-private[cue4s] object Event:
+object TerminalEvent:
   object Char:
-    def apply(c: scala.Char): Event.Char = Event.Char(c.toInt)
+    def apply(c: scala.Char): TerminalEvent.Char = TerminalEvent.Char(c.toInt)
 
-private[cue4s] enum KeyEvent:
+enum KeyEvent:
   case UP, DOWN, LEFT, RIGHT, ENTER, DELETE, TAB
