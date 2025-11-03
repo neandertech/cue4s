@@ -91,7 +91,7 @@ private class InputProviderImpl(o: Terminal)
     val readingThread = KeyboardReadingThread(
       whatNext,
       send,
-      () => changeMode.getchar(),
+      () => changeMode.read(),
     )
 
     readingThread.start()

@@ -20,7 +20,7 @@ import scala.scalanative.meta.LinktimeInfo
 
 trait ChangeModeNative:
   def changeMode(rawMode: Boolean): Boolean
-  def getchar(): Int
+  def read(): Int
 
 object ChangeModeNative:
   def instance: ChangeModeNative =

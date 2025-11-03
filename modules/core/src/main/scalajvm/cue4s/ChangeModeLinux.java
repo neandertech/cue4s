@@ -78,6 +78,8 @@ class ChangeModeLinux implements ChangeMode {
     private static final int TCSANOW = 0;
     private static final int ICANON = 0x0000002;
     private static final int ECHO = 0x0008;
+    private static final int VTIME = 5;
+    private static final int VMIN = 6;
 
     @Override
     public int getchar() {
@@ -85,22 +87,36 @@ class ChangeModeLinux implements ChangeMode {
     }
 
     private Optional<Integer> flags = Optional.empty();
+    private Optional<byte[]> c_cc = Optional.empty();
 
     @Override
     public void changemode(int dir) {
         termios termiosAttrs = new termios();
 
-        if (dir == 1) {
+        System.err.println(
+            "flags: " + flags + " c_cc: " + c_cc + "dir: " + dir
+        );
+
+        if (dir == 1 && flags.isEmpty() && c_cc.isEmpty()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
+            System.err.println(
+                "Setting " + (termiosAttrs.c_lflag & (ICANON | ECHO))
+            );
             flags = Optional.of(termiosAttrs.c_lflag);
+            c_cc = Optional.of(termiosAttrs.c_cc.clone());
+            termiosAttrs.c_cc[VTIME - 1] = 5;
+            termiosAttrs.c_cc[VMIN - 1] = 0;
             termiosAttrs.c_lflag = termiosAttrs.c_lflag & ~(ICANON | ECHO); // disable canonical mode and echo
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
-        } else {
+        } else if (dir == 0 && flags.isPresent() && c_cc.isPresent()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
+            System.err.println("Reverting " + (flags.get() & (ICANON | ECHO)));
             flags.ifPresent(old -> {
                 termiosAttrs.c_lflag = old;
             });
+            c_cc.ifPresent(old -> termiosAttrs.c_cc = old.clone());
             flags = Optional.empty();
+            c_cc = Optional.empty();
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         }
     }

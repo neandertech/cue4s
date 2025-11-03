@@ -20,6 +20,7 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.NativeLong;
 import com.sun.jna.Structure;
+import cue4s.ChangeMode;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -46,7 +47,7 @@ class ChangeModeDarwin implements ChangeMode {
 
         int tcsetattr(int fd, int optional_actions, termios termios);
 
-        int getchar();
+        int read(int fd, byte[] buf, int count);
     }
 
     // Define the termios structure
@@ -79,31 +80,41 @@ class ChangeModeDarwin implements ChangeMode {
     public static final int TCSANOW = 0;
     public static final int ICANON = 256;
     public static final int ECHO = 0x0008;
+    public static final int VTIME = 17;
+    public static final int VMIN = 16;
 
     // Function to change mode
     private termios oldt = new termios(); // store original termios
 
+    private byte[] buf = new byte[1];
+
     @Override
-    public int getchar() {
-        return CLibrary.INSTANCE.getchar();
+    public synchronized int getchar() {
+        int cnt = CLibrary.INSTANCE.read(STDIN_FILENO, buf, 1);
+        return cnt > 0 ? buf[0] : 0;
     }
 
     private Optional<Long> flags = Optional.empty();
+    private Optional<byte[]> c_cc = Optional.empty();
 
     @Override
     public void changemode(int dir) {
         termios termiosAttrs = new termios();
 
-        if (dir == 1) {
+        if (dir == 1 && flags.isEmpty() && c_cc.isEmpty()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
             flags = Optional.of(termiosAttrs.c_lflag.longValue());
+            c_cc = Optional.of(termiosAttrs.c_cc.clone());
+            termiosAttrs.c_cc[VTIME - 1] = 5;
+            termiosAttrs.c_cc[VMIN - 1] = 0;
             termiosAttrs.c_lflag.setValue(
                 termiosAttrs.c_lflag.longValue() & ~(ICANON | ECHO)
             ); // disable canonical mode and echo
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
-        } else {
+        } else if (dir == 0 && flags.isPresent() && c_cc.isPresent()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
             flags.ifPresent(old -> termiosAttrs.c_lflag.setValue(old));
+            c_cc.ifPresent(old -> termiosAttrs.c_cc = old.clone());
             flags = Optional.empty();
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         }

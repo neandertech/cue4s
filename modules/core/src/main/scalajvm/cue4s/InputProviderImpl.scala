@@ -111,7 +111,6 @@ private class InputProviderImpl(o: Terminal)
     readingThread.join()
 
     completed
-
   end evaluate
 
   override def close() =

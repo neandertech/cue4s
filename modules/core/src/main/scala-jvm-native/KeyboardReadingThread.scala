@@ -5,7 +5,7 @@ import cue4s.CharCollector.*
 private[cue4s] class KeyboardReadingThread[Result](
     whatNext: Next[Result] => Boolean,
     send: TerminalEvent => Boolean,
-    getchar: () => Int
+    getchar: () => Int,
 ) extends Thread:
   override def run(): Unit =
     var lastRead = 0
@@ -17,14 +17,16 @@ private[cue4s] class KeyboardReadingThread[Result](
     var state = State.Init
     var stop  = false
 
-    while !stop && read() != 0 do
-      val (newState, result) = decode(state, lastRead)
+    while !stop && read() >= 0 do
+      if lastRead != 0 then
+        val (newState, result) = decode(state, lastRead)
 
-      result match
-        case n: DecodeResult  => stop = whatNext(n.toNext)
-        case e: TerminalEvent => stop = send(e)
+        result match
+          case n: DecodeResult => stop = whatNext(n.toNext)
+          case e: TerminalEvent =>
+            stop = send(e)
 
-      state = newState
+        state = newState
 
     end while
   end run

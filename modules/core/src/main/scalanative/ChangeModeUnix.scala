@@ -21,8 +21,12 @@ import scala.scalanative.unsafe.*
 trait ChangeModeUnix extends ChangeModeNative:
   val STDIN_FILENO = 0
 
-  def getchar(): Int =
-    scalanative.libc.stdio.getchar()
+  @extern def read(fd: Int, buf: Ptr[Byte], count: Int): Int = extern
+
+  override def read(): Int =
+    val b = stackalloc[Byte](1)
+    read(STDIN_FILENO, b, 1)
+    b(0)
 
   protected inline def assertAndReturn(b: Boolean, msg: String) =
     assert(b, msg)
