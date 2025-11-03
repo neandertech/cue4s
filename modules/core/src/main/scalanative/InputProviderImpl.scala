@@ -60,13 +60,6 @@ private class InputProviderImpl(o: Terminal)
   override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
     changeMode.changeMode(rawMode = true)
 
-    val hook = () =>
-      handler(TerminalEvent.Interrupt)
-      o.cursorShow()
-      close()
-
-    if !asyncHookSet then InputProviderImpl.addShutdownHook(hook)
-
     val result = Promise[Completion[Result]]()
     def whatNext(n: Next[Result]): Boolean =
       if !result.isCompleted then
@@ -82,6 +75,13 @@ private class InputProviderImpl(o: Terminal)
             result.complete(Success(Completion.error(msg)))
             true
       else true
+
+    val hook = () =>
+      whatNext(handler(TerminalEvent.Interrupt))
+      o.cursorShow()
+      close()
+
+    if !asyncHookSet then InputProviderImpl.addShutdownHook(hook)
 
     handler.setupBackchannel(whatNext(_))
 
@@ -122,18 +122,10 @@ private object InputProviderImpl:
   private val hooks: mutable.Set[() => Unit] = mutable.Set.empty
 
   def addShutdownHook(f: () => Unit): Unit =
-    this.synchronized:
+    InputProviderImpl.synchronized:
       hooks.add(f)
 
   def removeShutdownHook(f: () => Unit): Unit =
-    this.synchronized:
+    InputProviderImpl.synchronized:
       hooks.remove(f)
-
-  rt.addShutdownHook(
-    Thread(() =>
-      hooks.foreach: hook =>
-        try hook()
-        catch case e: Throwable => (),
-    ),
-  )
 end InputProviderImpl

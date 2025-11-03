@@ -1,4 +1,4 @@
-package cue4s_test
+package cue4s_example
 
 import cue4s.*
 import cue4s.KeyEvent

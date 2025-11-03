@@ -42,7 +42,6 @@ private class InputProviderImpl(o: Terminal)
     val hook = () =>
       handler(TerminalEvent.Interrupt)
       o.cursorShow()
-      cancellation.complete(Success(Completion.interrupted))
       ()
 
     InputProviderImpl.addShutdownHook(hook)
@@ -84,6 +83,7 @@ private class InputProviderImpl(o: Terminal)
     hook = Some: () =>
       o.cursorShow()
       whatNext(handler(TerminalEvent.Interrupt))
+      InputProviderImpl.nativeInterop.changemode(0)
 
     if !asyncHookSet then hook.foreach(InputProviderImpl.addShutdownHook)
 

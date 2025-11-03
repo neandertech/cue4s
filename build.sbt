@@ -37,6 +37,7 @@ val Versions = new {
   val jna           = "5.14.0"
   val catsEffect    = "3.6.0"
   val osLib         = "0.11.3"
+  val scalaJavaTime = "2.6.0"
 }
 
 lazy val munitSettings = Seq(
@@ -126,7 +127,10 @@ lazy val example = projectMatrix
   )
   .nativePlatform(
     Versions.scalaVersions,
-    settings = Seq(Compile / mainClass := Some("cue4s_example.sync")),
+    settings = Seq(
+      Compile / mainClass := Some("cue4s_example.tictac"),
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % Versions.scalaJavaTime,
+    ),
   )
   .settings(
     scalaJSUseMainModuleInitializer := true,
