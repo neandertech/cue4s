@@ -93,15 +93,8 @@ class ChangeModeLinux implements ChangeMode {
     public void changemode(int dir) {
         termios termiosAttrs = new termios();
 
-        System.err.println(
-            "flags: " + flags + " c_cc: " + c_cc + "dir: " + dir
-        );
-
         if (dir == 1 && flags.isEmpty() && c_cc.isEmpty()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
-            System.err.println(
-                "Setting " + (termiosAttrs.c_lflag & (ICANON | ECHO))
-            );
             flags = Optional.of(termiosAttrs.c_lflag);
             c_cc = Optional.of(termiosAttrs.c_cc.clone());
             termiosAttrs.c_cc[VTIME - 1] = 5;
@@ -110,7 +103,6 @@ class ChangeModeLinux implements ChangeMode {
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         } else if (dir == 0 && flags.isPresent() && c_cc.isPresent()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
-            System.err.println("Reverting " + (flags.get() & (ICANON | ECHO)));
             flags.ifPresent(old -> {
                 termiosAttrs.c_lflag = old;
             });
