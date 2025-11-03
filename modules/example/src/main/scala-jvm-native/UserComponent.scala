@@ -70,7 +70,7 @@ class TicTacToe(terminal: Terminal, out: Output)
       case TerminalEvent.Char(' ') => checkWin
 
       case TerminalEvent.Interrupt =>
-        PromptAction.Stop
+        PromptAction.setStatus(Status.Canceled)
 
       case _ => PromptAction.Continue
 
@@ -122,6 +122,8 @@ class TicTacToe(terminal: Terminal, out: Output)
           else str
         .mkString("| ", " | ", " |")
       builder += "-" * (3 * 3 + 1 * 4)
+
+    builder += ""
 
     builder.result()
   end renderState
