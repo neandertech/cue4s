@@ -21,7 +21,7 @@ class FallbackRenderingTests extends munit.FunSuite, TerminalTests:
       )
       .withWindowSize(3),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       DOWN,
       DOWN,
       DOWN,
@@ -41,7 +41,7 @@ class FallbackRenderingTests extends munit.FunSuite, TerminalTests:
       )
       .withWindowSize(3),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       TAB,
       DOWN,
       TAB,
@@ -59,8 +59,8 @@ class FallbackRenderingTests extends munit.FunSuite, TerminalTests:
   terminalTestComplete("fallback.confirm")(
     Prompt.Confirmation("Are you sure?", default = true),
     list(
-      Event.Init,
-      Event.Char('n'),
+      TerminalEvent.Init,
+      TerminalEvent.Char('n'),
     ),
     false,
     symbols = Symbols.ASCIISymbols,
@@ -74,7 +74,7 @@ class FallbackRenderingTests extends munit.FunSuite, TerminalTests:
         else None,
       ),
     list(
-      Event.Init,
+      TerminalEvent.Init,
       chars("go"),
       ENTER, // prevents submission
       chars("od"),

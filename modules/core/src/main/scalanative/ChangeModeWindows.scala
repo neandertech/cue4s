@@ -21,6 +21,11 @@ import scala.scalanative.unsafe.*
 object ChangeModeWindows extends ChangeModeNative:
   def getchar(): Int                        = Msvcrt._getch()
   def changeMode(rawMode: Boolean): Boolean = rawMode
+  override def read(): Int =
+    ???
+    // val b   = stackalloc[Byte](1)
+    // val cnt = read(STDIN_FILENO, b, 1)
+    // b(0)
 
   object Msvcrt:
     @extern() @link("msvcrt")

@@ -28,6 +28,7 @@ private[cue4s] class InteractiveSingleChoice(
   import InteractiveSingleChoice.*
 
   override type PromptState = State
+  override type Event       = TerminalEvent
 
   private lazy val altsWithIndex = alts.zipWithIndex
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap
@@ -42,15 +43,15 @@ private[cue4s] class InteractiveSingleChoice(
     ),
   )
 
-  override def handleEvent(event: Event) =
+  override def handleEvent(event: TerminalEvent) =
     event match
-      case Event.Key(KeyEvent.UP) =>
+      case TerminalEvent.Key(KeyEvent.UP) =>
         PromptAction.updateState(_.updateDisplay(_.up))
 
-      case Event.Key(KeyEvent.DOWN) =>
+      case TerminalEvent.Key(KeyEvent.DOWN) =>
         PromptAction.updateState(_.updateDisplay(_.down))
 
-      case Event.Key(KeyEvent.ENTER) => // enter
+      case TerminalEvent.Key(KeyEvent.ENTER) => // enter
         currentState().display.showing match
           case None =>
             PromptAction.setStatus(
@@ -59,13 +60,13 @@ private[cue4s] class InteractiveSingleChoice(
           case Some((_, idx)) =>
             PromptAction.setStatus(Status.Finished(altMapping(idx)))
 
-      case Event.Key(KeyEvent.DELETE) => // enter
+      case TerminalEvent.Key(KeyEvent.DELETE) => // enter
         PromptAction.updateState(_.trimText)
 
-      case Event.Char(which) =>
+      case TerminalEvent.Char(which) =>
         PromptAction.updateState(_.addText(which.toChar))
 
-      case Event.Interrupt =>
+      case TerminalEvent.Interrupt =>
         PromptAction.setStatus(Status.Canceled)
 
       case _ =>

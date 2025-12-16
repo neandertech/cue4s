@@ -16,11 +16,28 @@
 
 package cue4s
 
-private[cue4s] abstract class Handler[Result]:
-  def apply(ev: Event): Next[Result]
+/** [TerminalHandler] acts as a bridge between prompts and platform-specific
+  * input providers.
+  */
+private[cue4s] abstract class TerminalHandler[Result]:
+  /** Invoked by the [InputProvider] to setup a channel of communication from
+    * the prompt to input provider. Implemented in [PromptFramework].
+    */
+  def setupBackchannel(notif: Next[Result] => Unit): Unit = ()
 
-private[cue4s] abstract class InputProvider(protected val terminal: Terminal)
+  /** Invoked by the [InputProvider] when a terminal event needs to be handled.
+    * Implemented in [PromptFramework].
+    */
+  def apply(ev: TerminalEvent): Next[Result]
+end TerminalHandler
+
+/** Input provider encapsulates the logic that translates terminal events into
+  * [TerminalEvent] values. Implementation is highly platform-specific
+  *
+  * @param terminal
+  */
+abstract class InputProvider(protected val terminal: Terminal)
     extends AutoCloseable,
       InputProviderPlatform
 
-private[cue4s] object InputProvider extends InputProviderCompanionPlatform
+object InputProvider extends InputProviderCompanionPlatform

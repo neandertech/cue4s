@@ -19,14 +19,14 @@ package cue4s
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-trait InputProviderPlatform:
-  self: InputProvider =>
+private trait PromptFrameworkPlatform[Result]:
+  self: PromptFramework[Result] =>
 
-  def evaluateFuture[Result](
-      f: TerminalHandler[Result],
-  )(using ExecutionContext): Future[Completion[Result]]
-
-trait InputProviderCompanionPlatform:
-  def apply(o: Terminal): InputProvider = InputProviderImpl(o)
-
-end InputProviderCompanionPlatform
+  /** Evaluate this prompt asynchronously until it produces a result or is
+    * cancelled
+    */
+  def runFuture(ip: InputProvider)(using
+      ExecutionContext,
+  ): Future[Completion[Result]] =
+    ip.evaluateFuture(self.handler)
+end PromptFrameworkPlatform

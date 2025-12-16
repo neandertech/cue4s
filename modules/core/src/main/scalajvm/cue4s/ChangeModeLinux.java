@@ -18,28 +18,27 @@ package cue4s;
 
 import com.sun.jna.Library;
 import com.sun.jna.Native;
-import com.sun.jna.NativeLong;
 import com.sun.jna.Structure;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-class ChangeModeDarwin implements ChangeMode {
+class ChangeModeLinux implements ChangeMode {
 
-    private static ChangeModeDarwin INSTANCE;
+    private static ChangeModeLinux INSTANCE;
 
-    private ChangeModeDarwin() {}
+    private ChangeModeLinux() {}
 
-    public static ChangeModeDarwin getInstance() {
+    public static ChangeModeLinux getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new ChangeModeDarwin();
+            INSTANCE = new ChangeModeLinux();
         }
 
         return INSTANCE;
     }
 
     // Define the libc interface
-    static interface CLibrary extends Library {
+    private static interface CLibrary extends Library {
         CLibrary INSTANCE = Native.load("c", CLibrary.class);
 
         int tcgetattr(int fd, termios termios);
@@ -64,47 +63,52 @@ class ChangeModeDarwin implements ChangeMode {
     )
     public static class termios extends Structure {
 
-        public NativeLong c_iflag;
-        public NativeLong c_oflag;
-        public NativeLong c_cflag;
-        public NativeLong c_lflag;
+        public int c_iflag;
+        public int c_oflag;
+        public int c_cflag;
+        public int c_lflag;
         public byte c_line;
         public byte[] c_cc = new byte[32];
-        public NativeLong c_ispeed;
-        public NativeLong c_ospeed;
+        public int c_ispeed;
+        public int c_ospeed;
     }
 
     // Constants
-    public static final int STDIN_FILENO = 0;
-    public static final int TCSANOW = 0;
-    public static final int ICANON = 256;
-    public static final int ECHO = 0x0008;
-
-    // Function to change mode
-    private termios oldt = new termios(); // store original termios
+    private static final int STDIN_FILENO = 0;
+    private static final int TCSANOW = 0;
+    private static final int ICANON = 0x0000002;
+    private static final int ECHO = 0x0008;
+    private static final int VTIME = 5;
+    private static final int VMIN = 6;
 
     @Override
     public int getchar() {
         return CLibrary.INSTANCE.getchar();
     }
 
-    private Optional<Long> flags = Optional.empty();
+    private Optional<Integer> flags = Optional.empty();
+    private Optional<byte[]> c_cc = Optional.empty();
 
     @Override
     public void changemode(int dir) {
         termios termiosAttrs = new termios();
 
-        if (dir == 1) {
+        if (dir == 1 && flags.isEmpty() && c_cc.isEmpty()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
-            flags = Optional.of(termiosAttrs.c_lflag.longValue());
-            termiosAttrs.c_lflag.setValue(
-                termiosAttrs.c_lflag.longValue() & ~(ICANON | ECHO)
-            ); // disable canonical mode and echo
+            flags = Optional.of(termiosAttrs.c_lflag);
+            c_cc = Optional.of(termiosAttrs.c_cc.clone());
+            termiosAttrs.c_cc[VTIME - 1] = 5;
+            termiosAttrs.c_cc[VMIN - 1] = 0;
+            termiosAttrs.c_lflag = termiosAttrs.c_lflag & ~(ICANON | ECHO); // disable canonical mode and echo
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
-        } else {
+        } else if (dir == 0 && flags.isPresent() && c_cc.isPresent()) {
             CLibrary.INSTANCE.tcgetattr(STDIN_FILENO, termiosAttrs); // get current terminal attributes
-            flags.ifPresent(old -> termiosAttrs.c_lflag.setValue(old));
+            flags.ifPresent(old -> {
+                termiosAttrs.c_lflag = old;
+            });
+            c_cc.ifPresent(old -> termiosAttrs.c_cc = old.clone());
             flags = Optional.empty();
+            c_cc = Optional.empty();
             CLibrary.INSTANCE.tcsetattr(STDIN_FILENO, TCSANOW, termiosAttrs); // set new terminal attributes
         }
     }

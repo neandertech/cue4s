@@ -26,22 +26,23 @@ private[cue4s] class InteractiveConfirmation(
 ) extends PromptFramework[Boolean](terminal, out):
 
   override type PromptState = Unit
+  override type Event       = TerminalEvent
 
   override def initialState: PromptState = ()
 
-  override def handleEvent(event: Event): PromptAction =
+  override def handleEvent(event: TerminalEvent): PromptAction =
     event match
-      case Event.Init => PromptAction.Update()
-      case Event.Key(KeyEvent.ENTER) =>
+      case TerminalEvent.Init => PromptAction.Update()
+      case TerminalEvent.Key(KeyEvent.ENTER) =>
         PromptAction.setStatus(Status.Finished(default))
-      case Event.Char(which) =>
+      case TerminalEvent.Char(which) =>
         which match
           case 'y' | 'Y' =>
             PromptAction.setStatus(Status.Finished(true))
           case 'n' | 'N' =>
             PromptAction.setStatus(Status.Finished(false))
           case _ => PromptAction.Continue
-      case Event.Interrupt =>
+      case TerminalEvent.Interrupt =>
         PromptAction.setStatus(Status.Canceled)
       case _ =>
         PromptAction.Continue

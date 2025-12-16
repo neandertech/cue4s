@@ -6,10 +6,8 @@ Global / excludeLintKeys += scalaJSLinkerConfig
 
 inThisBuild(
   List(
-    organization           := "tech.neander",
-    organizationName       := "Neandertech",
-    sonatypeCredentialHost := "s01.oss.sonatype.org",
-    resolvers ++= Resolver.sonatypeOssRepos("releases"),
+    organization     := "tech.neander",
+    organizationName := "Neandertech",
     homepage := Some(
       url("https://github.com/neandertech/cue4s"),
     ),
@@ -30,13 +28,14 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3        = "3.3.5"
-  val munit         = "1.1.0"
+  val Scala3        = "3.3.7"
+  val munit         = "1.2.1"
   val scalaVersions = Seq(Scala3)
   val fansi         = "0.5.0"
   val jna           = "5.14.0"
   val catsEffect    = "3.6.0"
   val osLib         = "0.11.3"
+  val scalaJavaTime = "2.6.0"
 }
 
 lazy val munitSettings = Seq(
@@ -126,7 +125,10 @@ lazy val example = projectMatrix
   )
   .nativePlatform(
     Versions.scalaVersions,
-    settings = Seq(Compile / mainClass := Some("cue4s_example.sync")),
+    settings = Seq(
+      Compile / mainClass := Some("cue4s_example.tictac"),
+      libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % Versions.scalaJavaTime,
+    ),
   )
   .settings(
     scalaJSUseMainModuleInitializer := true,
@@ -232,6 +234,9 @@ lazy val docs =
     .enablePlugins(MdocPlugin)
     .settings(scalaVersion := Versions.Scala3)
     .dependsOn(core.jvm(true), catsEffect.jvm(true))
+    .settings(
+      mdocExtraArguments += "--disable-using-directives",
+    )
 
 val noPublish = Seq(
   publish / skip      := true,
