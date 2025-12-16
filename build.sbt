@@ -234,6 +234,9 @@ lazy val docs =
     .enablePlugins(MdocPlugin)
     .settings(scalaVersion := Versions.Scala3)
     .dependsOn(core.jvm(true), catsEffect.jvm(true))
+    .settings(
+      mdocExtraArguments += "--disable-using-directives",
+    )
 
 val noPublish = Seq(
   publish / skip      := true,
