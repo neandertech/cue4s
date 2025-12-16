@@ -6,10 +6,8 @@ Global / excludeLintKeys += scalaJSLinkerConfig
 
 inThisBuild(
   List(
-    organization           := "tech.neander",
-    organizationName       := "Neandertech",
-    sonatypeCredentialHost := "s01.oss.sonatype.org",
-    resolvers ++= Resolver.sonatypeOssRepos("releases"),
+    organization     := "tech.neander",
+    organizationName := "Neandertech",
     homepage := Some(
       url("https://github.com/neandertech/cue4s"),
     ),
@@ -30,8 +28,8 @@ inThisBuild(
 )
 
 val Versions = new {
-  val Scala3        = "3.3.5"
-  val munit         = "1.1.0"
+  val Scala3        = "3.3.7"
+  val munit         = "1.2.1"
   val scalaVersions = Seq(Scala3)
   val fansi         = "0.5.0"
   val jna           = "5.14.0"

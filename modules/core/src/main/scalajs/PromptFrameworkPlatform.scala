@@ -22,6 +22,9 @@ import scala.concurrent.Future
 private trait PromptFrameworkPlatform[Result]:
   self: PromptFramework[Result] =>
 
+  /** Evaluate this prompt asynchronously until it produces a result or is
+    * cancelled
+    */
   def runFuture(ip: InputProvider)(using
       ExecutionContext,
   ): Future[Completion[Result]] =
