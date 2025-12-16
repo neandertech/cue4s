@@ -29,7 +29,7 @@ private[cue4s] class InteractiveMultipleChoice(
   import InteractiveMultipleChoice.*
 
   override type PromptState = State
-  override type Event = TerminalEvent
+  override type Event       = TerminalEvent
 
   private lazy val preSelected =
     alts.zipWithIndex.filter(_._1._2).map(_._2)

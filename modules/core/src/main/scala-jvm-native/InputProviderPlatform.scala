@@ -22,8 +22,8 @@ import scala.concurrent.Future
 private trait InputProviderPlatform:
   self: InputProvider =>
 
-  def evaluate[Result](f: Handler[Result]): Completion[Result]
-  def evaluateFuture[Result](f: Handler[Result])(using
+  def evaluate[Result](f: TerminalHandler[Result]): Completion[Result]
+  def evaluateFuture[Result](f: TerminalHandler[Result])(using
       ExecutionContext,
   ): Future[Completion[Result]]
 

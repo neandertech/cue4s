@@ -30,17 +30,19 @@ private[cue4s] class InteractiveTextInput(
   import InteractiveTextInput.*
 
   override type PromptState = State
-  override type Event = TerminalEvent
+  override type Event       = TerminalEvent
 
   override def initialState: State = State(default.getOrElse(""))
 
   override def handleEvent(event: TerminalEvent) =
-    def update(state: State, f: State => State) =
-      val newState = f(state)
+
+    // TODO: rework the framework to support validation?
+    def update(f: State => State) =
+      val newState = f(currentState())
       val newStatus =
         Status.Running(validate(newState.text).toLeft(newState.text))
 
-      PromptAction.Update(_ => newStatus, _ => newState)
+      PromptAction.set(newState, newStatus)
 
     event match
       case TerminalEvent.Key(KeyEvent.ENTER) =>
@@ -55,9 +57,10 @@ private[cue4s] class InteractiveTextInput(
           case _ => PromptAction.Continue
 
       case TerminalEvent.Key(KeyEvent.DELETE) =>
-        update(currentState(), _.trimText)
+        update(_.trimText)
 
-      case TerminalEvent.Char(which) => update(currentState(), _.addText(which.toChar))
+      case TerminalEvent.Char(which) =>
+        update(_.addText(which.toChar))
 
       case TerminalEvent.Interrupt => PromptAction.setStatus(Status.Canceled)
 

@@ -28,7 +28,7 @@ private[cue4s] class InteractiveSingleChoice(
   import InteractiveSingleChoice.*
 
   override type PromptState = State
-  override type Event = TerminalEvent
+  override type Event       = TerminalEvent
 
   private lazy val altsWithIndex = alts.zipWithIndex
   private lazy val altMapping    = altsWithIndex.map(_.swap).toMap

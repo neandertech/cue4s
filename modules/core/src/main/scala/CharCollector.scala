@@ -35,7 +35,10 @@ private[cue4s] object CharCollector:
       case Continue   => Next.Continue
       case Error(msg) => Next.Error(msg)
 
-  def decode(curState: State, char: Int): (State, DecodeResult | TerminalEvent) =
+  def decode(
+      curState: State,
+      char: Int,
+  ): (State, DecodeResult | TerminalEvent) =
     def isCSIParameterByte(b: Int) =
       (b >= 0x30 && b <= 0x3f)
 

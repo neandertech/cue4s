@@ -29,7 +29,7 @@ private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
       InputProviderPlatform:
   override def evaluateFuture[Result](
-      handler: Handler[Result],
+      handler: TerminalHandler[Result],
   )(using ExecutionContext): Future[Completion[Result]] =
 
     val stdin = Process.stdin

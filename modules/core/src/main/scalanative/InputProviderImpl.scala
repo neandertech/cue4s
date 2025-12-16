@@ -16,16 +16,16 @@
 
 package cue4s
 
+import scala.concurrent.Await
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scala.concurrent.Promise
+import scala.concurrent.duration.Duration
+import scala.util.Success
 import scala.util.boundary
 
 import CharCollector.*
 import boundary.break
-import scala.util.Success
-import scala.concurrent.Promise
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
 
 private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
@@ -35,7 +35,7 @@ private class InputProviderImpl(o: Terminal)
 
   val changeMode = ChangeModeNative.instance
 
-  override def evaluateFuture[Result](handler: Handler[Result])(using
+  override def evaluateFuture[Result](handler: TerminalHandler[Result])(using
       ExecutionContext,
   ) =
     val hook = () =>
@@ -57,7 +57,9 @@ private class InputProviderImpl(o: Terminal)
     fut
   end evaluateFuture
 
-  override def evaluate[Result](handler: Handler[Result]): Completion[Result] =
+  override def evaluate[Result](
+      handler: TerminalHandler[Result],
+  ): Completion[Result] =
     changeMode.changeMode(rawMode = true)
 
     val result = Promise[Completion[Result]]()

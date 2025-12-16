@@ -26,7 +26,7 @@ private[cue4s] class InteractiveConfirmation(
 ) extends PromptFramework[Boolean](terminal, out):
 
   override type PromptState = Unit
-  override type Event = TerminalEvent
+  override type Event       = TerminalEvent
 
   override def initialState: PromptState = ()
 

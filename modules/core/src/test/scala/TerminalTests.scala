@@ -20,8 +20,12 @@ trait TerminalTests extends MunitSnapshotsIntegration:
 
   def terminalTestComplete[R](
       name: munit.TestOptions,
-  )(prompt: PromptChain[R], events: List[TerminalEvent | List[TerminalEvent]], expected: R)(
-      implicit loc: munit.Location,
+  )(
+      prompt: PromptChain[R],
+      events: List[TerminalEvent | List[TerminalEvent]],
+      expected: R,
+  )(implicit
+      loc: munit.Location,
   ): Unit =
     test(name) {
       val Result(result, snapshot, processed) =
@@ -39,11 +43,13 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       assertEquals(result, expected)
     }
 
-  def flatten(evs: List[KeyEvent | TerminalEvent | List[TerminalEvent]]): List[TerminalEvent] =
+  def flatten(
+      evs: List[KeyEvent | TerminalEvent | List[TerminalEvent]],
+  ): List[TerminalEvent] =
     evs.flatMap:
-      case ev: TerminalEvent    => List(ev)
-      case ev: KeyEvent => List(TerminalEvent.Key(ev))
-      case ev: List[?]  => ev
+      case ev: TerminalEvent => List(ev)
+      case ev: KeyEvent      => List(TerminalEvent.Key(ev))
+      case ev: List[?]       => ev
 
   def terminalTestComplete[R](
       name: munit.TestOptions,
@@ -93,7 +99,11 @@ trait TerminalTests extends MunitSnapshotsIntegration:
       assertEquals(result, expected)
     }
 
-  case class Result[T](value: T, snapshot: String, eventsProcessed: List[TerminalEvent])
+  case class Result[T](
+      value: T,
+      snapshot: String,
+      eventsProcessed: List[TerminalEvent],
+  )
 
   def run[T](
       events: Seq[TerminalEvent],

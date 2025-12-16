@@ -1,10 +1,27 @@
+/*
+ * Copyright 2023 Neandertech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package cue4s_example
+
+import java.time.LocalDate
+import java.time.LocalTime
+import java.util.concurrent.atomic.AtomicBoolean
 
 import cue4s.*
 import cue4s.KeyEvent
-import java.util.concurrent.atomic.AtomicBoolean
-import java.time.LocalDate
-import java.time.LocalTime
 
 @main def tictac =
   val terminal = Terminal.ansi(Output.Std)
@@ -25,7 +42,7 @@ import java.time.LocalTime
         Thread.sleep(2000)
 
   t.start()
-  val result = input.evaluate(tic.handler)
+  val result = tic.run(input)
   finish.set(true)
   t.join()
 
@@ -60,10 +77,10 @@ class TicTacToe(terminal: Terminal, out: Output)
       case TerminalEvent.Init => PromptAction.Continue
       case TerminalEvent.Key(which) =>
         which match
-          case KeyEvent.UP    => PromptAction.Update(state = _.shiftRow(-1))
-          case KeyEvent.DOWN  => PromptAction.Update(state = _.shiftRow(+1))
-          case KeyEvent.LEFT  => PromptAction.Update(state = _.shiftCol(-1))
-          case KeyEvent.RIGHT => PromptAction.Update(state = _.shiftCol(+1))
+          case KeyEvent.UP    => PromptAction.updateState(_.shiftRow(-1))
+          case KeyEvent.DOWN  => PromptAction.updateState(_.shiftRow(+1))
+          case KeyEvent.LEFT  => PromptAction.updateState(_.shiftCol(-1))
+          case KeyEvent.RIGHT => PromptAction.updateState(_.shiftCol(+1))
           case KeyEvent.TAB   => checkWin
           case _              => PromptAction.Continue
 
@@ -83,7 +100,7 @@ class TicTacToe(terminal: Terminal, out: Output)
       case None =>
         currentStatus()
 
-    PromptAction.Update(status = _ => newStatus, state = _ => newState)
+    PromptAction.set(newState, newStatus)
   end checkWin
 
   override def renderState(state: State, status: Status): List[String] =
