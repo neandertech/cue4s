@@ -22,10 +22,6 @@ import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.Duration
 import scala.util.Success
-import scala.util.boundary
-
-import CharCollector.*
-import boundary.break
 
 private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),

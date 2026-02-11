@@ -5,6 +5,7 @@ import scala.scalanative.libc.signal.*
 
 import types.*
 import scala.scalanative.unsigned.UShort
+import scala.scalanative.meta.LinktimeInfo
 
 @extern
 private[cue4s] def scalanative_sigwinch(): Int = extern
@@ -31,38 +32,41 @@ object TerminalResizingHandler:
   def use[A](send: TerminalEvent.Resized => Unit)(
       f: => A,
   ): A =
-    // Immediately after this handler is invoked, we send the first measurement of the terminal.
-    // Users should receive `TerminalEvent.Init` and then `TerminalEvent.Resized`
-    val ws = stackalloc[WinSize]()
-    scalanative_get_window_size(ws)
-    send(
-      TerminalEvent
-        .Resized(
-          (!ws).row.toInt.asInstanceOf[TerminalRows],
-          (!ws).col.toInt.asInstanceOf[TerminalCols],
-        ),
-    )
-    try
-      sender = Some(send)
-      signal(
-        scalanative_sigwinch(),
-        CFuncPtr1.fromScalaFunction: _ =>
-          val ws = stackalloc[WinSize]()
-          scalanative_get_window_size(ws)
-          sender.foreach(
-            _.apply(
-              TerminalEvent
-                .Resized(
-                  (!ws).row.toInt.asInstanceOf[TerminalRows],
-                  (!ws).col.toInt.asInstanceOf[TerminalCols],
-                ),
-            ),
+    // resizing is not implemented on windows (yet)
+    if LinktimeInfo.isWindows then f
+    else
+      // Immediately after this handler is invoked, we send the first measurement of the terminal.
+      // Users should receive `TerminalEvent.Init` and then `TerminalEvent.Resized`
+      val ws = stackalloc[WinSize]()
+      scalanative_get_window_size(ws)
+      send(
+        TerminalEvent
+          .Resized(
+            (!ws).row.toInt.asInstanceOf[TerminalRows],
+            (!ws).col.toInt.asInstanceOf[TerminalCols],
           ),
       )
-      f
-    finally
-      signal(scalanative_sigwinch(), SIG_DFL)
-      sender = None
-    end try
+      try
+        sender = Some(send)
+        signal(
+          scalanative_sigwinch(),
+          CFuncPtr1.fromScalaFunction: _ =>
+            val ws = stackalloc[WinSize]()
+            scalanative_get_window_size(ws)
+            sender.foreach(
+              _.apply(
+                TerminalEvent
+                  .Resized(
+                    (!ws).row.toInt.asInstanceOf[TerminalRows],
+                    (!ws).col.toInt.asInstanceOf[TerminalCols],
+                  ),
+              ),
+            ),
+        )
+        f
+      finally
+        signal(scalanative_sigwinch(), SIG_DFL)
+        sender = None
+      end try
   end use
 end TerminalResizingHandler
