@@ -19,11 +19,12 @@ package cue4s;
 import com.sun.jna.Library;
 import com.sun.jna.Native;
 import com.sun.jna.Structure;
+import cue4s.GetWindowSize;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-class ChangeModeLinux implements ChangeMode {
+class ChangeModeLinux implements ChangeMode, GetWindowSize {
 
     private static ChangeModeLinux INSTANCE;
 
@@ -46,6 +47,26 @@ class ChangeModeLinux implements ChangeMode {
         int tcsetattr(int fd, int optional_actions, termios termios);
 
         int getchar();
+
+        int ioctl(int fd, long request, Object... args);
+    }
+
+    @Structure.FieldOrder({ "ws_row", "ws_col" })
+    public static class winsize extends Structure {
+
+        public short ws_row;
+        public short ws_col;
+    }
+
+    @Override
+    public WinSize getWinSize() {
+        winsize attrs = new winsize();
+        CLibrary.INSTANCE.ioctl(STDIN_FILENO, TIOCGWINSZ, attrs);
+
+        return new WinSize(
+            Integer.valueOf(attrs.ws_row),
+            Integer.valueOf(attrs.ws_col)
+        );
     }
 
     // Define the termios structure
@@ -74,6 +95,7 @@ class ChangeModeLinux implements ChangeMode {
     }
 
     // Constants
+    private static final int TIOCGWINSZ = 0x5413;
     private static final int STDIN_FILENO = 0;
     private static final int TCSANOW = 0;
     private static final int ICANON = 0x0000002;

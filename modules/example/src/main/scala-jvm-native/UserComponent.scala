@@ -74,7 +74,10 @@ class TicTacToe(terminal: Terminal, out: Output)
 
   private def handleTerminalEvent(t: TerminalEvent): PromptAction =
     t match
-      case TerminalEvent.Init => PromptAction.Continue
+      case TerminalEvent.Init =>
+        PromptAction.Continue
+      case TerminalEvent.Resized(rows, cols) =>
+        PromptAction.updateState(_.setWindowSize((rows, cols)))
       case TerminalEvent.Key(which) =>
         which match
           case KeyEvent.UP    => PromptAction.updateState(_.shiftRow(-1))
@@ -104,11 +107,30 @@ class TicTacToe(terminal: Terminal, out: Output)
   end checkWin
 
   override def renderState(state: State, status: Status): List[String] =
+    val minRows = 10
+    val minCols = 50
+
+    state.windowSize match
+      case Some((rows, cols)) if rows >= minRows && cols >= minCols =>
+        renderBoard(state)
+
+      case None =>
+        Nil
+
+      case Some((rows, cols)) =>
+        s"Terminal size is too small – needs to be at least ($minRows x $minCols), currently it's ($rows x $cols)"
+          .grouped(cols.toInt)
+          .toList
+
+    end match
+
+  end renderState
+
+  private def renderBoard(state: State): List[String] =
+    import state.*
     val builder = List.newBuilder[String]
     import Turn.*
-    import state.*
-
-    state.finished match
+    finished match
       case Some(Outcome.Draw) =>
         builder += "It's a draw!"
       case Some(Outcome.Winner(Noughts)) =>
@@ -143,7 +165,7 @@ class TicTacToe(terminal: Terminal, out: Output)
     builder += ""
 
     builder.result()
-  end renderState
+  end renderBoard
 
 end TicTacToe
 
@@ -173,6 +195,7 @@ case class State(
     turn: Turn,
     selected: (Int, Int),
     flash: Option[String],
+    windowSize: Option[(TerminalRows, TerminalCols)],
     debug: Boolean = false,
 ):
   def cursorRow    = selected._1
@@ -194,6 +217,9 @@ case class State(
 
   def shiftRow(i: 1 | -1) =
     copy(selected = ((cursorRow + i).max(0).min(2), cursorColumn))
+
+  def setWindowSize(size: (TerminalRows, TerminalCols)) =
+    copy(windowSize = Some(size))
 
   def finished: Option[Outcome] =
     def rows(turn: Turn) =
@@ -221,4 +247,4 @@ end State
 
 object State:
   def init =
-    new State(Vector.fill(3)(Vector.fill(3)(None)), Noughts, (0, 0), None)
+    new State(Vector.fill(3)(Vector.fill(3)(None)), Noughts, (0, 0), None, None)

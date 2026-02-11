@@ -45,7 +45,7 @@ private[cue4s] class KeyboardReadingThread[Result](
 
           state = newState
         catch
-          case ex: CharCollector.ExitThrowable.type =>
+          case CharCollector.ExitThrowable =>
             stop = whatNext(Next.Stop)
 
     end while

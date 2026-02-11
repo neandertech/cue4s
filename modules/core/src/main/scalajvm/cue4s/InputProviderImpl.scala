@@ -22,10 +22,7 @@ import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.Duration
 import scala.util.Success
-import scala.util.boundary
-
-import boundary.break
-import CharCollector.*
+import sun.misc.Signal
 
 private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
@@ -98,9 +95,39 @@ private class InputProviderImpl(o: Terminal)
       () => InputProviderImpl.nativeInterop.getchar(),
     )
 
-    readingThread.start()
+    val nativeWindowSize = InputProviderImpl.nativeWindowSize
 
     whatNext(handler(TerminalEvent.Init))
+
+    nativeWindowSize
+      .map(_.getWinSize())
+      .foreach: ws =>
+        whatNext(
+          handler(
+            TerminalEvent.Resized(
+              ws.getRows().asInstanceOf[TerminalRows],
+              ws.getCols().asInstanceOf[TerminalCols],
+            ),
+          ),
+        )
+
+    val resizeSignalHandler =
+      nativeWindowSize.foreach: ws =>
+        Signal.handle(
+          new Signal("WINCH"),
+          _ =>
+            val winSize = ws.getWinSize()
+            whatNext(
+              handler(
+                TerminalEvent.Resized(
+                  winSize.getRows().asInstanceOf[TerminalRows],
+                  winSize.getCols().asInstanceOf[TerminalCols],
+                ),
+              ),
+            ),
+        )
+
+    readingThread.start()
 
     result.future.onComplete: _ =>
       readingThread.interrupt()
@@ -137,7 +164,7 @@ private object InputProviderImpl:
   rt.addShutdownHook(Thread(() =>
     hooks.foreach: hook =>
       try hook()
-      catch case e: Throwable => ()
+      catch case _: Throwable => ()
 
     nativeInterop.changemode(0),
   ))
@@ -154,5 +181,14 @@ private object InputProviderImpl:
         )
     end match
   end nativeInterop
+
+  lazy private val nativeWindowSize: Option[GetWindowSize] =
+    import Platform.*
+    os match
+      case OS.MacOS => Some(GetWindowSize.forDarwin())
+      case OS.Linux => Some(GetWindowSize.forLinux())
+      case _        => None
+    end match
+  end nativeWindowSize
 
 end InputProviderImpl

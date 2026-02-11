@@ -35,7 +35,7 @@ private class InputProviderImpl(o: Terminal)
     val stdin = Process.stdin
 
     if stdin.isTTY.contains(true) then
-
+      val stdout = Process.stdout.asInstanceOf[TTYWriteStream]
       stdin.setRawMode(true)
 
       val rl = Readline.createInterface(
@@ -55,8 +55,18 @@ private class InputProviderImpl(o: Terminal)
       lazy val keypress: js.Function = (str: js.UndefOr[String], key: Key) =>
         handle(key)
 
+      lazy val resize: js.Function =
+        () =>
+          handler(
+            TerminalEvent.Resized(
+              stdout.rows.asInstanceOf[TerminalRows],
+              stdout.columns.asInstanceOf[TerminalCols],
+            ),
+          )
+
       def close(res: Completion[Result]) =
         stdin.removeListener("keypress", keypress)
+        stdout.removeListener("resize", resize)
         if stdin.isTTY.contains(true) then stdin.setRawMode(false)
         rl.close()
         completion.success(res)
@@ -94,6 +104,14 @@ private class InputProviderImpl(o: Terminal)
                 case e: TerminalEvent => send(e)
 
       handler(TerminalEvent.Init)
+      handler(
+        TerminalEvent.Resized(
+          stdout.rows.asInstanceOf[TerminalRows],
+          stdout.columns.asInstanceOf[TerminalCols],
+        ),
+      )
+
+      stdout.on("resize", resize)
       stdin.on("keypress", keypress)
 
       fut

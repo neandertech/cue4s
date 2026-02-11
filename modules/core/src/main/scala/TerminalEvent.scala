@@ -16,12 +16,16 @@
 
 package cue4s
 
+opaque type TerminalRows <: Int = Int
+opaque type TerminalCols <: Int = Int
+
 enum TerminalEvent:
   case Init
   case Key(which: KeyEvent)
   case Char(which: Int)
   case CSICode(bytes: List[Byte])
   case Interrupt
+  case Resized(rows: TerminalRows, cols: TerminalCols)
 
   override def toString(): String =
     this match
@@ -30,6 +34,7 @@ enum TerminalEvent:
       case Char(which)    => s"Event.Char('${which.toChar}')"
       case CSICode(bytes) => s"Event.CSICode(${bytes.mkString("[", ", ", "]")})"
       case Interrupt      => "Event.Interrupt"
+      case Resized(width, height) => s"Event.Resized($width, $height)"
 end TerminalEvent
 
 object TerminalEvent:
