@@ -37,11 +37,12 @@ class PromptsIO private (
     // TODO: provide native CE interface here
     IO.executionContext
       .flatMap: ec =>
-        IO.fromFuture(
-          IO(inputProvider.evaluateFuture(framework.handler)(using ec)),
+        IO.fromFutureCancelable(
+          IO(
+            inputProvider.evaluateFuture(framework.handler)(using ec),
+            IO(terminal.cursorShow()) >> IO(inputProvider.close()),
+          ),
         )
-      .guarantee(IO(terminal.cursorShow()))
-      .guarantee(IO(inputProvider.close()))
 
   end run
 
@@ -119,7 +120,9 @@ class PromptsIO private (
   ): IO[Completion[List[String]]] =
     run(modify(Prompt.MultipleChoice.withSomeSelected(label, options)))
 
-  override def close(): Unit = inputProvider.close()
+  override def close(): Unit =
+    terminal.cursorShow()
+    inputProvider.close()
 end PromptsIO
 
 object PromptsIO:
