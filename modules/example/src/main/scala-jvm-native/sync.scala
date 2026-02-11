@@ -34,7 +34,7 @@ import cue4s.Prompt.PasswordInput.Password
           "relaxing",
           "stressful",
           "exhausting",
-          "challenging",
+          "challenging challenging challenging challenging challenging challenging challenging challenging challenging challenging challenging",
           "wonderful",
           "uneventful",
           "interesting",
