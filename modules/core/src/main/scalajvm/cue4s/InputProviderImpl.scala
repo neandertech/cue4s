@@ -22,6 +22,7 @@ import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.Duration
 import scala.util.Success
+
 import sun.misc.Signal
 
 private class InputProviderImpl(o: Terminal)

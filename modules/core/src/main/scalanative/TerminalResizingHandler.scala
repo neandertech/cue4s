@@ -1,11 +1,11 @@
 package cue4s
 
-import scala.scalanative.unsafe.*
 import scala.scalanative.libc.signal.*
+import scala.scalanative.meta.LinktimeInfo
+import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.UShort
 
 import types.*
-import scala.scalanative.unsigned.UShort
-import scala.scalanative.meta.LinktimeInfo
 
 @extern
 private[cue4s] def scalanative_sigwinch(): Int = extern
