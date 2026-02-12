@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-class ChangeModeDarwin implements ChangeMode {
+class ChangeModeDarwin implements ChangeMode, GetWindowSize {
 
     private static ChangeModeDarwin INSTANCE;
 
@@ -39,6 +39,17 @@ class ChangeModeDarwin implements ChangeMode {
         return INSTANCE;
     }
 
+    @Override
+    public WinSize getWinSize() {
+        winsize attrs = new winsize();
+        CLibrary.INSTANCE.ioctl(STDIN_FILENO, TIOCGWINSZ, attrs);
+
+        return new WinSize(
+            Integer.valueOf(attrs.ws_row),
+            Integer.valueOf(attrs.ws_col)
+        );
+    }
+
     // Define the libc interface
     static interface CLibrary extends Library {
         CLibrary INSTANCE = Native.load("c", CLibrary.class);
@@ -48,6 +59,15 @@ class ChangeModeDarwin implements ChangeMode {
         int tcsetattr(int fd, int optional_actions, termios termios);
 
         int read(int fd, byte[] buf, int count);
+
+        int ioctl(int fd, long request, Object... args);
+    }
+
+    @Structure.FieldOrder({ "ws_row", "ws_col" })
+    public static class winsize extends Structure {
+
+        public short ws_row;
+        public short ws_col;
     }
 
     // Define the termios structure
@@ -76,6 +96,7 @@ class ChangeModeDarwin implements ChangeMode {
     }
 
     // Constants
+    public static final long TIOCGWINSZ = 0x40087468L;
     public static final int STDIN_FILENO = 0;
     public static final int TCSANOW = 0;
     public static final int ICANON = 256;

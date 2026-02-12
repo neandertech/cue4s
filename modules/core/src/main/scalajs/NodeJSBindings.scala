@@ -35,7 +35,16 @@ end ReadStream
 
 @js.native
 trait WriteStream extends js.Object:
-  def write(a: Any): Unit = js.native
+  def write(a: Any): Unit        = js.native
+  def isTTY: js.UndefOr[Boolean] = js.native
+
+@js.native
+trait TTYWriteStream extends WriteStream:
+  def rows: Int                                               = js.native
+  def columns: Int                                            = js.native
+  def on(eventName: String, listener: js.Function): this.type = js.native
+  def removeListener(eventName: String, listener: js.Function): this.type =
+    js.native
 
 @js.native
 trait Process extends js.Object:

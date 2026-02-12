@@ -22,10 +22,6 @@ import scala.concurrent.Future
 import scala.concurrent.Promise
 import scala.concurrent.duration.Duration
 import scala.util.Success
-import scala.util.boundary
-
-import CharCollector.*
-import boundary.break
 
 private class InputProviderImpl(o: Terminal)
     extends InputProvider(o),
@@ -96,22 +92,22 @@ private class InputProviderImpl(o: Terminal)
       () => changeMode.read(),
     )
 
-    readingThread.start()
-
     whatNext(handler(TerminalEvent.Init))
 
-    result.future.onComplete: _ =>
-      readingThread.interrupt()
+    TerminalResizingHandler.use(send(_)):
+      readingThread.start()
 
-    given ExecutionContext = ExecutionContext.global
+      result.future.onComplete: _ =>
+        readingThread.interrupt()
 
-    val completed = Await.result(result.future, Duration.Inf)
-    if !asyncHookSet then InputProviderImpl.removeShutdownHook(hook)
+      given ExecutionContext = ExecutionContext.global
 
-    readingThread.join()
+      val completed = Await.result(result.future, Duration.Inf)
+      if !asyncHookSet then InputProviderImpl.removeShutdownHook(hook)
 
-    completed
+      readingThread.join()
 
+      completed
   end evaluate
 
   override def close() = changeMode.changeMode(rawMode = false)
