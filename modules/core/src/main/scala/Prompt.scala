@@ -231,6 +231,7 @@ object Prompt:
       private val lab: String,
       private val alts: List[String],
       private val windowSize: Int = 10,
+      private val width: Int = 50,
   ) extends Prompt[String]:
 
     def withWindowSize(i: Int) = copy(windowSize = i)
@@ -248,6 +249,7 @@ object Prompt:
         out = output,
         theme = theme,
         windowSize = this.windowSize,
+        width = this.width,
         symbols = symbols,
       )
   end SingleChoice
