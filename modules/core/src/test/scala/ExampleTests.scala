@@ -351,6 +351,48 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     List("steak", "sweet potato", "fried chicken"),
   )
 
+  terminalTestComplete("multiple.choice.toggle.all.select")(
+    Prompt.MultipleChoice.withNoneSelected(
+      "What would you like for lunch",
+      List("pizza", "steak", "sweet potato", "fried chicken"),
+    ),
+    list(
+      TerminalEvent.Init,
+      TerminalEvent.Key(KeyEvent.SHIFT_TAB), // select all
+      ENTER,
+    ),
+    List("pizza", "steak", "sweet potato", "fried chicken"),
+  )
+
+  terminalTestComplete("multiple.choice.toggle.all.deselect")(
+    Prompt.MultipleChoice.withAllSelected(
+      "What would you like for lunch",
+      List("pizza", "steak", "sweet potato", "fried chicken"),
+    ),
+    list(
+      TerminalEvent.Init,
+      TerminalEvent.Key(KeyEvent.SHIFT_TAB), // deselect all
+      TAB,                                   // select one back (pizza)
+      ENTER,
+    ),
+    List("pizza"),
+  )
+
+  terminalTestComplete("multiple.choice.toggle.all.filtered")(
+    Prompt.MultipleChoice.withNoneSelected(
+      "What would you like for lunch",
+      List("pizza", "steak", "sweet potato", "fried chicken"),
+    ),
+    list(
+      TerminalEvent.Init,
+      chars("p"), // filter to "pizza", "sweet potato"
+      TerminalEvent.Key(KeyEvent.SHIFT_TAB), // select all filtered
+      DELETE,                                // clear filter
+      ENTER,
+    ),
+    List("pizza", "sweet potato"),
+  )
+
   case class MyPrompt(
       @cue(_.text("Sir...?"))
       title: String,

@@ -42,4 +42,4 @@ object TerminalEvent:
     def apply(c: scala.Char): TerminalEvent.Char = TerminalEvent.Char(c.toInt)
 
 enum KeyEvent:
-  case UP, DOWN, LEFT, RIGHT, ENTER, DELETE, TAB
+  case UP, DOWN, LEFT, RIGHT, ENTER, DELETE, TAB, SHIFT_TAB

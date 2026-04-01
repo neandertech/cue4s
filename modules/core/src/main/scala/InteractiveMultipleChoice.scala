@@ -61,7 +61,7 @@ private[cue4s] class InteractiveMultipleChoice(
     status match
       case Status.Running(_) | Status.Init =>
         lines += "? ".focused + lab.prompt + s" $promptCue ".prompt + st.text.input
-        lines += "Tab".emphasis + " to toggle, " + "Enter".emphasis + " to submit."
+        lines += "Tab".emphasis + " to toggle, " + "Shift+Tab".emphasis + " to toggle all, " + "Enter".emphasis + " to submit."
 
         status match
           case Status.Running(Left(err)) =>
@@ -124,12 +124,15 @@ private[cue4s] class InteractiveMultipleChoice(
       case TerminalEvent.Key(KeyEvent.ENTER) =>
         PromptAction.setStatus(
           Status.Finished(
-            currentState().selected.toList.sorted.map(altMapping).toList,
+            currentState().selected.toList.sorted.map(altMapping),
           ),
         )
 
       case TerminalEvent.Key(KeyEvent.TAB) =>
         PromptAction.updateState(_.toggle)
+
+      case TerminalEvent.Key(KeyEvent.SHIFT_TAB) =>
+        PromptAction.updateState(_.toggleAll)
 
       case TerminalEvent.Key(KeyEvent.DELETE) =>
         PromptAction.updateState(_.trimText)
@@ -170,6 +173,15 @@ private[cue4s] object InteractiveMultipleChoice:
         case Some((_, cursor)) =>
           if selected(cursor) then copy(selected = selected - cursor)
           else copy(selected = selected + cursor)
+
+    def toggleAll =
+      display.showing match
+        case None => this
+        case Some((filtered, _)) =>
+          val filteredSet = filtered.toSet
+          if filteredSet.subsetOf(selected) then
+            copy(selected = selected -- filteredSet)
+          else copy(selected = selected ++ filteredSet)
 
     private def changeText(newText: String) =
       val newFiltered = all.filter((alt, _) =>
