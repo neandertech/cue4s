@@ -91,6 +91,7 @@ private[cue4s] object CharCollector:
           case 'B' => toInit(TerminalEvent.Key(KeyEvent.DOWN))
           case 'C' => toInit(TerminalEvent.Key(KeyEvent.RIGHT))
           case 'D' => toInit(TerminalEvent.Key(KeyEvent.LEFT))
+          case 'Z' => toInit(TerminalEvent.Key(KeyEvent.SHIFT_TAB))
 
           case b
               if isCSIParameterByte(b) || isCSIIntermediateByte(
