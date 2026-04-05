@@ -115,6 +115,7 @@ private[cue4s] object CharCollector:
           case 75 => toInit(TerminalEvent.Key(KeyEvent.LEFT))
           case 28 => toInit(TerminalEvent.Key(KeyEvent.ENTER))
           case 83 => toInit(TerminalEvent.Key(KeyEvent.DELETE))
+          case 15 => toInit(TerminalEvent.Key(KeyEvent.SHIFT_TAB))
           case _  => (State.Init, DecodeResult.Continue)
 
     end match

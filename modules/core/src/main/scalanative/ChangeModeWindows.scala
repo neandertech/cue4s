@@ -19,7 +19,14 @@ package cue4s
 import scala.scalanative.unsafe.*
 
 object ChangeModeWindows extends ChangeModeNative:
-  def getchar(): Int                        = Msvcrt._getch()
+  def getchar(): Int =
+    val ch = Msvcrt._getch()
+    /* For raw scan codes, _getch() returns either 0 or 0xE0 as prefix.
+     * Normalize 0x00 to 0xE0 to match JVM behavior and avoid
+     * the 0-byte being skipped by KeyboardReadingThread.
+     */
+    if ch == 0 then 0xe0 else ch
+
   def changeMode(rawMode: Boolean): Boolean = rawMode
   override def read(): Int =
     ???
