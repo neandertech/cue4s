@@ -17,7 +17,7 @@ addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.8.1")
 // Scala.js and Scala Native
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.20.1")
 
-addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.9")
+addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.11")
 
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
 
@@ -25,4 +25,4 @@ addSbtPlugin("com.indoorvivants.snapshots" % "sbt-snapshots" % "0.0.11")
 
 addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.4")
 
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.0")
+addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "2.3.1")

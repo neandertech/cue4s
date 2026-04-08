@@ -33,7 +33,7 @@ val Versions = new {
   val scalaVersions = Seq(Scala3)
   val fansi         = "0.5.0"
   val jna           = "5.14.0"
-  val catsEffect    = "3.6.0"
+  val catsEffect    = "3.7.0"
   val osLib         = "0.11.3"
   val scalaJavaTime = "2.6.0"
 }
@@ -126,7 +126,7 @@ lazy val example = projectMatrix
   .nativePlatform(
     Versions.scalaVersions,
     settings = Seq(
-      Compile / mainClass := Some("cue4s_example.tictac"),
+      Compile / mainClass := Some("cue4s_example.sync"),
       libraryDependencies += "io.github.cquiroz" %%% "scala-java-time" % Versions.scalaJavaTime,
     ),
   )
