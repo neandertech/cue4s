@@ -72,8 +72,6 @@ object ChangeModeMac extends ChangeModeUnix:
           Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
           "getting current flags failed",
         )
-        println(oldVMIN)
-        println(oldVTIME)
         oldVMIN.foreach: old =>
           (!state)._5(VMIN) = old
         oldVTIME.foreach: old =>
