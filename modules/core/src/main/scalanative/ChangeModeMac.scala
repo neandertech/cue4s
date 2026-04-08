@@ -21,10 +21,23 @@ import cue4s.ChangeModeUnix.Termios
 import scalanative.unsafe.*
 
 object ChangeModeMac extends ChangeModeUnix:
-  // int read(int fd, byte[] buf, int count);
   import scalanative.posix.termios.{TCSANOW, ECHO, ICANON}
 
-  type termios = scalanative.posix.termios.termios
+  type tcflag_t = CLong
+  type cc_t     = CChar
+  type speed_t  = CLong
+  import scalanative.unsafe.Nat.*
+  type NCCS = Digit2[_2, _0]
+  type c_cc = CArray[cc_t, NCCS]
+  type termios = CStruct7[
+    tcflag_t, /* c_iflag - input flags   */
+    tcflag_t, /* c_oflag - output flags  */
+    tcflag_t, /* c_cflag - control flags */
+    tcflag_t, /* c_lflag - local flags   */
+    c_cc,     /* cc_t c_cc[NCCS] - control chars */
+    speed_t,  /* c_ispeed - input speed   */
+    speed_t,  /* c_ospeed - output speed  */
+  ]
 
   private val VTIME = 17
   private val VMIN  = 16
@@ -59,6 +72,8 @@ object ChangeModeMac extends ChangeModeUnix:
           Termios.tcgetattr(STDIN_FILENO, state.asInstanceOf) == 0,
           "getting current flags failed",
         )
+        println(oldVMIN)
+        println(oldVTIME)
         oldVMIN.foreach: old =>
           (!state)._5(VMIN) = old
         oldVTIME.foreach: old =>
