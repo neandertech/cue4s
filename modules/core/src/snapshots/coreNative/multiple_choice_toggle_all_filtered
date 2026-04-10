@@ -7,6 +7,7 @@ Event.Init
 ┃ ◯ sweet potato                                         ┃
 ┃ ◯ fried chicken                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('p')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -14,6 +15,7 @@ Event.Char('p')
 ┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
 ┃ ◯ pizza                                                ┃
 ┃ ◯ sweet potato                                         ┃
+┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
@@ -27,6 +29,7 @@ Event.Key(SHIFT_TAB)
 ┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -37,12 +40,14 @@ Event.Key(DELETE)
 ┃ ◉ sweet potato                                         ┃
 ┃ ◯ fried chicken                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃✔ What would you like for lunch                         ┃
 ┃ ◉ pizza                                                ┃
 ┃ ◉ sweet potato                                         ┃
+┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃

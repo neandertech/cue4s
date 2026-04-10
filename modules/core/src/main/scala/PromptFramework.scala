@@ -154,7 +154,10 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
           state: PromptState,
           status: Status,
       ): List[String] =
-        self.renderState(state, self.currentStatus())
+        val innerStatus = status match
+          case Status.Running(Left(err)) => self.Status.Running(Left(err))
+          case _                         => self.currentStatus()
+        self.renderState(state, innerStatus)
 
       override def handleEvent(
           event: Event,
@@ -162,6 +165,10 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
         self.handleEvent(event) match
           case self.PromptAction.Update(statusChange, stateChange) =>
             self.stateTransition(stateChange, statusChange)
+
+            val innerWasFinished = self.currentStatus() match
+              case self.Status.Finished(_) => true
+              case _                       => false
 
             val refinedStatus =
               self.currentStatus() match
@@ -174,12 +181,14 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
                 case self.Status.Running(r) => Status.Running(r.flatMap(f))
                 case self.Status.Init       => Status.Init
 
-            // propagate information backwards...
+            // When outer validation rejects a Finished result,
+            // reset the inner to Init so it can accept new events
+            // and doesn't carry stale error status
             refinedStatus match
-              case Status.Running(Left(err)) =>
+              case Status.Running(Left(_)) if innerWasFinished =>
                 self.stateTransition(
                   identity,
-                  _ => self.Status.Running(Left(err)),
+                  _ => self.Status.Init,
                 )
               case _ =>
 

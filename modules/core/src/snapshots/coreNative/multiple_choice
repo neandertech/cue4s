@@ -7,6 +7,7 @@ Event.Init
 ┃ ◯ sweet potato                                         ┃
 ┃ ◯ fried chicken                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(TAB)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -16,6 +17,7 @@ Event.Key(TAB)
 ┃ ◯ steak                                                ┃
 ┃ ◯ sweet potato                                         ┃
 ┃ ◯ fried chicken                                        ┃
+┃                                                        ┃
 ┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
@@ -27,6 +29,7 @@ Event.Key(DOWN)
 ┃ ◯ sweet potato                                         ┃
 ┃ ◯ fried chicken                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(TAB)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -37,6 +40,7 @@ Event.Key(TAB)
 ┃ ◯ sweet potato                                         ┃
 ┃ ◯ fried chicken                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DOWN)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -46,6 +50,7 @@ Event.Key(DOWN)
 ┃ ◉ steak                                                ┃
 ┃ ◯ sweet potato                                         ┃
 ┃ ◯ fried chicken                                        ┃
+┃                                                        ┃
 ┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('h')
@@ -57,12 +62,14 @@ Event.Char('h')
 ┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(TAB)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? What would you like for lunch › h                     ┃
 ┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
 ┃ ◉ fried chicken                                        ┃
+┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
@@ -77,6 +84,7 @@ Event.Key(DELETE)
 ┃ ◯ sweet potato                                         ┃
 ┃ ◉ fried chicken                                        ┃
 ┃                                                        ┃
+┃                                                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -84,6 +92,7 @@ Event.Key(ENTER)
 ┃ ◉ pizza                                                ┃
 ┃ ◉ steak                                                ┃
 ┃ ◉ fried chicken                                        ┃
+┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃
 ┃                                                        ┃

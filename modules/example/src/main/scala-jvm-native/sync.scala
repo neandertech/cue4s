@@ -22,11 +22,12 @@ import cue4s.Prompt.PasswordInput.Password
 @main def sync(which: String*) =
   Prompts.sync.use: prompts =>
     val examples = Map[String, (String, SyncPrompts => Unit)](
-      "confirm"       -> ("Yes/No confirmation", likeCats),
-      "single-choice" -> ("Single choice", day),
-      "multi-choice"  -> ("Multiple choice", letters),
-      "validated-int" -> ("Validated integer", seasons),
-      "password"      -> ("Password", password),
+      "confirm"         -> ("Yes/No confirmation", likeCats),
+      "single-choice"   -> ("Single choice", day),
+      "multi-choice"    -> ("Multiple choice", letters),
+      "validated-multi" -> ("Validated multiple choice", validatedLetters),
+      "validated-int"   -> ("Validated integer", seasons),
+      "password"        -> ("Password", password),
     )
 
     if which.isEmpty then
@@ -108,6 +109,25 @@ def letters(prompts: SyncPrompts): Completion[List[String]] =
     ('A' to 'Z').map(_.toString).toList,
     _.withWindowSize(7),
   )
+
+def validatedLetters(prompts: SyncPrompts): Unit =
+  val result = prompts.run(
+    Prompt.MultipleChoice
+      .withNoneSelected(
+        "Pick at least one letter",
+        ('A' to 'Z').zip(('B' to 'Z') :+ 'A').map(_.toString).toList,
+      )
+      .withWindowSize(7)
+      .mapValidated(ls =>
+        Either.cond(
+          ls.nonEmpty,
+          ls,
+          PromptError("Please select at least one letter."),
+        ),
+      ),
+  )
+  println(s"Result: $result")
+end validatedLetters
 
 def seasons(prompts: SyncPrompts): Completion[Int] =
   prompts.int(

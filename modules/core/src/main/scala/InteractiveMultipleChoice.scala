@@ -63,11 +63,6 @@ private[cue4s] class InteractiveMultipleChoice(
         lines += "? ".focused + lab.prompt + s" $promptCue ".prompt + st.text.input
         lines += "Tab".emphasis + " to toggle, " + "Shift+Tab".emphasis + " to toggle all, " + "Enter".emphasis + " to submit."
 
-        status match
-          case Status.Running(Left(err)) =>
-            lines += err.error
-          case _ =>
-
         st.display.showing match
           case None =>
             lines += "no matches...".noMatches
@@ -94,6 +89,12 @@ private[cue4s] class InteractiveMultipleChoice(
                     )
                   end if
         end match
+
+        status match
+          case Status.Running(Left(err)) =>
+            lines += err.error
+          case _ =>
+            lines += ""
 
       case Status.Finished(ids) =>
         lines += s"$promptDone ".focused + lab.prompt

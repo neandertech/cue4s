@@ -97,6 +97,31 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     true,
   )
 
+  terminalTestComplete("alternatives.multiple.derived.revalidation")(
+    Prompt.MultipleChoice
+      .withNoneSelected(
+        "Pick at least one",
+        List("alpha", "beta", "gamma"),
+      )
+      .mapValidated(ls =>
+        Either.cond(
+          ls.nonEmpty,
+          ls,
+          PromptError("Please select at least one."),
+        ),
+      ),
+    list(
+      TerminalEvent.Init,
+      ENTER, // reject: nothing selected
+      TAB,   // select alpha
+      TAB,   // deselect alpha
+      ENTER, // reject again: nothing selected
+      TAB,   // select alpha
+      ENTER, // accept: alpha selected
+    ),
+    List("alpha"),
+  )
+
   terminalTestComplete("alternatives.infiniscroll.multiple")(
     Prompt.MultipleChoice
       .withNoneSelected(
