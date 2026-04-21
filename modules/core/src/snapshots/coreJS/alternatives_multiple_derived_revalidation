@@ -1,0 +1,69 @@
+Event.Init
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃? Pick at least one ›                                   ┃
+┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
+┃ ◯ alpha                                                ┃
+┃ ◯ beta                                                 ┃
+┃ ◯ gamma                                                ┃
+┃                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(ENTER)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃? Pick at least one ›                                   ┃
+┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
+┃Please select at least one.                             ┃
+┃ ◯ alpha                                                ┃
+┃ ◯ beta                                                 ┃
+┃ ◯ gamma                                                ┃
+┃                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(TAB)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃? Pick at least one ›                                   ┃
+┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
+┃ ◉ alpha                                                ┃
+┃ ◯ beta                                                 ┃
+┃ ◯ gamma                                                ┃
+┃                                                        ┃
+┃                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(TAB)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃? Pick at least one ›                                   ┃
+┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
+┃Please select at least one.                             ┃
+┃ ◯ alpha                                                ┃
+┃ ◯ beta                                                 ┃
+┃ ◯ gamma                                                ┃
+┃                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(ENTER)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃? Pick at least one ›                                   ┃
+┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
+┃Please select at least one.                             ┃
+┃ ◯ alpha                                                ┃
+┃ ◯ beta                                                 ┃
+┃ ◯ gamma                                                ┃
+┃                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(TAB)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃? Pick at least one ›                                   ┃
+┃Tab to toggle, Shift+Tab to toggle all, Enter to submit.┃
+┃ ◉ alpha                                                ┃
+┃ ◯ beta                                                 ┃
+┃ ◯ gamma                                                ┃
+┃                                                        ┃
+┃                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+Event.Key(ENTER)
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃✔ Pick at least one                                     ┃
+┃ ◉ alpha                                                ┃
+┃                                                        ┃
+┃                                                        ┃
+┃                                                        ┃
+┃                                                        ┃
+┃                                                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
