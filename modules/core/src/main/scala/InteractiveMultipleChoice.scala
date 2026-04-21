@@ -54,14 +54,14 @@ private[cue4s] class InteractiveMultipleChoice(
       st: State,
       status: Status,
   ): List[String] =
-    val lines = List.newBuilder[String]
+    val lines = List.newBuilder[fansi.Str]
 
     import symbols.*
 
     status match
-      case Status.Running(_) | Status.Init =>
-        lines += "? ".focused + lab.prompt + s" $promptCue ".prompt + st.text.input
-        lines += "Tab".emphasis + " to toggle, " + "Shift+Tab".emphasis + " to toggle all, " + "Enter".emphasis + " to submit."
+      case Status.Running(_) =>
+        lines += "? ".focused ++ lab.prompt ++ s" $promptCue ".prompt ++ st.text.input
+        lines += "Tab".emphasis ++ " to toggle, " ++ "Shift+Tab".emphasis ++ " to toggle all, " ++ "Enter".emphasis ++ " to submit."
 
         status match
           case Status.Running(Left(err)) =>
@@ -96,7 +96,7 @@ private[cue4s] class InteractiveMultipleChoice(
         end match
 
       case Status.Finished(ids) =>
-        lines += s"$promptDone ".focused + lab.prompt
+        lines += s"$promptDone ".focused ++ lab.prompt
 
         if ids.isEmpty then lines += "nothing selected".nothingSelected
         else
@@ -105,12 +105,11 @@ private[cue4s] class InteractiveMultipleChoice(
               lines += s" $altSelected " + value.emphasis
 
       case Status.Canceled =>
-        lines += s"$promptCancelled ".canceled +
-          (lab + " ").prompt
+        lines += s"$promptCancelled ".canceled ++ (lab + " ").prompt
         lines += ""
     end match
 
-    lines.result()
+    lines.result().map(_.render)
   end renderState
 
   override def extractResult(state: State): Either[PromptError, List[String]] =

@@ -18,50 +18,50 @@ package cue4s
 
 object TextFormatting:
 
-  def rgb(r: Int, g: Int, b: Int): String => String =
-    s => fansi.Color.True(r, g, b)(s).toString
+  def rgb(r: Int, g: Int, b: Int): String => fansi.Str =
+    s => fansi.Color.True(r, g, b)(s)
 
   extension (t: String)
-    def bold      = fansi.Bold.On(t).toString
-    def underline = fansi.Underlined.On(t).toString
+    def bold      = fansi.Bold.On(t)
+    def underline = fansi.Underlined.On(t)
 
-    def rgb(r: Int, g: Int, b: Int) = fansi.Color.True(r, g, b)(t).toString
+    def rgb(r: Int, g: Int, b: Int) = fansi.Color.True(r, g, b)(t)
 
-    def reset        = fansi.Color.Reset(t).toString
-    def black        = fansi.Color.Black(t).toString
-    def red          = fansi.Color.Red(t).toString
-    def green        = fansi.Color.Green(t).toString
-    def yellow       = fansi.Color.Yellow(t).toString
-    def blue         = fansi.Color.Blue(t).toString
-    def magenta      = fansi.Color.Magenta(t).toString
-    def cyan         = fansi.Color.Cyan(t).toString
-    def lightGray    = fansi.Color.LightGray(t).toString
-    def darkGray     = fansi.Color.DarkGray(t).toString
-    def lightRed     = fansi.Color.LightRed(t).toString
-    def lightGreen   = fansi.Color.LightGreen(t).toString
-    def lightYellow  = fansi.Color.LightYellow(t).toString
-    def lightBlue    = fansi.Color.LightBlue(t).toString
-    def lightMagenta = fansi.Color.LightMagenta(t).toString
-    def lightCyan    = fansi.Color.LightCyan(t).toString
-    def white        = fansi.Color.White(t).toString
+    def reset        = fansi.Color.Reset(t)
+    def black        = fansi.Color.Black(t)
+    def red          = fansi.Color.Red(t)
+    def green        = fansi.Color.Green(t)
+    def yellow       = fansi.Color.Yellow(t)
+    def blue         = fansi.Color.Blue(t)
+    def magenta      = fansi.Color.Magenta(t)
+    def cyan         = fansi.Color.Cyan(t)
+    def lightGray    = fansi.Color.LightGray(t)
+    def darkGray     = fansi.Color.DarkGray(t)
+    def lightRed     = fansi.Color.LightRed(t)
+    def lightGreen   = fansi.Color.LightGreen(t)
+    def lightYellow  = fansi.Color.LightYellow(t)
+    def lightBlue    = fansi.Color.LightBlue(t)
+    def lightMagenta = fansi.Color.LightMagenta(t)
+    def lightCyan    = fansi.Color.LightCyan(t)
+    def white        = fansi.Color.White(t)
 
-    def bgReset        = fansi.Back.Reset(t).toString
-    def bgBlack        = fansi.Back.Black(t).toString
-    def bgRed          = fansi.Back.Red(t).toString
-    def bgGreen        = fansi.Back.Green(t).toString
-    def bgYellow       = fansi.Back.Yellow(t).toString
-    def bgBlue         = fansi.Back.Blue(t).toString
-    def bgMagenta      = fansi.Back.Magenta(t).toString
-    def bgCyan         = fansi.Back.Cyan(t).toString
-    def bgLightGray    = fansi.Back.LightGray(t).toString
-    def bgDarkGray     = fansi.Back.DarkGray(t).toString
-    def bgLightRed     = fansi.Back.LightRed(t).toString
-    def bgLightGreen   = fansi.Back.LightGreen(t).toString
-    def bgLightYellow  = fansi.Back.LightYellow(t).toString
-    def bgLightBlue    = fansi.Back.LightBlue(t).toString
-    def bgLightMagenta = fansi.Back.LightMagenta(t).toString
-    def bgLightCyan    = fansi.Back.LightCyan(t).toString
-    def bgWhite        = fansi.Back.White(t).toString
+    def bgReset        = fansi.Back.Reset(t)
+    def bgBlack        = fansi.Back.Black(t)
+    def bgRed          = fansi.Back.Red(t)
+    def bgGreen        = fansi.Back.Green(t)
+    def bgYellow       = fansi.Back.Yellow(t)
+    def bgBlue         = fansi.Back.Blue(t)
+    def bgMagenta      = fansi.Back.Magenta(t)
+    def bgCyan         = fansi.Back.Cyan(t)
+    def bgLightGray    = fansi.Back.LightGray(t)
+    def bgDarkGray     = fansi.Back.DarkGray(t)
+    def bgLightRed     = fansi.Back.LightRed(t)
+    def bgLightGreen   = fansi.Back.LightGreen(t)
+    def bgLightYellow  = fansi.Back.LightYellow(t)
+    def bgLightBlue    = fansi.Back.LightBlue(t)
+    def bgLightMagenta = fansi.Back.LightMagenta(t)
+    def bgLightCyan    = fansi.Back.LightCyan(t)
+    def bgWhite        = fansi.Back.White(t)
 
   end extension
 end TextFormatting
