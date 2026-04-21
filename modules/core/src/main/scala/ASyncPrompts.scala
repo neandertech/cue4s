@@ -22,7 +22,7 @@ import scala.concurrent.Future
 import cue4s.Prompt.PasswordInput.Password
 
 class AsyncPromptsBuilder private (impl: AsyncPromptsOptions):
-  def this() = this(AsyncPromptsOptions(Output.Std, Theme.Default))
+  def this() = this(AsyncPromptsOptions(Output.StdNoLogging, Theme.Default))
 
   def noColors: AsyncPromptsBuilder                = withTheme(Theme.NoColors)
   def withOutput(out: Output): AsyncPromptsBuilder = copy(_.copy(out = out))
