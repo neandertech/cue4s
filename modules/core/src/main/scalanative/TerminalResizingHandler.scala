@@ -23,12 +23,6 @@ import scala.scalanative.unsigned.UShort
 
 import types.*
 
-@extern
-private[cue4s] def scalanative_sigwinch(): Int = extern
-
-@extern
-private[cue4s] def scalanative_get_window_size(ws: Ptr[WinSize]): Int = extern
-
 private[cue4s] object types:
   opaque type WinSize = CStruct2[UShort, UShort]
   object WinSize:
@@ -40,6 +34,15 @@ private[cue4s] object types:
     end extension
   end WinSize
 end types
+
+import types.*
+
+@extern
+private[cue4s] def scalanative_sigwinch(): Int = extern
+
+@extern
+private[cue4s] def scalanative_get_window_size(ws: Ptr[WinSize]): Int =
+  extern
 
 object TerminalResizingHandler:
   // We are using this var here because we can't capture @send variable from dynamic scope inside the C function pointer.
