@@ -21,7 +21,7 @@ addSbtPlugin("org.scala-native" % "sbt-scala-native" % "0.5.11")
 
 addSbtPlugin("com.github.sbt" % "sbt-native-packager" % "1.9.16")
 
-addSbtPlugin("com.indoorvivants.snapshots" % "sbt-snapshots" % "0.0.11")
+addSbtPlugin("com.indoorvivants.snapshots" % "sbt-snapshots" % "0.0.12")
 
 addSbtPlugin("org.scalameta" % "sbt-native-image" % "0.3.4")
 
