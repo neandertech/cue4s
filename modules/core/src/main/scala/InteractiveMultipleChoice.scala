@@ -113,6 +113,9 @@ private[cue4s] class InteractiveMultipleChoice(
     lines.result()
   end renderState
 
+  override def extractResult(state: State): Either[PromptError, List[String]] =
+    Right(state.selected.toList.sorted.map(altMapping))
+
   override def handleEvent(event: TerminalEvent) =
     event match
       case TerminalEvent.Key(KeyEvent.UP) =>
@@ -122,11 +125,7 @@ private[cue4s] class InteractiveMultipleChoice(
         PromptAction.updateState(_.updateDisplay(_.down))
 
       case TerminalEvent.Key(KeyEvent.ENTER) =>
-        PromptAction.setStatus(
-          Status.Finished(
-            currentState().selected.toList.sorted.map(altMapping),
-          ),
-        )
+        PromptAction.TrySubmit
 
       case TerminalEvent.Key(KeyEvent.TAB) =>
         PromptAction.updateState(_.toggle)
@@ -141,7 +140,7 @@ private[cue4s] class InteractiveMultipleChoice(
         PromptAction.updateState(_.addText(which.toChar))
 
       case TerminalEvent.Interrupt =>
-        PromptAction.setStatus(Status.Canceled)
+        PromptAction.Stop
 
       case _ =>
         PromptAction.Continue

@@ -21,7 +21,6 @@ private[cue4s] class InteractiveTextInput(
     terminal: Terminal,
     out: Output,
     theme: Theme,
-    validate: String => Option[PromptError],
     hideText: Boolean,
     symbols: Symbols,
     default: Option[String],
@@ -32,37 +31,27 @@ private[cue4s] class InteractiveTextInput(
   override type PromptState = State
   override type Event       = TerminalEvent
 
-  override def initialState: State = State(default.getOrElse(""))
+  override def initialState: State = State(default.getOrElse(""), None)
+
+  override def extractResult(state: State): Either[PromptError, String] =
+    Right(state.text)
 
   override def handleEvent(event: TerminalEvent) =
 
-    // TODO: rework the framework to support validation?
-    def update(f: State => State) =
-      val newState = f(currentState())
-      val newStatus =
-        Status.Running(validate(newState.text).toLeft(newState.text))
-
-      PromptAction.set(newState, newStatus)
-
     event match
       case TerminalEvent.Key(KeyEvent.ENTER) =>
-        currentStatus() match
-          case Status.Running(Right(candidate)) =>
-            PromptAction.setStatus(Status.Finished(candidate))
-          case Status.Init =>
-            default match
-              case None        => PromptAction.Continue
-              case Some(value) => PromptAction.setStatus(Status.Finished(value))
-
-          case _ => PromptAction.Continue
+        PromptAction.TrySubmit
 
       case TerminalEvent.Key(KeyEvent.DELETE) =>
-        update(_.trimText)
+        PromptAction.updateState(_.trimText)
 
       case TerminalEvent.Char(which) =>
-        update(_.addText(which.toChar))
+        PromptAction.updateState(_.addText(which.toChar))
 
-      case TerminalEvent.Interrupt => PromptAction.setStatus(Status.Canceled)
+      case TerminalEvent.Interrupt => PromptAction.Stop
+
+      case TerminalEvent.Resized(rows, cols) =>
+        PromptAction.updateState(_.copy(terminalSize = Some(rows -> cols)))
 
       case _ => PromptAction.Continue
     end match
@@ -103,6 +92,7 @@ end InteractiveTextInput
 private[cue4s] object InteractiveTextInput:
   case class State(
       text: String,
+      terminalSize: Option[(TerminalRows, TerminalCols)],
   ):
     def addText(t: Char) = copy(text = text + t)
 

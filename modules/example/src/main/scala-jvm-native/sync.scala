@@ -22,11 +22,12 @@ import cue4s.Prompt.PasswordInput.Password
 @main def sync(which: String*) =
   Prompts.sync.use: prompts =>
     val examples = Map[String, (String, SyncPrompts => Unit)](
-      "confirm"       -> ("Yes/No confirmation", likeCats),
-      "single-choice" -> ("Single choice", day),
-      "multi-choice"  -> ("Multiple choice", letters),
-      "validated-int" -> ("Validated integer", seasons),
-      "password"      -> ("Password", password),
+      "confirm"         -> ("Yes/No confirmation", likeCats),
+      "single-choice"   -> ("Single choice", day),
+      "multi-choice"    -> ("Multiple choice", letters),
+      "validated-int"   -> ("Validated integer", seasons),
+      "password"        -> ("Password", password),
+      "validated-multi" -> ("Validated multiple choice", validatedMultiChoice),
     )
 
     if which.isEmpty then
@@ -120,3 +121,22 @@ def seasons(prompts: SyncPrompts): Completion[Int] =
 
 def password(prompts: SyncPrompts): Completion[Password] =
   prompts.password("Choose a new password")
+
+def validatedMultiChoice(prompts: SyncPrompts): Unit =
+  val result = prompts.run(
+    Prompt.MultipleChoice
+      .withNoneSelected(
+        "Pick at least one letter",
+        ('A' to 'Z').zip(('B' to 'Z') :+ 'A').map(_.toString).toList,
+      )
+      .withWindowSize(7)
+      .mapValidated(ls =>
+        Either.cond(
+          ls.nonEmpty,
+          ls,
+          PromptError("Please select at least one letter."),
+        ),
+      ),
+  )
+  println(s"Result: $result")
+end validatedMultiChoice

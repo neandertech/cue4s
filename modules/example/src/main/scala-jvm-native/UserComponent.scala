@@ -56,6 +56,9 @@ class TicTacToe(terminal: Terminal, out: Output)
 
   override def initialState: PromptState = State.init
 
+  override def extractResult(state: State) =
+    state.finished.toRight(PromptError("Game is not over yet"))
+
   override def handleEvent(event: TerminalEvent | TimerEvent): PromptAction =
     event match
       case t: TimerEvent    => handleTimerEvent(t)
@@ -90,20 +93,18 @@ class TicTacToe(terminal: Terminal, out: Output)
       case TerminalEvent.Char(' ') => checkWin
 
       case TerminalEvent.Interrupt =>
-        PromptAction.setStatus(Status.Canceled)
+        PromptAction.Stop
 
       case _ => PromptAction.Continue
 
   private def checkWin =
     val cur      = currentState()
     val newState = cur.toggle
-    val newStatus = newState.finished match
+    newState.finished match
       case Some(value) =>
-        Status.Finished(value)
+        PromptAction.Submit(value)
       case None =>
-        currentStatus()
-
-    PromptAction.set(newState, newStatus)
+        PromptAction.updateState(_ => newState)
   end checkWin
 
   override def renderState(state: State, status: Status): List[String] =

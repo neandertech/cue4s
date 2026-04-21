@@ -146,6 +146,32 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
     true,
   )
 
+  terminalTestComplete("alternatives.multiple.derived.revalidation")(
+    Prompt.MultipleChoice
+      .withNoneSelected(
+        "Pick at least one",
+        List("alpha", "beta", "gamma"),
+      )
+      .mapValidated(ls =>
+        Either.cond(
+          ls.nonEmpty,
+          ls,
+          PromptError("Please select at least one."),
+        ),
+      ),
+    list(
+      TerminalEvent.Init,
+      ENTER, // reject: nothing selected
+      TAB,   // select alpha
+      TAB,   // deselect alpha
+      ENTER, // reject again: nothing selected
+      TAB,   // select alpha
+      ENTER, // accept: alpha selected
+    ),
+    List("alpha"),
+    // log = true,
+  )
+
   terminalTest("alternatives.confirm.cancel")(
     Prompt.Confirmation("Are you sure?"),
     list(
@@ -177,6 +203,24 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ),
     list(
       TerminalEvent.Init,
+      chars("go"),
+      ENTER, // prevents submission
+      chars("od"),
+      ENTER,
+    ),
+    "good",
+  )
+
+  terminalTestComplete("input.terminal.size")(
+    Prompt
+      .Input("how do you do fellow kids?")
+      .validate(value =>
+        if value.length < 4 then Some(PromptError("too short!"))
+        else None,
+      ),
+    list(
+      TerminalEvent.Init,
+      TerminalEvent.Resized(TerminalRows(20), TerminalCols(100)),
       chars("go"),
       ENTER, // prevents submission
       chars("od"),
@@ -264,7 +308,6 @@ class ExampleTests extends munit.FunSuite, TerminalTests:
       ENTER,
     ),
     true,
-    log = false,
   )
 
   terminalTestComplete("number.default")(

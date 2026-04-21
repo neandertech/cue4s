@@ -19,6 +19,35 @@ package cue4s
 /** A base trait for interactive terminal components. `Result` is the type of
   * value the component produces when terminated normally.
   *
+  * When extending this trait, you need to override PromptState type (which
+  * should be an **immutable** state, such as case class, which will contain
+  * everything required to render your prompt).
+  *
+  * ```scala
+  * class MyPrompt(terminal: Terminal, out: Output)
+  *     extends PromptFramework[String](terminal, out):
+  *   override type PromptState = String
+  *   override type Event       = TerminalEvent
+  *
+  *   override def initialState: PromptState = ""
+  *
+  *   override def extractResult(s: String) = Right(s)
+  *
+  *   override def handleEvent(event: Event): PromptAction = event match
+  *     case TerminalEvent.Key(KeyEvent.ENTER) =>
+  *       PromptAction.TrySubmit
+  *     case TerminalEvent.Char(char) =>
+  *       PromptAction.updateState(_ :+ char.toChar)
+  *     case _ => PromptAction.Continue
+  *
+  *   override def renderState(
+  *       state: PromptState,
+  *       status: Status,
+  *   ): List[String] =
+  *     List(s"Current state: $state")
+  * end MyPrompt
+  * ```
+  *
   * @param terminal
   * @param out
   */
@@ -26,7 +55,9 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
     extends PromptFrameworkPlatform[Result]:
   self =>
 
-  /** This type represents the internal state of the component.
+  /** This type represents the internal state of the component – it should be an
+    * **immutable** state, such as case class, which will contain everything
+    * required to render your prompt.
     */
   type PromptState
 
@@ -35,12 +66,12 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
     * etc.). Best used with a union type that includes `TerminalEvent`
     *
     * Example:
-    * {{{
+    * ```scala
     * enum MyEvent:
     *   case Ping, Pong
     *
     * type Event = TerminalEvent | MyEvent
-    * }}}
+    * ```
     */
   type Event >: TerminalEvent
 
@@ -61,28 +92,26 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
   def handleEvent(event: Event): PromptAction
 
   /** Terminal rendering of the prompt based purely on its state and status.
-    * Each list element must be a string NOT containing any newlines. The prompt
-    * framework mechanism will use the result of this method to incrementally
-    * update the visible state of the prompt.
+    * Each list element mu= ?st be a string NOT containing any newlines. The
+    * prompt framework mechanism will use the result of this method to
+    * incrementally update the visible state of the prompt.
     *
     * This function MUST be pure, as the results might be cached.
     *
     * @param state
     * @param status
     * @return
+    *   list of lines to be printed to terminal
     */
   def renderState(state: PromptState, status: Status): List[String]
 
+  def extractResult(state: PromptState): Either[PromptError, Result]
+
   /** Prompt-specific status */
   protected enum Status:
-    /** All prompts start as [Init], and once it moves to any other status it
-      * cannot transition back.
-      */
-    case Init
-
     /** [Running] status is where the prompt spends most of its time – reacting
       * to terminal events and re-rendering. The value might not be available if
-      * validation returns `Left[PromptError]`. If the
+      * validation returns `Left[PromptError]`
       */
     case Running(err: Either[PromptError, Result])
 
@@ -109,12 +138,15 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
   protected enum PromptAction:
     /** Modify status or state, or both */
     case Update(
-        status: Status => Status = identity,
         state: PromptState => PromptState = identity,
     )
 
     /** do nothing */
     case Continue
+
+    case Submit(result: Result)
+
+    case TrySubmit
 
     /** Immediately terminate this prompt, returning an
       * [CompletionError.Interrupted] error to the caller
@@ -123,12 +155,6 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
   end PromptAction
 
   protected object PromptAction:
-    def set(state: PromptState, status: Status) =
-      PromptAction.Update(_ => status, _ => state)
-
-    /** Set [Status] to the given value. State remains unchanged */
-    def setStatus(f: Status): PromptAction = PromptAction.Update(_ => f)
-
     /** Set [State] to the given value. Status remains unchanged */
     def setState(f: PromptState): PromptAction =
       PromptAction.Update(state = _ => f)
@@ -136,6 +162,10 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
     /** Update [State] using the given function. [Status] remains unchanged */
     def updateState(f: PromptState => PromptState) =
       PromptAction.Update(state = f)
+
+    def trySubmit: PromptAction = PromptAction.TrySubmit
+
+    def submit(result: Result): PromptAction = PromptAction.Submit(result)
   end PromptAction
 
   /** Construct a new [PromptFramework] for a different type, with the mapping
@@ -144,49 +174,115 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
   final def mapValidated[Derived](
       f: Result => Either[PromptError, Derived],
   ): PromptFramework[Derived] =
+    val inner = self
     new PromptFramework[Derived](terminal, out):
-      override type PromptState = self.PromptState
-      override type Event       = self.Event
+      override type PromptState = inner.PromptState
+      override type Event       = inner.Event
 
-      override def initialState: PromptState = self.initialState
+      private val outer = this
+
+      override def initialState: PromptState = inner.initialState
+
+      override val state =
+        Transition.readOnly(inner.state)
+
+      override val rendering = Transition.readOnly(inner.rendering)
+
+      override val status = LoggedTransition(
+        "derived status",
+        Transition.base(
+          Status.Running(outer.extractResult(outer.state.current)),
+        ),
+        out,
+      )
+
+      override def extractResult(
+          state: PromptState,
+      ): Either[PromptError, Derived] =
+        inner.extractResult(state).flatMap(f)
 
       override def renderState(
           state: PromptState,
           status: Status,
       ): List[String] =
-        self.renderState(state, self.currentStatus())
+        inner.renderState(inner.currentState(), inner.currentStatus())
+
+      private def statuses(
+          state: PromptState,
+      ): (inner.Status.Running, outer.Status.Running) =
+        inner.extractResult(state) match
+          case v @ Left(err) =>
+            (inner.Status.Running(v), outer.Status.Running(Left(err)))
+          case Right(innerValue) =>
+            f(innerValue) match
+              case v @ Left(err) =>
+                (
+                  inner.Status.Running(Left(err)),
+                  outer.Status.Running(Left(err)),
+                )
+              case v @ Right(outerValue) =>
+                (
+                  inner.Status
+                    .Running(Right(innerValue)),
+                  outer.Status.Running(Right(outerValue)),
+                )
 
       override def handleEvent(
           event: Event,
       ): PromptAction =
-        self.handleEvent(event) match
-          case self.PromptAction.Update(statusChange, stateChange) =>
-            self.stateTransition(stateChange, statusChange)
-
-            val refinedStatus =
-              self.currentStatus() match
-                case self.Status.Finished(result) =>
-                  f(result) match
-                    case Left(value)  => Status.Running(Left(value))
-                    case Right(value) => Status.Finished(value)
-
-                case self.Status.Canceled   => Status.Canceled
-                case self.Status.Running(r) => Status.Running(r.flatMap(f))
-                case self.Status.Init       => Status.Init
-
-            // propagate information backwards...
-            refinedStatus match
-              case Status.Running(Left(err)) =>
-                self.stateTransition(
-                  identity,
-                  _ => self.Status.Running(Left(err)),
+        import inner.PromptAction as InnerPromptAction
+        val innerResult = inner.handleEvent(event)
+        out.logLn(s"[derived] Inner result: $innerResult")
+        innerResult match
+          case InnerPromptAction.Continue => PromptAction.Continue
+          case InnerPromptAction.Stop =>
+            inner.stateTransition(status = _ => inner.Status.Canceled)
+            PromptAction.Stop
+          case InnerPromptAction.TrySubmit =>
+            statuses(state.current) match
+              case (
+                    inner.Status.Running(Right(innerValue)),
+                    outer.Status.Running(Right(outerValue)),
+                  ) =>
+                inner.stateTransition(status =
+                  _ => inner.Status.Finished(innerValue),
                 )
-              case _ =>
+                PromptAction.Submit(outerValue)
+              case (innerStatus, outerStatus) =>
+                inner.stateTransition(status = _ => innerStatus)
+                PromptAction.Continue
 
-            PromptAction.Update(_ => refinedStatus, stateChange)
+          case InnerPromptAction.Submit(result) =>
+            statuses(state.current) match
+              case (
+                    inner.Status.Running(Right(innerValue)),
+                    _,
+                  ) =>
+                inner.stateTransition(status =
+                  _ => inner.Status.Finished(innerValue),
+                )
+                f(result) match
+                  case Left(value)  => PromptAction.Continue
+                  case Right(value) => PromptAction.Submit(value)
+              case (innerStatus, _) =>
+                inner.stateTransition(status = _ => innerStatus)
+                PromptAction.Continue
 
-          case self.PromptAction.Continue => PromptAction.Continue
-          case self.PromptAction.Stop     => PromptAction.Stop
+          case InnerPromptAction.Update(stateChange) =>
+            val tempState   = stateChange(inner.state.current)
+            val innerStatus = statuses(tempState)._1
+
+            inner.stateTransition(
+              state = _ => tempState,
+              status = _ => innerStatus,
+            )
+
+            PromptAction.Continue
+
+        end match
+
+      end handleEvent
+    end new
 
   end mapValidated
 
@@ -194,7 +290,14 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
     override def setupBackchannel(notif: Next[Result] => Unit): Unit =
       backchannel = Some(notif)
     override def apply(ev: TerminalEvent): Next[Result] =
-      if ev == TerminalEvent.Init then printPrompt()
+      out.logLn(s"Handling event $ev")
+      ev match
+        case TerminalEvent.Resized(rows, cols) =>
+          this.synchronized:
+            terminalSize.next(Some(cols))
+          printPrompt()
+        case _ =>
+
       manage(handleEvent(ev))
     end apply
 
@@ -207,108 +310,139 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
     * @param ev
     */
   final def send(ev: Event) =
+    out.logLn(s"Event sent directly to prompt: $ev")
     backchannel.foreach(b => b(manage(handleEvent(ev))))
 
   private var backchannel: Option[Next[Result] => Unit] = None
 
   private def manage(a: PromptAction) =
-    a match
+    out.logLn(s"Interpreting prompt action: $a")
+    val next = a match
       case PromptAction.Continue => Next.Continue
-      case PromptAction.Stop     => Next.Stop
+      case PromptAction.Stop =>
+        stateTransition(status = _ => Status.Canceled)
+        Next.Stop
 
-      case PromptAction.Update(statusF, stateF) =>
-        stateTransition(stateF, statusF)
-        val next: Next[Result] = currentStatus() match
+      case PromptAction.Update(stateF) =>
+        stateTransition(
+          stateF,
+          _ => Status.Running(extractResult(state.current)),
+        )
+
+        status.current match
           case Status.Finished(result) => Next.Done(result)
           case Status.Running(_)       => Next.Continue
           case Status.Canceled         => Next.Stop
-          case Status.Init             => Next.Continue
 
-        printPrompt()
-        next
+      case PromptAction.TrySubmit =>
+        extractResult(state.current) match
+          case Right(result) =>
+            stateTransition(status = _ => Status.Finished(result))
+            Next.Done(result)
+          case _ => Next.Continue
 
+      case PromptAction.Submit(value) =>
+        stateTransition(status = _ => Status.Finished(value))
+        out.logLn(s"Submitted value: $value, ${status.current}")
+        Next.Done(value)
+
+    if rendering.changed then printPrompt()
+
+    next
   end manage
 
   private def stateTransition(
-      stateChange: PromptState => PromptState,
-      statusChange: Status => Status,
+      state: PromptState => PromptState = identity,
+      status: Status => Status = identity,
   ) =
     this.synchronized:
-      state = state.nextFn(stateChange)
-      status = status.nextFn(statusChange)
-      rendering = rendering.next(
-        renderState(state.current, status.current),
-      )
+      val stateChanged  = this.state.nextFn(state)
+      val statusChanged = this.status.nextFn(status)
+      import Transition.Changed
+      if stateChanged == Changed.Yes || statusChanged == Changed.Yes then
+        this.rendering.next(
+          renderState(this.state.current, this.status.current),
+        )
   end stateTransition
 
   private def printPrompt() =
-    import terminal.*
-    this.synchronized:
-      if currentStatus() != Status.Canceled then cursorHide()
-      rendering.last match
-        case None =>
-          // initial print
-          rendering.current.foreach: line =>
-            out.outLn(line)
-            moveHorizontalTo(0)
-          moveUp(rendering.current.length).moveHorizontalTo(0)
-        case Some(previousRendering) =>
-          val paddingLength =
-            (previousRendering.length - rendering.current.length).max(0)
+    terminal.cursorHide()
+    rendering.last match
+      case Some(value) if value.length > rendering.current.length =>
+        out.logLn("Clearing because previous rendering was longer")
+        terminal.withRestore:
+          clear(value, terminalSize.current)
+      case None =>
+        // We don't use cursor save/restore here because after outputing empty lines,
+        // the terminal might scroll and the saved cursor position would be incorrect
+        out.logLn("Freeing up empty space for initial rendering")
+        rendering.current.foreach(_ => out.outLn(""))
+        terminal.moveUp(rendering.current.length).moveHorizontalTo(0)
+        rendering.nextFn(identity)
+      case _ =>
+        out.logLn("Clearing just for current rendering")
+        terminal.withRestore:
+          clear(rendering.current, terminalSize.current)
+    end match
 
-          inline def pad(n: Int) = List.fill(n)("")
-
-          val (current, previous) =
-            if rendering.current.length > previousRendering.length then
-              (
-                rendering.current,
-                previousRendering ++ pad(
-                  rendering.current.length - previousRendering.length,
-                ),
-              )
-            else
-              (
-                rendering.current ++ pad(
-                  previousRendering.length - rendering.current.length,
-                ),
-                previousRendering,
-              )
-
-          def render =
-            current
-              .zip(previous)
-              .foreach: (line, oldLine) =>
-                if line != oldLine then
-                  moveHorizontalTo(0).eraseEntireLine()
-                  out.out(line)
-                moveDown(1)
-
-          if isRunning(currentStatus()) then
-            render
-            moveUp(current.length).moveHorizontalTo(0)
-          else // we are finished
-            render
-            // do not leave empty lines behind - move cursor up
-            moveUp(paddingLength).moveHorizontalTo(0)
-          end if
-      end match
-
+    out.logLn(
+      s"Rendering ${rendering.current} with ${terminalSize.current}",
+    )
+    currentStatus() match
+      case _: Status.Finished | Status.Canceled =>
+        rendering.current.foreach(l => out.outLn(l))
+        terminal.cursorShow()
+      case _ =>
+        terminal.withRestore:
+          rendering.current.foreach(l => out.outLn(l))
   end printPrompt
 
-  private def isRunning(status: Status) =
-    status match
-      case Status.Finished(_) => false
-      case Status.Canceled    => false
-      case _                  => true
+  def clear(lines: List[String], cols: Option[TerminalCols]) =
+    cols match
+      case Some(cols) =>
+        val rows =
+          lines
+            .map(l =>
+              1 + math.floor((l.length.toDouble - 1).max(0) / cols).toInt,
+            )
+            .sum
+        out.logLn(s"Clearing ${rows} rows (with terminal size)")
+        for _ <- 0 until rows do
+          terminal.eraseEntireLine()
+          terminal.moveDown(1)
+      case None =>
+        out.logLn(s"Clearing ${lines.length} rows (no terminal size)")
+        for _ <- lines.indices do
+          terminal.eraseEntireLine()
+          terminal.moveDown(1)
 
-  private var state = Transition(
-    initialState,
+  protected val state: Transition[self.PromptState] = LoggedTransition(
+    "state",
+    Transition.base(
+      initialState,
+    ),
+    out,
   )
-  private var status = Transition[Status](
-    Status.Init,
+
+  protected val status = LoggedTransition(
+    "status",
+    Transition.base(
+      Status.Running(extractResult(initialState)),
+    ),
+    out,
   )
-  private var rendering = Transition(
-    renderState(currentState(), currentStatus()),
+
+  protected val rendering: Transition[List[String]] =
+    LoggedTransition(
+      "rendering",
+      Transition.base(
+        renderState(currentState(), currentStatus()),
+      ),
+      out,
+    )
+
+  private var terminalSize = Transition.base[Option[TerminalCols]](
+    None,
   )
 
 end PromptFramework

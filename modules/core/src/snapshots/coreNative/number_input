@@ -2,13 +2,11 @@ Event.Init
 ┏━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › ┃
 ┃                      ┃
-┃                      ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('3')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 3 ┃
 ┃must be no less than 5.0┃
-┃                        ┃
 ┃                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('.')
@@ -16,20 +14,17 @@ Event.Char('.')
 ┃? think of a number › 3.┃
 ┃must be no less than 5.0┃
 ┃                        ┃
-┃                        ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('0')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 3.0┃
 ┃must be no less than 5.0 ┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 3.0┃
 ┃must be no less than 5.0 ┃
-┃                         ┃
 ┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
@@ -37,27 +32,23 @@ Event.Key(DELETE)
 ┃? think of a number › 3. ┃
 ┃must be no less than 5.0 ┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 3  ┃
 ┃must be no less than 5.0 ┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number ›    ┃
 ┃not a valid number       ┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number ›    ┃
 ┃not a valid number       ┃
-┃                         ┃
 ┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('h')
@@ -65,13 +56,11 @@ Event.Char('h')
 ┃? think of a number › h  ┃
 ┃not a valid number       ┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › h  ┃
 ┃not a valid number       ┃
-┃                         ┃
 ┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
@@ -79,13 +68,11 @@ Event.Key(DELETE)
 ┃? think of a number ›    ┃
 ┃not a valid number       ┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number ›    ┃
 ┃not a valid number       ┃
-┃                         ┃
 ┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('3')
@@ -93,13 +80,11 @@ Event.Char('3')
 ┃? think of a number › 3  ┃
 ┃must be no less than 5.0 ┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('1')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 31 ┃
 ┃must be no more than 30.0┃
-┃                         ┃
 ┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('.')
@@ -107,13 +92,11 @@ Event.Char('.')
 ┃? think of a number › 31.┃
 ┃must be no more than 30.0┃
 ┃                         ┃
-┃                         ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('0')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 31.0┃
 ┃must be no more than 30.0 ┃
-┃                          ┃
 ┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
@@ -121,13 +104,11 @@ Event.Key(ENTER)
 ┃? think of a number › 31.0┃
 ┃must be no more than 30.0 ┃
 ┃                          ┃
-┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 31. ┃
 ┃must be no more than 30.0 ┃
-┃                          ┃
 ┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
@@ -135,13 +116,11 @@ Event.Key(DELETE)
 ┃? think of a number › 31  ┃
 ┃must be no more than 30.0 ┃
 ┃                          ┃
-┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 3   ┃
 ┃must be no less than 5.0  ┃
-┃                          ┃
 ┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(DELETE)
@@ -149,19 +128,16 @@ Event.Key(DELETE)
 ┃? think of a number ›     ┃
 ┃not a valid number        ┃
 ┃                          ┃
-┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('2')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 2   ┃
 ┃must be no less than 5.0  ┃
 ┃                          ┃
-┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('5')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 25  ┃
-┃                          ┃
 ┃                          ┃
 ┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -170,19 +146,16 @@ Event.Char('.')
 ┃? think of a number › 25. ┃
 ┃                          ┃
 ┃                          ┃
-┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Char('0')
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃? think of a number › 25.0┃
 ┃                          ┃
 ┃                          ┃
-┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛
 Event.Key(ENTER)
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━┓
 ┃✔ think of a number … 25.0┃
-┃                          ┃
 ┃                          ┃
 ┃                          ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━┛

@@ -43,6 +43,14 @@ private[cue4s] class InteractiveSingleChoice(
     ),
   )
 
+  override def extractResult(state: PromptState) =
+    state.display.showing match
+      case None =>
+        Left(PromptError("nothing selected"))
+
+      case Some((_, idx)) =>
+        Right(altMapping(idx))
+
   override def handleEvent(event: TerminalEvent) =
     event match
       case TerminalEvent.Key(KeyEvent.UP) =>
@@ -52,14 +60,7 @@ private[cue4s] class InteractiveSingleChoice(
         PromptAction.updateState(_.updateDisplay(_.down))
 
       case TerminalEvent.Key(KeyEvent.ENTER) => // enter
-        currentState().display.showing match
-          case None =>
-            PromptAction.setStatus(
-              Status.Running(Left(PromptError("nothing selected"))),
-            )
-          case Some((_, idx)) =>
-            PromptAction.setStatus(Status.Finished(altMapping(idx)))
-
+        PromptAction.TrySubmit
       case TerminalEvent.Key(KeyEvent.DELETE) => // enter
         PromptAction.updateState(_.trimText)
 
@@ -67,7 +68,7 @@ private[cue4s] class InteractiveSingleChoice(
         PromptAction.updateState(_.addText(which.toChar))
 
       case TerminalEvent.Interrupt =>
-        PromptAction.setStatus(Status.Canceled)
+        PromptAction.Stop
 
       case _ =>
         PromptAction.Continue
@@ -80,18 +81,18 @@ private[cue4s] class InteractiveSingleChoice(
       st: State,
       status: Status,
   ): List[String] =
-    val lines = List.newBuilder[String]
+    val lines = List.newBuilder[fansi.Str]
 
     import symbols.*
 
     status match
-      case Status.Running(_) | Status.Init =>
+      case Status.Running(_) =>
         // prompt question
-        lines += "? ".focused + (lab + s" $promptCue ").prompt + st.text.input
+        lines += "? ".focused ++ (lab + s" $promptCue ").prompt ++ st.text.input
 
         status match
           case Status.Running(err) =>
-            err.foreach: err =>
+            err.left.foreach: err =>
               lines += err.error
           case _ =>
 
@@ -118,16 +119,15 @@ private[cue4s] class InteractiveSingleChoice(
                   )
         end match
       case Status.Finished(value) =>
-        lines += s"$promptDone ".focused +
-          (lab + " ").prompt +
-          s" $ellipsis ".hint +
+        lines += s"$promptDone ".focused ++
+          (lab + " ").prompt ++
+          s" $ellipsis ".hint ++
           value.emphasis
       case Status.Canceled =>
-        lines += s"$promptCancelled ".canceled +
-          (lab + " ").prompt
+        lines += s"$promptCancelled ".canceled ++ (lab + " ").prompt
     end match
 
-    lines.result()
+    lines.result().map(_.render)
   end renderState
 end InteractiveSingleChoice
 
