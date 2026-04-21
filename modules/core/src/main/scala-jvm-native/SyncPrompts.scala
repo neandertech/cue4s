@@ -19,7 +19,7 @@ package cue4s
 import cue4s.Prompt.PasswordInput.Password
 
 class SyncPromptsBuilder private (impl: SyncPromptsOptions):
-  def this() = this(SyncPromptsOptions(Output.Std, Theme.Default))
+  def this() = this(SyncPromptsOptions(Output.StdNoLogging, Theme.Default))
 
   def noColors: SyncPromptsBuilder                = withTheme(Theme.NoColors)
   def withOutput(out: Output): SyncPromptsBuilder = copy(_.copy(out = out))
@@ -28,9 +28,10 @@ class SyncPromptsBuilder private (impl: SyncPromptsOptions):
   def use[A](f: SyncPrompts => A): A =
     val p    = Prompts(impl.out, Terminal.ansi, impl.theme)
     val inst = SyncPrompts(p)
-    try
-      f(inst)
-    finally p.close()
+    try f(inst)
+    finally
+      p.close()
+      impl.out.close()
 
   private def copy(f: SyncPromptsOptions => SyncPromptsOptions) =
     new SyncPromptsBuilder(f(impl))

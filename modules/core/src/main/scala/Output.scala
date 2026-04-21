@@ -18,7 +18,8 @@ package cue4s
 
 trait Output:
   def out[A: AsString](a: A): Unit
-  def logLn[A: AsString](a: A): Unit
+  def logLn[A: AsString](a: => A): Unit
+  def close(): Unit = ()
 
 trait AsString[A]:
   extension (a: A) def render: String
@@ -31,22 +32,49 @@ extension (o: Output)
     o.out(a.render + "\n")
   def loggerOnly: Output =
     new Output:
-      override def logLn[A: AsString](a: A): Unit = o.logLn(a)
-      override def out[A: AsString](a: A): Unit   = ()
+      override def logLn[A: AsString](a: => A): Unit = o.logLn(a)
+      override def out[A: AsString](a: A): Unit      = ()
+end extension
 
 object Output:
   object Std extends PlatformStd
 
+  /** Outputs to STDOUT, logging messages are ignored. This is the default
+    * output chosen by the library under normal usage.
+    *
+    * If logging is necessary, the recommended approach is to log to a file:
+    *
+    * {{{
+    * val out = FileLogging.toFile(Output.StdNoLogging, "myfile.log")
+    * Promps.sync.withOutput(out).use { prompts => ... }
+    * }}}
+    *
+    * For convenience, you can use a logger that is enabled only if a special
+    * environment variable is passed:
+    *
+    * {{{
+    * val out = FileLogging.fromEnv(Output.StdNoLogging)
+    * Promps.sync.withOutput(out).use { prompts => ... }
+    * }}}
+    *
+    * Then logging will be written to a file specified by `CUE4S_LOG_FILE` env
+    * variable. If the env variable is absent, logger will not output anything
+    */
+  object StdNoLogging extends PlatformStd:
+    override def logLn[A: AsString](a: => A): Unit = ()
+  end StdNoLogging
+
   object StdOut extends Output:
-    override def logLn[A: AsString](a: A): Unit = System.out.println(a.render)
-    override def out[A: AsString](a: A): Unit   = System.out.print(a.render)
+    override def logLn[A: AsString](a: => A): Unit =
+      System.out.println(a.render)
+    override def out[A: AsString](a: A): Unit = System.out.print(a.render)
 
   object DarkVoid extends Output:
-    override def logLn[A: AsString](a: A): Unit = ()
-    override def out[A: AsString](a: A): Unit   = ()
+    override def logLn[A: AsString](a: => A): Unit = ()
+    override def out[A: AsString](a: A): Unit      = ()
 
   class Delegate(writeOut: String => Unit, writeLog: String => Unit)
       extends Output:
-    override def logLn[A: AsString](a: A): Unit = writeLog(a.render + "\n")
-    override def out[A: AsString](a: A): Unit   = writeOut(a.render)
+    override def logLn[A: AsString](a: => A): Unit = writeLog(a.render + "\n")
+    override def out[A: AsString](a: A): Unit      = writeOut(a.render)
 end Output
