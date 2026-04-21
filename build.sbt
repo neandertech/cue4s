@@ -119,7 +119,7 @@ lazy val example = projectMatrix
       nativeImageJvm      := "graalvm-java23",
       nativeImageVersion  := "23.0.0",
       nativeImageOptions ++= Seq("--install-exit-handlers", "--no-fallback"),
-      nativeImageReady := {() => sLog.value.info("Native image ready")}
+      nativeImageReady := { () => sLog.value.info("Native image ready") },
     ),
   )
   .jsPlatform(
