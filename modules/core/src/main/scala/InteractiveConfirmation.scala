@@ -25,25 +25,28 @@ private[cue4s] class InteractiveConfirmation(
     symbols: Symbols,
 ) extends PromptFramework[Boolean](terminal, out):
 
-  override type PromptState = Unit
+  override type PromptState = Boolean
   override type Event       = TerminalEvent
 
-  override def initialState: PromptState = ()
+  override def initialState: PromptState = default
+
+  override def extractResult(state: PromptState): Either[PromptError, Boolean] =
+    Right(state)
 
   override def handleEvent(event: TerminalEvent): PromptAction =
     event match
-      case TerminalEvent.Init => PromptAction.Update()
+      case TerminalEvent.Init => PromptAction.Continue
       case TerminalEvent.Key(KeyEvent.ENTER) =>
-        PromptAction.setStatus(Status.Finished(default))
+        PromptAction.TrySubmit
       case TerminalEvent.Char(which) =>
         which match
           case 'y' | 'Y' =>
-            PromptAction.setStatus(Status.Finished(true))
+            PromptAction.submit(true)
           case 'n' | 'N' =>
-            PromptAction.setStatus(Status.Finished(false))
+            PromptAction.submit(false)
           case _ => PromptAction.Continue
       case TerminalEvent.Interrupt =>
-        PromptAction.setStatus(Status.Canceled)
+        PromptAction.Stop
       case _ =>
         PromptAction.Continue
     end match
@@ -52,7 +55,7 @@ private[cue4s] class InteractiveConfirmation(
   import theme.*
 
   override def renderState(
-      state: Unit,
+      state: Boolean,
       status: Status,
   ): List[String] =
     val lines = List.newBuilder[String]

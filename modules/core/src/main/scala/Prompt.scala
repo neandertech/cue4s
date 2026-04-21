@@ -44,14 +44,16 @@ end Prompt
 object Prompt:
   case class Input private (
       private val lab: String,
-      private val validate: String => Option[PromptError] = _ => None,
+      private val validate: Option[String => Option[PromptError]] = None,
       private val default: Option[String] = None,
   ) extends Prompt[String]:
 
-    def this(lab: String) = this(lab, _ => None)
+    def this(lab: String) = this(lab, None)
 
     def validate(f: String => Option[PromptError]): Input =
-      copy(validate = (n: String) => validate(n).orElse(f(n)))
+      validate match
+        case Some(value) => copy(validate = Some(in => value(in).orElse(f(in))))
+        case None        => copy(validate = Some(f))
 
     def default(value: String): Input =
       copy(default = Some(value))
@@ -61,16 +63,26 @@ object Prompt:
         output: Output,
         theme: Theme,
         symbols: Symbols,
-    ) = InteractiveTextInput(
-      prompt = lab,
-      terminal = terminal,
-      out = output,
-      theme = theme,
-      validate = validate,
-      hideText = false,
-      symbols = symbols,
-      default = default,
-    )
+    ) =
+
+      val base = InteractiveTextInput(
+        prompt = lab,
+        terminal = terminal,
+        out = output,
+        theme = theme,
+        // validate = validate,
+        hideText = false,
+        symbols = symbols,
+        default = default,
+      )
+
+      validate match
+        case Some(value) =>
+          base.mapValidated[String](i => value(i).toLeft(i))
+        case None =>
+          base
+    end framework
+
   end Input
 
   object Input:
@@ -80,17 +92,20 @@ object Prompt:
 
   case class PasswordInput private (
       private val lab: String,
-      private val validate: Password => Option[PromptError] = _ => None,
+      private val validate: Option[Password => Option[PromptError]] = None,
       private val default: Option[Password] = None,
   ) extends Prompt[Password]:
 
-    def this(lab: String) = this(lab, _ => None)
+    def this(lab: String) = this(lab, None, None)
 
     def default(value: Password): PasswordInput =
       copy(default = Some(value))
 
     def validate(f: Password => Option[PromptError]): PasswordInput =
-      copy(validate = (n: Password) => validate(n).orElse(f(n)))
+      validate match
+        case Some(value) =>
+          copy(validate = Some(in => value(in).orElse(f(in))))
+        case None => copy(validate = Some(f))
 
     override def framework(
         terminal: Terminal,
@@ -104,7 +119,6 @@ object Prompt:
           terminal = terminal,
           out = output,
           theme = theme,
-          validate = _ => None,
           hideText = true,
           symbols = symbols,
           default = default.map(_.raw),
@@ -112,7 +126,7 @@ object Prompt:
 
       textBase.mapValidated[Password](str =>
         val pwd = Password(str)
-        validate(pwd).toLeft(pwd),
+        validate.getOrElse(_ => None).apply(pwd).toLeft(pwd),
       )
     end framework
 
@@ -126,17 +140,23 @@ object Prompt:
 
   case class NumberInput[N: Numeric] private (
       private val lab: String,
-      private val validateNumber: N => Option[PromptError] = (_: N) => None,
+      private val validateNumber: Option[N => Option[PromptError]] = None,
       private val default: Option[N] = None,
   ) extends Prompt[N]:
     private val num = Numeric[N]
 
-    def this(lab: String) = this(lab, _ => None)
+    def this(lab: String) = this(lab, None)
 
     def default(value: N): NumberInput[N] = copy(default = Some(value))
 
+    // def validate(f: N => Option[PromptError]): NumberInput[N] =
+    //   copy(validateNumber = (n: N) => validateNumber(n).orElse(f(n)))
+
     def validate(f: N => Option[PromptError]): NumberInput[N] =
-      copy(validateNumber = (n: N) => validateNumber(n).orElse(f(n)))
+      validateNumber match
+        case Some(value) =>
+          copy(validateNumber = Some(in => value(in).orElse(f(in))))
+        case None => copy(validateNumber = Some(f))
 
     def positive = validate(n =>
       Option.when(num.lteq(n, num.zero))(PromptError("must be positive")),
@@ -164,7 +184,8 @@ object Prompt:
         theme: Theme,
         symbols: Symbols,
     ) =
-      val lifted = (n: N) => validateNumber(n).toLeft(n)
+      val lifted = (n: N) =>
+        validateNumber.getOrElse(_ => None).apply(n).toLeft(n)
 
       val transform = (s: String) =>
         Numeric[N]
@@ -172,14 +193,11 @@ object Prompt:
           .toRight(PromptError("not a valid number"))
           .flatMap(lifted)
 
-      val stringValidate = transform(_: String).left.toOption
-
       InteractiveTextInput(
         prompt = lab,
         terminal = terminal,
         out = output,
         theme = theme,
-        validate = stringValidate,
         hideText = false,
         symbols = symbols,
         default = default.map(_.toString()),
