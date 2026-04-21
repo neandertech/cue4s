@@ -29,10 +29,11 @@ object ChangeModeWindows extends ChangeModeNative:
 
   def changeMode(rawMode: Boolean): Boolean = rawMode
   override def read(): Int =
-    ???
-    // val b   = stackalloc[Byte](1)
-    // val cnt = read(STDIN_FILENO, b, 1)
-    // b(0)
+    val ch = getchar()
+
+    // For raw scan codes, this function returns either 0 or 0xE0.
+    // To avoid ambiguity, force it to always be 0xE0.
+    if ch == 0 then 0xe0 else ch
 
   object Msvcrt:
     @extern() @link("msvcrt")
