@@ -21,7 +21,7 @@ class AnsiTerminal(out: Output) extends Terminal:
 
   private val writer = (s: String) => out.out(s)
 
-  private inline def call(name: Char, inline args: Int*): this.type =
+  private inline def csi(name: Char, inline args: Int*): this.type =
     writer(s"$CSI${args.mkString(";")}$name")
     this
 
@@ -33,10 +33,10 @@ class AnsiTerminal(out: Output) extends Terminal:
   override inline def cursorShow(): this.type = call(s"$CSI?25h")
 
   private inline def lineEraseMode(n: Int): this.type =
-    call('K', n)
+    csi('K', n)
 
   private inline def screenEraseMode(n: Int): this.type =
-    call('K', n)
+    csi('K', n)
 
   override inline def eraseEntireLine(): this.type   = lineEraseMode(2)
   override inline def eraseEntireScreen(): this.type = screenEraseMode(2)
@@ -47,20 +47,20 @@ class AnsiTerminal(out: Output) extends Terminal:
   override inline def eraseToEndOfLine(): this.type   = lineEraseMode(0)
   override inline def eraseToEndOfScreen(): this.type = screenEraseMode(0)
 
-  override inline def moveBack(n: Int): this.type    = call('D', n)
-  override inline def moveDown(n: Int): this.type    = call('B', n)
-  override inline def moveForward(n: Int): this.type = call('C', n)
+  override inline def moveBack(n: Int): this.type    = csi('D', n)
+  override inline def moveDown(n: Int): this.type    = csi('B', n)
+  override inline def moveForward(n: Int): this.type = csi('C', n)
   override inline def moveHorizontalTo(column: Int): this.type =
-    call('G', column)
-  override inline def moveNextLine(n: Int): this.type     = call('E', n)
-  override inline def movePreviousLine(n: Int): this.type = call('F', n)
+    csi('G', column)
+  override inline def moveNextLine(n: Int): this.type     = csi('E', n)
+  override inline def movePreviousLine(n: Int): this.type = csi('F', n)
   override inline def moveToPosition(row: Int, column: Int): this.type =
-    call('H', row, column)
+    csi('H', row, column)
   override inline def moveUp(n: Int): this.type =
-    call('A', n)
+    csi('A', n)
 
-  override inline def restore(): this.type     = call('u')
-  override inline def save(): this.type        = call('s')
+  override inline def restore(): this.type     = call(s"${ESC}8")
+  override inline def save(): this.type        = call(s"${ESC}7")
   override inline def screenClear(): this.type = call(s"${ESC}c")
 
 end AnsiTerminal

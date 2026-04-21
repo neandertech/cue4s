@@ -98,6 +98,10 @@ private[cue4s] object CharCollector:
                 b,
               ) =>
             (State.CSI_Collecting(b.toByte :: Nil), DecodeResult.Continue)
+          case _ =>
+            error(
+              s"Unexpected byte ${char}, expected CSI parameter or intermediate byte",
+            )
 
       case State.CSI_Collecting(bytes) =>
         char match
