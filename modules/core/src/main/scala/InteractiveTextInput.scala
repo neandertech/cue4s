@@ -63,28 +63,26 @@ private[cue4s] class InteractiveTextInput(
       st: State,
       status: Status,
   ): List[String] =
-    val lines = List.newBuilder[String]
+    val lines = List.newBuilder[fansi.Str]
     import symbols.*
 
     val txt = if hideText then "*" * st.text.length else st.text
 
     status match
-      case Status.Init =>
-        lines += "? ".focused + prompt.prompt + s" $promptCue " + txt.input
       case Status.Running(err) =>
-        lines += "? ".focused + prompt.prompt + s" $promptCue " + txt.input
+        lines += "? ".focused ++ prompt.prompt ++ s" $promptCue ".hint ++ txt.input
         err.left.toOption.foreach: err =>
           lines += err.error
       case Status.Finished(res) =>
         val txt = if hideText then "*" * res.length else res
-        lines += s"$promptDone ".focused + prompt.prompt + s" $ellipsis ".hint + txt.emphasis
+        lines += s"$promptDone ".focused ++ prompt.prompt ++ s" $ellipsis ".hint ++ txt.emphasis
       case Status.Canceled =>
-        lines += s"$promptCancelled ".canceled + prompt.prompt
+        lines += s"$promptCancelled ".canceled ++ prompt.prompt
     end match
+    // lines += ""
 
-    lines += ""
+    lines.result().map(_.render)
 
-    lines.result()
   end renderState
 
 end InteractiveTextInput

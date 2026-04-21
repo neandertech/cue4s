@@ -58,28 +58,26 @@ private[cue4s] class InteractiveConfirmation(
       state: Boolean,
       status: Status,
   ): List[String] =
-    val lines = List.newBuilder[String]
+    val lines = List.newBuilder[fansi.Str]
     import symbols.*
 
     status match
-      case Status.Init =>
-        lines += "? ".focused + prompt.prompt +
-          (s" $promptCue (" + (if default then "Y/n" else "y/N") + ")").hint
       case Status.Running(error) =>
-        lines += "? ".focused + prompt.prompt +
+        lines += "? ".focused ++ prompt.prompt ++
           (s" $promptCue (" + (if default then "Y/n" else "y/N") + ")").hint
         error.left.toOption.foreach: err =>
           lines += err.error
       case Status.Finished(res) =>
-        lines += s"$promptDone ".focused + prompt.prompt + s" $ellipsis ".hint +
+        lines += s"$promptDone ".focused ++
+          prompt.prompt ++
+          s" $ellipsis ".hint ++
           (if res then "yes" else "no").emphasis
       case Status.Canceled =>
-        lines += s"$promptCancelled ".canceled + prompt.emphasis
+        lines += s"$promptCancelled ".canceled ++ prompt.emphasis
     end match
+    // lines += ""
 
-    lines += ""
-
-    lines.result()
+    lines.result().map(_.render)
   end renderState
 
 end InteractiveConfirmation

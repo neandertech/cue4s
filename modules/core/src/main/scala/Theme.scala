@@ -18,19 +18,19 @@ package cue4s
 
 trait Theme:
   extension (s: String)
-    def prompt: String
-    def emphasis: String
-    def input: String
-    def option: String
-    def optionMany: String
-    def noMatches: String
-    def nothingSelected: String
-    def focused: String
-    def selectedMany: String
-    def selectedManyInactive: String
-    def canceled: String
-    def error: String
-    def hint: String
+    def prompt: fansi.Str
+    def emphasis: fansi.Str
+    def input: fansi.Str
+    def option: fansi.Str
+    def optionMany: fansi.Str
+    def noMatches: fansi.Str
+    def nothingSelected: fansi.Str
+    def focused: fansi.Str
+    def selectedMany: fansi.Str
+    def selectedManyInactive: fansi.Str
+    def canceled: fansi.Str
+    def error: fansi.Str
+    def hint: fansi.Str
   end extension
 end Theme
 
@@ -39,37 +39,37 @@ object Theme:
 
   object Default extends Theme:
     extension (s: String)
-      def prompt: String               = s.cyan
-      def emphasis: String             = s.bold
-      def input: String                = s
-      def option: String               = s.bold
-      def optionMany: String           = s
-      def noMatches: String            = s.bold
-      def nothingSelected: String      = s.underline
-      def focused: String              = s.green
-      def selectedMany: String         = s.underline.green
-      def selectedManyInactive: String = s.underline
-      def canceled: String             = s.red
-      def error: String                = s.red
-      def hint: String                 = s.darkGray
+      def prompt: fansi.Str               = s.cyan
+      def emphasis: fansi.Str             = s.bold
+      def input: fansi.Str                = s
+      def option: fansi.Str               = s.bold
+      def optionMany: fansi.Str           = s
+      def noMatches: fansi.Str            = s.bold
+      def nothingSelected: fansi.Str      = s.underline
+      def focused: fansi.Str              = s.green
+      def selectedMany: fansi.Str         = fansi.Color.Green(s.underline)
+      def selectedManyInactive: fansi.Str = s.underline
+      def canceled: fansi.Str             = s.red
+      def error: fansi.Str                = s.red
+      def hint: fansi.Str                 = s.darkGray
     end extension
   end Default
 
   object NoColors extends Theme:
     extension (s: String)
-      def prompt: String               = s
-      def emphasis: String             = s
-      def input: String                = s
-      def option: String               = s
-      def optionMany: String           = s
-      def noMatches: String            = s
-      def nothingSelected: String      = s
-      def focused: String              = s
-      def selectedMany: String         = s
-      def selectedManyInactive: String = s
-      def canceled: String             = s
-      def error: String                = s
-      def hint: String                 = s
+      def prompt: fansi.Str               = s
+      def emphasis: fansi.Str             = s
+      def input: fansi.Str                = s
+      def option: fansi.Str               = s
+      def optionMany: fansi.Str           = s
+      def noMatches: fansi.Str            = s
+      def nothingSelected: fansi.Str      = s
+      def focused: fansi.Str              = s
+      def selectedMany: fansi.Str         = s
+      def selectedManyInactive: fansi.Str = s
+      def canceled: fansi.Str             = s
+      def error: fansi.Str                = s
+      def hint: fansi.Str                 = s
     end extension
   end NoColors
 end Theme
