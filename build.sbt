@@ -70,7 +70,9 @@ lazy val core = projectMatrix
   .settings(
     snapshotsPackageName := "cue4s",
     snapshotsIntegrations += SnapshotIntegration.MUnit,
+    snapshotsForceOverwrite := !sys.env.contains("CI"),
     scalacOptions += "-Wunused:all",
+    scalacOptions += "-snippet-compiler:compile",
     scalaJSUseMainModuleInitializer := true,
     scalaJSLinkerConfig ~= (_.withModuleKind(ModuleKind.CommonJSModule)),
     libraryDependencies += "com.lihaoyi" %%% "fansi" % Versions.fansi,
@@ -117,6 +119,7 @@ lazy val example = projectMatrix
       nativeImageJvm      := "graalvm-java23",
       nativeImageVersion  := "23.0.0",
       nativeImageOptions ++= Seq("--install-exit-handlers", "--no-fallback"),
+      nativeImageReady := {() => sLog.value.info("Native image ready")}
     ),
   )
   .jsPlatform(
