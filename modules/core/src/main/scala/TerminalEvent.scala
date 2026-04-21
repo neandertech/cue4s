@@ -17,7 +17,12 @@
 package cue4s
 
 opaque type TerminalRows <: Int = Int
+object TerminalRows:
+  inline def apply(value: Int): TerminalRows = value.asInstanceOf[TerminalRows]
+
 opaque type TerminalCols <: Int = Int
+object TerminalCols:
+  inline def apply(value: Int): TerminalCols = value.asInstanceOf[TerminalCols]
 
 enum TerminalEvent:
   case Init
