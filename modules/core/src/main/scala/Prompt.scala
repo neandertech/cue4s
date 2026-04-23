@@ -44,7 +44,7 @@ end Prompt
 object Prompt:
   case class Input private (
       private val lab: String,
-      private val validate: Option[String => Option[PromptError]] = None,
+      private val validate: Option[String => Option[PromptError]],
       private val default: Option[String] = None,
   ) extends Prompt[String]:
 
@@ -70,7 +70,6 @@ object Prompt:
         terminal = terminal,
         out = output,
         theme = theme,
-        // validate = validate,
         hideText = false,
         symbols = symbols,
         default = default,
@@ -92,8 +91,8 @@ object Prompt:
 
   case class PasswordInput private (
       private val lab: String,
-      private val validate: Option[Password => Option[PromptError]] = None,
-      private val default: Option[Password] = None,
+      private val validate: Option[Password => Option[PromptError]],
+      private val default: Option[Password],
   ) extends Prompt[Password]:
 
     def this(lab: String) = this(lab, None, None)
@@ -148,9 +147,6 @@ object Prompt:
     def this(lab: String) = this(lab, None)
 
     def default(value: N): NumberInput[N] = copy(default = Some(value))
-
-    // def validate(f: N => Option[PromptError]): NumberInput[N] =
-    //   copy(validateNumber = (n: N) => validateNumber(n).orElse(f(n)))
 
     def validate(f: N => Option[PromptError]): NumberInput[N] =
       validateNumber match
@@ -219,7 +215,7 @@ object Prompt:
 
   case class Confirmation private (
       private val lab: String,
-      private val default: Boolean = true,
+      private val default: Boolean,
   ) extends Prompt[Boolean]:
 
     def default(value: Boolean) = copy(default = value)

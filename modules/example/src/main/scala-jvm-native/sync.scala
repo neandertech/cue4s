@@ -21,7 +21,7 @@ import cue4s.Prompt.PasswordInput.Password
 
 @main def sync(which: String*) =
   Prompts.sync
-    .withOutput(FileLogging.fromEnv(Output.Std))
+    .withOutput(FileLogging.fromEnv(Output.StdNoLogging))
     .use: prompts =>
       val examples = Map[String, (String, SyncPrompts => Unit)](
         "confirm"         -> ("Yes/No confirmation", likeCats),

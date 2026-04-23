@@ -38,7 +38,7 @@ object Prompts extends PromptsCompanionPlatform:
     "0.0.5",
   )
   def apply(
-      out: Output = Output.Std,
+      out: Output = Output.StdNoLogging,
       createTerminal: Output => Terminal = Terminal.ansi,
       theme: Theme = Theme.Default,
       symbols: Symbols = Symbols.platformDefault,
@@ -49,7 +49,7 @@ object Prompts extends PromptsCompanionPlatform:
     "0.0.5",
   )
   def use[A](
-      out: Output = Output.Std,
+      out: Output = Output.StdNoLogging,
       createTerminal: Output => Terminal = Terminal.ansi,
       theme: Theme = Theme.Default,
   )(f: Prompts => A): A =
