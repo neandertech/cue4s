@@ -20,42 +20,44 @@ import cue4s.*
 import cue4s.Prompt.PasswordInput.Password
 
 @main def sync(which: String*) =
-  Prompts.sync.use: prompts =>
-    val examples = Map[String, (String, SyncPrompts => Unit)](
-      "confirm"         -> ("Yes/No confirmation", likeCats),
-      "single-choice"   -> ("Single choice", day),
-      "multi-choice"    -> ("Multiple choice", letters),
-      "validated-int"   -> ("Validated integer", seasons),
-      "password"        -> ("Password", password),
-      "validated-multi" -> ("Validated multiple choice", validatedMultiChoice),
-    )
+  Prompts.sync
+    .withOutput(FileLogging.fromEnv(Output.Std))
+    .use: prompts =>
+      val examples = Map[String, (String, SyncPrompts => Unit)](
+        "confirm"         -> ("Yes/No confirmation", likeCats),
+        "single-choice"   -> ("Single choice", day),
+        "multi-choice"    -> ("Multiple choice", letters),
+        "validated-int"   -> ("Validated integer", seasons),
+        "password"        -> ("Password", password),
+        "validated-multi" -> ("Validated multiple choice", validatedMultiChoice),
+      )
 
-    if which.isEmpty then
-      val maxLength = examples.keys.map(_.length).max
+      if which.isEmpty then
+        val maxLength = examples.keys.map(_.length).max
 
-      val selected = prompts
-        .multiChoiceNoneSelected(
-          "Which examples would you like to run?",
-          examples
-            .map { case (k, (desc, _)) =>
-              s"${k.padTo(maxLength, ' ')}: $desc"
-            }
-            .toList
-            .sorted,
-        )
-        .getOrThrow
+        val selected = prompts
+          .multiChoiceNoneSelected(
+            "Which examples would you like to run?",
+            examples
+              .map { case (k, (desc, _)) =>
+                s"${k.padTo(maxLength, ' ')}: $desc"
+              }
+              .toList
+              .sorted,
+          )
+          .getOrThrow
 
-      val toShow = selected.map(_.split(": ").head.trim)
-      toShow.foreach { k => examples(k)._2(prompts) }
-    else
-      val allowed = examples.keySet
-      val missing = which.toSet -- allowed
+        val toShow = selected.map(_.split(": ").head.trim)
+        toShow.foreach { k => examples(k)._2(prompts) }
+      else
+        val allowed = examples.keySet
+        val missing = which.toSet -- allowed
 
-      if missing.nonEmpty then
-        sys.error(s"Unknown example names: ${missing
-            .mkString(", ")}. Available examples: ${allowed.mkString(", ")}")
-      else which.foreach { k => examples(k)._2(prompts) }
-    end if
+        if missing.nonEmpty then
+          sys.error(s"Unknown example names: ${missing
+              .mkString(", ")}. Available examples: ${allowed.mkString(", ")}")
+        else which.foreach { k => examples(k)._2(prompts) }
+      end if
 
 end sync
 

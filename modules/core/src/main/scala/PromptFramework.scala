@@ -293,9 +293,10 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
       out.logLn(s"Handling event $ev")
       ev match
         case TerminalEvent.Resized(rows, cols) =>
-          this.synchronized:
-            terminalSize.next(Some(cols))
-          printPrompt()
+          stateTransition(terminalSize = _ => Some(cols))
+          if rendering.changed || rendering.last.isEmpty then
+            printPrompt()
+            rendering.forgetChanges()
         case _ =>
 
       manage(handleEvent(ev))
@@ -346,7 +347,9 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
         out.logLn(s"Submitted value: $value, ${status.current}")
         Next.Done(value)
 
-    if rendering.changed then printPrompt()
+    if rendering.changed || rendering.last.isEmpty then
+      printPrompt()
+      rendering.forgetChanges()
 
     next
   end manage
@@ -354,12 +357,15 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
   private def stateTransition(
       state: PromptState => PromptState = identity,
       status: Status => Status = identity,
+      terminalSize: Option[TerminalCols] => Option[TerminalCols] = identity,
   ) =
     this.synchronized:
       val stateChanged  = this.state.nextFn(state)
       val statusChanged = this.status.nextFn(status)
+      val sizeChanged   = this.terminalSize.nextFn(terminalSize)
       import Transition.Changed
-      if stateChanged == Changed.Yes || statusChanged == Changed.Yes then
+      if stateChanged == Changed.Yes || statusChanged == Changed.Yes || sizeChanged == Changed.Yes
+      then
         this.rendering.next(
           renderState(this.state.current, this.status.current),
         )
@@ -368,26 +374,43 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
   private def printPrompt() =
     terminal.cursorHide()
     rendering.last match
-      case Some(value) if value.length > rendering.current.length =>
-        out.logLn("Clearing because previous rendering was longer")
-        terminal.withRestore:
-          clear(value, terminalSize.current)
       case None =>
         // We don't use cursor save/restore here because after outputing empty lines,
         // the terminal might scroll and the saved cursor position would be incorrect
         out.logLn("Freeing up empty space for initial rendering")
-        rendering.current.foreach(_ => out.outLn(""))
+        rendering.current.foreach: _ =>
+          terminal.eraseToEndOfLine()
+          out.outLn("")
         terminal.moveUp(rendering.current.length).moveHorizontalTo(0)
-        rendering.nextFn(identity)
-      case _ =>
-        out.logLn("Clearing just for current rendering")
-        terminal.withRestore:
-          clear(rendering.current, terminalSize.current)
+      case Some(last) =>
+        if last.length == rendering.current.length then
+          out.logLn(
+            "Clearing just for current rendering (same length as before)",
+          )
+          terminal.withRestore:
+            clear(last, terminalSize.current)
+        else if last.length < rendering.current.length then
+          out.logLn(
+            s"Current rendering is longer than previous one, clearing ${rendering.current.length} rows",
+          )
+          rendering.current.foreach: _ =>
+            terminal.eraseToEndOfLine()
+            out.outLn("")
+          terminal.moveUp(rendering.current.length).moveHorizontalTo(0)
+        else
+          out.logLn(
+            s"Clearing because previous rendering was longer ${last.length} vs ${rendering.current.length}",
+          )
+          terminal.withRestore:
+            clear(last, terminalSize.current)
     end match
 
     out.logLn(
-      s"Rendering ${rendering.current} with ${terminalSize.current}",
+      s"Rendering with terminal size: ${terminalSize.current}:",
     )
+    rendering.current.zipWithIndex.foreach { (line, index) =>
+      out.logLn(s"    ${(index + 1).toString.padTo(4, ' ')}|$line")
+    }
     currentStatus() match
       case _: Status.Finished | Status.Canceled =>
         rendering.current.foreach(l => out.outLn(l))
@@ -441,7 +464,7 @@ trait PromptFramework[Result](terminal: Terminal, out: Output)
       out,
     )
 
-  private var terminalSize = Transition.base[Option[TerminalCols]](
+  protected val terminalSize = Transition.base[Option[TerminalCols]](
     None,
   )
 
