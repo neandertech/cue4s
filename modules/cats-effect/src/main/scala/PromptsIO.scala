@@ -131,7 +131,7 @@ object PromptsIO:
     "0.0.5",
   )
   def apply(
-      out: Output = Output.Std,
+      out: Output = Output.StdNoLogging,
       createTerminal: Output => Terminal = Terminal.ansi,
       theme: Theme = Theme.Default,
       symbols: Symbols = Symbols.platformDefault,
@@ -145,7 +145,7 @@ object PromptsIO:
 end PromptsIO
 
 class PromptsIOBuilder private (impl: IOPromptsOptions):
-  def this() = this(IOPromptsOptions(Output.Std, Theme.Default))
+  def this() = this(IOPromptsOptions(Output.StdNoLogging, Theme.Default))
 
   def noColors: PromptsIOBuilder                = withTheme(Theme.NoColors)
   def withOutput(out: Output): PromptsIOBuilder = copy(_.copy(out = out))

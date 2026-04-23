@@ -60,14 +60,11 @@ object Output:
     * Then logging will be written to a file specified by `CUE4S_LOG_FILE` env
     * variable. If the env variable is absent, logger will not output anything
     */
-  object StdNoLogging extends PlatformStd:
+  object StdNoLogging extends Output:
     override def logLn[A: AsString](a: => A): Unit = ()
+    override def out[A: AsString](a: A): Unit      = Std.out(a)
+    override def close(): Unit                     = Std.close()
   end StdNoLogging
-
-  object StdOut extends Output:
-    override def logLn[A: AsString](a: => A): Unit =
-      System.out.println(a.render)
-    override def out[A: AsString](a: A): Unit = System.out.print(a.render)
 
   object DarkVoid extends Output:
     override def logLn[A: AsString](a: => A): Unit = ()
