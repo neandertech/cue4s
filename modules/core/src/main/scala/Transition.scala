@@ -23,9 +23,9 @@ private[cue4s] trait Transition[R]:
   def last: Option[R]
   def next(r: R): Changed
   def nextFn(r: R => R): Changed
-
-  def changed: Boolean =
-    !last.contains(current)
+  def changed: Boolean = !last.contains(current)
+  def forgetChanges(): Unit =
+    next(current)
 
 private[cue4s] object Transition:
   enum Changed:
@@ -34,32 +34,49 @@ private[cue4s] object Transition:
   class RefTransition[R](init: R) extends Transition[R]:
     private var _current: R      = init
     private var _last: Option[R] = None
+    // private var _changed         = false
 
     override def current: R =
       if _current == null then
         _current = init
-        _current.nn
-      else _current.nn
+        _current
+      else _current
+
+    // override def changed: Boolean = _changed
 
     override def last: Option[R] = _last
 
     override def next(r: R): Changed =
-      if r == current then Changed.No
+      if r == current then
+        this.synchronized:
+          if _last.isEmpty then _last = Some(current)
+          _current = r
+          // _changed = true
+
+        // _changed = false
+        Changed.No
       else
         this.synchronized:
           _last = Some(current)
           _current = r
-
+          // _changed = true
         Changed.Yes
 
     override def nextFn(r: R => R): Changed =
       val newRes = r(current)
-      if newRes == current then Changed.No
+      if newRes == current then
+        this.synchronized:
+          if _last.isEmpty then _last = Some(current)
+          // _changed = false
+        Changed.No
       else
         this.synchronized:
           _last = Some(current)
           _current = newRes
+          // _changed = true
         Changed.Yes
+      end if
+    end nextFn
 
   end RefTransition
 
@@ -68,6 +85,7 @@ private[cue4s] object Transition:
     override def last: Option[R]            = t.last
     override def next(r: R): Changed        = t.next(r)
     override def nextFn(r: R => R): Changed = t.nextFn(r)
+    override def changed: Boolean           = t.changed
 
   def base[R](current: R): Transition[R] =
     new RefTransition(current)
@@ -103,23 +121,33 @@ private[cue4s] class LoggedTransition[R] private (
     out: Output,
 ) extends Transition[R]:
   export t.{current, last}
+  override def changed: Boolean = t.changed
   override def next(r: R): Changed =
-    // out.logLn(s"Transition [$label] (set): $current changed to $r")
-    out.logLn(s"Transition [$label] (set):")
-    out.logLn(s"  current: $current")
-    out.logLn(s"  new: $r")
-    t.next(r)
+    val transition = t.next(r)
+    if transition == Changed.Yes then
+      out.logLn(s"Transition [$label] (set):")
+      out.logLn(s"  current: $current")
+      out.logLn(s"  new: $r")
+    else out.logLn(s"Transition [$label] (set): <no changes>")
+
+    transition
+  end next
 
   override def nextFn(r: R => R): Changed =
     val cur        = current
     val transition = t.nextFn(r)
-    if cur != t.current then
+    if transition == Changed.Yes then
       out.logLn(s"Transition [$label] (mapping):")
       out.logLn(s"  current: $cur")
       out.logLn(s"  new: $current")
+    else out.logLn(s"Transition [$label] (mapping): <no changes>")
 
     transition
   end nextFn
+
+  override def forgetChanges(): Unit =
+    out.logLn(s"Forgetting changes [$label]")
+    t.forgetChanges()
 
 end LoggedTransition
 

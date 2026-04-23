@@ -115,7 +115,7 @@ trait TerminalTests extends MunitSnapshotsIntegration:
     val sb = new java.lang.StringBuilder
     val logger: String => Unit =
       if log then s => sb.append(s) else _ => ()
-    val term      = TracingTerminal(Output.Delegate(_ => (), _ => ()))
+    val term      = TracingTerminal(Output.Delegate(_ => (), logger))
     val capturing = Output.Delegate(term.writer, logger)
 
     val handler =
