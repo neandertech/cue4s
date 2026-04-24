@@ -27,25 +27,57 @@ https://github.com/user-attachments/assets/c762e557-26a2-4d24-bee2-23dd3443a21b
 This example is runnable on both JVM and Native (note how we're using `sync`).
 In fact, if you put into a file named `test.sc` you can run it with [Scala CLI](https://scala-cli.virtuslab.org/).
 
+
 ```scala mdoc:compile-only
 //> using dep tech.neander::cue4s::latest.release
 
 import cue4s.*
 
 Prompts.sync.use: prompts =>
-  val day = prompts
+  // There are some helpful methods available directly on prompts...
+  val day: String = prompts
     .singleChoice("How was your day?", List("great", "okay"))
     .getOrThrow
 
-  val work = prompts.text("Where do you work?").getOrThrow
+  val work: String = prompts.text("Where do you work?").getOrThrow
 
-  val letters = prompts.multiChoiceAllSelected(
-      "What are your favourite letters?",
-      ('A' to 'F').map(_.toString).toList
-    ).getOrThrow
+  val letters: List[String] = 
+    prompts.multiChoiceAllSelected(
+        "What are your favourite letters?",
+        ('A' to 'F').map(_.toString).toList
+      ).getOrThrow
+    
+  val age: Int = 
+    prompts.int("What is your age?", _.min(18).max(101)).getOrThrow
+    
+  val speed: Float = 
+    prompts.float("Airspeed velocity of an unladen swallow", _.positive).getOrThrow
+    
+  // ... but you can also construct prompts manually for tighter control 
+  val options: Either[CompletionError, List[Int]] = 
+    prompts.run(
+      Prompt.MultipleChoice
+        .withNoneSelected(
+          "Pick at least one letter",
+          ('A' to 'Z').zip(('B' to 'Z') :+ 'A').map(_.toString).toList,
+        )
+        .withWindowSize(7) // up to this point it's Prompt[List[String]]
+        .mapValidated(ls => // this method will validate and convert to Prompt[List[Int]]
+          Either.cond(
+            ls.nonEmpty,
+            ls.map(_.length), 
+            PromptError("Please select at least one letter."),
+          ),
+        ),
+    // this converts `Completion[CompletionError, List[Int]]` to an Either[CompletionError, List[Int]]
+    // if you don't care about exceptions, you can use `.getOrThrow`
+    ).toEither
+
 ```
 
 For this to work on JS, you need to use the `Future`-based methods, example for that is provided in [examples folder](./modules/example/src/main/).
+
+### Constructing 
 
 ### Auto-derivation for case classes
 

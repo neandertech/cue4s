@@ -139,7 +139,7 @@ object Prompt:
 
   case class NumberInput[N: Numeric] private (
       private val lab: String,
-      private val validateNumber: Option[N => Option[PromptError]] = None,
+      private val validateNumber: Option[N => Option[PromptError]],
       private val default: Option[N] = None,
   ) extends Prompt[N]:
     private val num = Numeric[N]
