@@ -15,7 +15,8 @@ Scala 3 library for CLI prompts that works on JVM, JS, and Native.
 
 The inspiration is taken from a JS library [prompts](https://github.com/terkelg/prompts#options), and the eventual goal is to have cue4s support all the same functionality. 
 
-https://github.com/user-attachments/assets/c762e557-26a2-4d24-bee2-23dd3443a21b
+<img width="1476" height="997" alt="2026-04-24 13 49 59" src="https://github.com/user-attachments/assets/f2214919-8ca9-4067-b979-d3377f42b91d" />
+
 
 ### Installation
 
