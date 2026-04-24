@@ -61,7 +61,12 @@ private[cue4s] class InteractiveMultipleChoice(
     status match
       case Status.Running(_) =>
         lines += "? ".focused ++ lab.prompt ++ s" $promptCue ".prompt ++ st.text.input
-        lines += "Tab".emphasis ++ " to toggle, " ++ "Shift+Tab".emphasis ++ " to toggle all, " ++ "Enter".emphasis ++ " to submit."
+        // TODO: https://github.com/neandertech/cue4s/issues/61
+        val shiftTab =
+          if Platform.os == Platform.OS.Windows then fansi.Str("")
+          else "Shift+Tab".emphasis ++ " to toggle all, "
+
+        lines += "Tab".emphasis ++ " to toggle, " ++ shiftTab ++ "Enter".emphasis ++ " to submit."
 
         status match
           case Status.Running(Left(err)) =>

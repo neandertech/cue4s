@@ -68,7 +68,7 @@ private[cue4s] object CharCollector:
             emit(TerminalEvent.Key(KeyEvent.TAB))
           case 8 | 127 =>
             emit(TerminalEvent.Key(KeyEvent.DELETE))
-          case 224 if Platform.os == Platform.OS.Windows => // 0xE0
+          case 0xe0 if Platform.os == Platform.OS.Windows => // 0xE0
             (State.ScanCode_Started, DecodeResult.Continue)
           case 3 | 4
               if Platform.os == Platform.OS.Windows => // Ctrl+C or Ctrl+D
@@ -119,6 +119,8 @@ private[cue4s] object CharCollector:
           case 75 => toInit(TerminalEvent.Key(KeyEvent.LEFT))
           case 28 => toInit(TerminalEvent.Key(KeyEvent.ENTER))
           case 83 => toInit(TerminalEvent.Key(KeyEvent.DELETE))
+          // This doesn't actually work
+          // TODO: https://github.com/neandertech/cue4s/issues/61
           case 15 => toInit(TerminalEvent.Key(KeyEvent.SHIFT_TAB))
           case _  => (State.Init, DecodeResult.Continue)
 
