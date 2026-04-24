@@ -24,9 +24,9 @@ import cue4s.*
 import cue4s.KeyEvent
 
 @main def tictac =
-  val terminal = Terminal.ansi(Output.Std)
+  val terminal = Terminal.ansi(Output.StdNoLogging)
   val input    = InputProvider(terminal)
-  val tic      = TicTacToe(terminal, Output.Std)
+  val tic      = TicTacToe(terminal, Output.StdNoLogging)
 
   val finish = AtomicBoolean()
 
