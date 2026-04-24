@@ -17,8 +17,19 @@
 package cue4s
 
 import scala.scalanative.unsafe.*
+import scala.scalanative.unsigned.*
 
 object ChangeModeWindows extends ChangeModeNative:
+
+  @extern
+  private def SetConsoleOutputCP(wCodePageID: UInt): Boolean = extern
+  @extern
+  private def GetConsoleOutputCP(): UInt = extern
+
+  // https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers
+  private val UtfCodePage                   = 65001.toUInt
+  private var consoleOutputCP: Option[UInt] = None
+
   def getchar(): Int =
     val ch = Msvcrt._getch()
     /* For raw scan codes, _getch() returns either 0 or 0xE0 as prefix.
@@ -27,13 +38,22 @@ object ChangeModeWindows extends ChangeModeNative:
      */
     if ch == 0 then 0xe0 else ch
 
-  def changeMode(rawMode: Boolean): Boolean = rawMode
-  override def read(): Int =
-    val ch = getchar()
+  def changeMode(rawMode: Boolean): Boolean =
+    // The code page logic here is required only on native: https://github.com/scala-native/scala-native/issues/4144
+    if rawMode then
+      val currentCP = GetConsoleOutputCP()
+      if currentCP != UtfCodePage then
+        consoleOutputCP = Some(currentCP)
+        SetConsoleOutputCP(UtfCodePage)
+    else
+      // Restore code page to what it was before entering prompts
+      consoleOutputCP.foreach: cp =>
+        SetConsoleOutputCP(cp)
 
-    // For raw scan codes, this function returns either 0 or 0xE0.
-    // To avoid ambiguity, force it to always be 0xE0.
-    if ch == 0 then 0xe0 else ch
+    rawMode
+  end changeMode
+
+  override def read(): Int = getchar()
 
   object Msvcrt:
     @extern() @link("msvcrt")
