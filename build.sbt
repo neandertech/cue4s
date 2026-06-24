@@ -91,6 +91,7 @@ lazy val catsEffect = projectMatrix
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions)
+  .nativePlatform(Versions.scalaVersions)
   .settings(
     snapshotsPackageName := "cue4s.catseffect",
     snapshotsIntegrations += SnapshotIntegration.MUnit,
@@ -169,6 +170,7 @@ lazy val exampleCatsEffect = projectMatrix
   .settings(munitSettings)
   .jvmPlatform(Versions.scalaVersions)
   .jsPlatform(Versions.scalaVersions)
+  .nativePlatform(Versions.scalaVersions)
   .settings(
     scalacOptions += "-Wunused:all",
     scalaJSUseMainModuleInitializer := true,
